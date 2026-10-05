@@ -1,0 +1,307 @@
+id: count-greatest
+title: How many times does the greatest appear?
+tier: variation
+variationOf: greatest-value
+format: write
+order: 2
+skills: [positions, loops, conditions, accumulators]
+difficulty: 3
+newIdea: >-
+  Two results that depend on each other: a count of the greatest value so far, which starts again at 1 whenever a greater value turns up.
+source:
+  type: original
+
+goal: Find the greatest value of a list and count how many times it appears.
+statement: |
+  Two answers are wanted this time. A list of whole numbers, `numbers`, is given. Find its greatest value and leave it in `greatest`. Then count how many times that value appears in the list, and leave the count in `greatest_count`.
+
+  With `numbers = [4, 4, 4, 9, 2, 9]` the greatest value is 9, and it appears twice. So `greatest` is 9 and `greatest_count` is 2. The three 4s do not count: 4 was the greatest so far until 9 turned up.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers
+    domain: { minLen: 1, maxLen: 20, min: -1000, max: 1000 }
+create:
+  - name: greatest
+    describe: the largest value in `numbers`
+  - name: greatest_count
+    describe: how many items of `numbers` are equal to `greatest`
+rules:
+  - '`numbers` has from 1 to 20 items, each a whole number from -1000 to 1000.'
+  - The list always has at least one item, so there is always a greatest value and it appears at least once. With one item, `greatest` is that item and `greatest_count` is 1.
+  - '`greatest_count` counts every appearance of the greatest value. With `[5, 8, 3, 8, 1]` it is 2.'
+  - Only the greatest value is counted. How often the other values appear does not matter.
+  - All the items may be negative.
+  - The items are in no particular order.
+  - Both variables must exist when the program ends.
+  - Do not use `max()`, `sorted()`, `.sort()` or `.count()`. They would do the finding or the counting for you, and the loop is what this task is for.
+  - Leave `numbers` unchanged.
+toWrite: A program of about ten lines. With one loop, it needs two start values and a chain of `if` and `elif` inside the loop. Two loops, one after the other, work too.
+unchanged: [numbers]
+forbid: ['max()', 'sorted()', '.sort()', '.count()']
+
+starter: |
+  # numbers is given. Leave your answers in greatest and greatest_count.
+exampleGiven: { numbers: [4, 4, 4, 9, 2, 9] }
+examples:
+  - given: { numbers: [4, 4, 4, 9, 2, 9] }
+    result: { greatest: 9, greatest_count: 2 }
+    why: 9 is the greatest. It appears at positions 3 and 5, so the count is 2. The three 4s do not count, because 4 is not the greatest.
+  - given: { numbers: [5, 8, 3, 8, 1] }
+    result: { greatest: 8, greatest_count: 2 }
+    why: 8 is the greatest, and it appears at positions 1 and 3.
+
+tests:
+  - name: a smaller value three times, then the greatest twice
+    given: { numbers: [4, 4, 4, 9, 2, 9] }
+    expect: { greatest: 9, greatest_count: 2 }
+    purpose: The first example from the task. 4 appears three times before 9 turns up. Catches a count that is not started again when a greater value is found.
+  - name: greatest once, in the middle
+    given: { numbers: [4, 9, 2, 7] }
+    expect: { greatest: 9, greatest_count: 1 }
+    purpose: The list from *Find the greatest value*. The greatest appears once, and it is neither first nor last.
+  - name: all items negative
+    given: { numbers: [-400, -900, -200, -700] }
+    expect: { greatest: -200, greatest_count: 1 }
+    purpose: No item is greater than 0. A `greatest` that starts at 0 is never replaced here, and nothing gets counted.
+  - name: one item
+    given: { numbers: [7] }
+    expect: { greatest: 7, greatest_count: 1 }
+    purpose: The shortest list allowed. The one item is the greatest, and it appears once. Catches a count that leaves the first item out, and one that counts it twice.
+  - name: all items equal
+    given: { numbers: [6, 6, 6] }
+    expect: { greatest: 6, greatest_count: 3 }
+    purpose: Every item is equal to the greatest, so all three count.
+  - name: the greatest appears twice
+    given: { numbers: [5, 8, 3, 8, 1] }
+    expect: { greatest: 8, greatest_count: 2 }
+    purpose: The second example. The greatest appears twice, with smaller items in between.
+  - name: greatest last
+    given: { numbers: [-1000, 250, 1000] }
+    expect: { greatest: 1000, greatest_count: 1 }
+    purpose: The largest value allowed sits at the last position, and the smallest allowed sits first. Catches a loop that stops one item early.
+  - name: the longest list allowed
+    given: { numbers: [15, 3, 15, 15, -8, 40, 7, 40, 0, 15, 22, 40, 39, -40, 12, 5, 31, 40, 9, 38] }
+    expect: { greatest: 40, greatest_count: 4 }
+    purpose: Twenty items. 15 is the greatest so far for the first five items and appears three times among them. Then 40 turns up, and only the four 40s count.
+
+mistakes:
+  - id: never-resets
+    label: Never starts the count again when a greater value turns up
+    shows: wrong-result
+    code: |
+      greatest = numbers[0]
+      greatest_count = 1
+      position = 1
+      while position < len(numbers):
+          if numbers[position] > greatest:
+              greatest = numbers[position]
+          elif numbers[position] == greatest:
+              greatest_count = greatest_count + 1
+          position = position + 1
+    feedback: |
+      Your `greatest` is right, but `greatest_count` is too high. It still includes items that were equal to an earlier, smaller greatest-so-far. In the first example the three 4s were counted while 4 was the greatest so far, and that count was kept when 9 turned up. Look at the branch that stores a new greatest: what should happen to the count on that round, given that the new value has been seen exactly once?
+  - id: counts-every-greatest-so-far
+    label: Counts every item that was the greatest so far at the time
+    shows: wrong-result
+    code: |
+      greatest = numbers[0]
+      greatest_count = 1
+      position = 1
+      while position < len(numbers):
+          if numbers[position] >= greatest:
+              greatest = numbers[position]
+              greatest_count = greatest_count + 1
+          position = position + 1
+    feedback: |
+      Your `greatest` is right, but `greatest_count` is too high. It counts every item that was the greatest so far at the moment it was seen, including items that were beaten later. In the first example that counts the three 4s and both 9s, although 4 is not the greatest in the end. When a greater value turns up, the items counted before it no longer matter: on that round the count has to start again, and a new greatest has been seen exactly once.
+  - id: starts-at-zero
+    label: Starts the greatest at 0
+    shows: wrong-result
+    code: |
+      greatest = 0
+      greatest_count = 0
+      position = 0
+      while position < len(numbers):
+          if numbers[position] > greatest:
+              greatest = numbers[position]
+              greatest_count = 1
+          elif numbers[position] == greatest:
+              greatest_count = greatest_count + 1
+          position = position + 1
+    feedback: |
+      Both answers are off: `greatest` is 0, which is not in the list, and `greatest_count` is 0. That happens when `greatest` starts at 0 and every item is negative: no item is greater than 0 or equal to it, so nothing is ever stored or counted. A start value taken from the list is safe whatever the list holds, and there is one item that is always there.
+  - id: separate-ifs
+    label: Two separate ifs, so a new greatest is counted twice
+    shows: wrong-result
+    code: |
+      greatest = numbers[0]
+      greatest_count = 1
+      position = 1
+      while position < len(numbers):
+          if numbers[position] > greatest:
+              greatest = numbers[position]
+              greatest_count = 1
+          if numbers[position] == greatest:
+              greatest_count = greatest_count + 1
+          position = position + 1
+    feedback: |
+      Your `greatest` is right, but `greatest_count` is 1 too high. With one loop, two separate `if` statements do that: on the round where a new greatest is stored, the second `if` runs as well, finds the item equal to `greatest` (which now holds that same item), and adds 1 straight after the count was started at 1. The second question should only be asked when the first one was answered with False. If you count in a loop of its own instead, look at the start value of the count: a count that starts at 1 has counted something before the counting loop has looked at any item.
+  - id: count-starts-at-zero
+    label: Starts the count at 0 although the first item has been seen
+    shows: wrong-result
+    code: |
+      greatest = numbers[0]
+      greatest_count = 0
+      position = 1
+      while position < len(numbers):
+          if numbers[position] > greatest:
+              greatest = numbers[position]
+              greatest_count = 1
+          elif numbers[position] == greatest:
+              greatest_count = greatest_count + 1
+          position = position + 1
+    feedback: |
+      Your `greatest` is right, but `greatest_count` is 1 too low, and it is 0 for a one-item list: the first item was never counted. A loop that starts at position 1 never looks at it. With one loop, the first item is the greatest so far before the loop starts and has been seen once, so the count has to include it from the start. A loop that only counts has to start at position 0. The gap only shows when the first item is the greatest, because a greater value starts the count again.
+  - id: counts-first-item-twice
+    label: Counts the first item once before the loop and again on the first round
+    shows: wrong-result
+    code: |
+      greatest = numbers[0]
+      greatest_count = 1
+      position = 0
+      while position < len(numbers):
+          if numbers[position] > greatest:
+              greatest = numbers[position]
+              greatest_count = 1
+          elif numbers[position] == greatest:
+              greatest_count = greatest_count + 1
+          position = position + 1
+    feedback: |
+      Your `greatest` is right, but `greatest_count` is 1 too high, and it is 2 for a one-item list. The first item was counted twice: once before the loop, as the start value of the count, and once more on the first round, because the loop starts at position 0 and the first item is equal to `greatest`. The start of the count and the start of the loop have to agree about whether the first item has been seen yet.
+  - id: misses-an-appearance
+    label: Starts the count again at 0, so a new greatest is not counted
+    shows: wrong-result
+    code: |
+      greatest = numbers[0]
+      greatest_count = 1
+      position = 1
+      while position < len(numbers):
+          if numbers[position] > greatest:
+              greatest = numbers[position]
+              greatest_count = 0
+          elif numbers[position] == greatest:
+              greatest_count = greatest_count + 1
+          position = position + 1
+    feedback: |
+      Your `greatest` is right, but `greatest_count` is too low. In the first example it is 1, although 9 appears twice, so one of the 9s was not counted. Check three places. On the round where a new greatest turns up, that item is its first appearance, so it counts too. On a round with an equal item, the count has to grow by 1, not be set to 1. And the loop has to reach the last position, where the second 9 sits.
+  - id: count-loop-never-runs
+    label: Counts in a second loop that runs no rounds, because position is not set back
+    shows: wrong-result
+    code: |
+      greatest = numbers[0]
+      position = 1
+      while position < len(numbers):
+          if numbers[position] > greatest:
+              greatest = numbers[position]
+          position = position + 1
+      greatest_count = 0
+      while position < len(numbers):
+          if numbers[position] == greatest:
+              greatest_count = greatest_count + 1
+          position = position + 1
+    feedback: |
+      Your `greatest` is right, but `greatest_count` is 0, although the greatest value is in the list. Nothing was ever counted. If you count in a second loop, check where that loop starts. When the first loop ends, `position` is already one past the last position, so a second loop that carries on with that `position` runs no rounds at all.
+  - id: never-moves-on
+    label: Only moves to the next position when a new greatest is found
+    shows: never-stops
+    code: |
+      greatest = numbers[0]
+      greatest_count = 1
+      position = 1
+      while position < len(numbers):
+          if numbers[position] > greatest:
+              greatest = numbers[position]
+              greatest_count = 1
+              position = position + 1
+          elif numbers[position] == greatest:
+              greatest_count = greatest_count + 1
+    feedback: |
+      The program had to be stopped because the loop never ended. Look for the line that moves `position` on. If it is missing, the loop looks at the same item forever. If it is indented inside one of the branches, it only runs on the rounds that take that branch, and on any other round the loop stays at the same item forever. Moving to the next position has to happen on every round, whichever branch runs.
+  - id: one-too-far
+    label: Asks for a position one past the end
+    shows: error
+    errorType: IndexError
+    code: |
+      greatest = numbers[0]
+      greatest_count = 1
+      position = 1
+      while position <= len(numbers):
+          if numbers[position] > greatest:
+              greatest = numbers[position]
+              greatest_count = 1
+          elif numbers[position] == greatest:
+              greatest_count = greatest_count + 1
+          position = position + 1
+    feedback: |
+      The program asked for a position that has no item. With 6 items the positions are 0 to 5, and with one item only position 0 exists. Python names the line where it happened: work out the number inside the brackets there at that moment, and compare it with the last position. The usual cause is a `while` line that lets the loop run one round too far, because `len(numbers)` is one past the last position.
+
+hints:
+  - |
+    Two results, and they depend on each other. When a greater value turns up, what does that mean for everything counted so far?
+  - |
+    On each round the current item is one of three things compared with `greatest`: greater, equal, or smaller. Only two of the three change anything. With `[4, 4, 4, 9, 2, 9]`: after the three 4s the count is 3. Then 9 turns up, and the count has to become 1, because 9 has been seen once.
+  - |
+    In words: start `greatest` at the first item and `greatest_count` at 1, because the first item has been seen once. From position 1 onward: if the item is greater than `greatest`, store it in `greatest` and set the count to 1. Otherwise, if it is equal to `greatest`, add 1 to the count. Then move to the next position. `elif` is the word for "otherwise, if".
+
+explanation: |
+  *Find the greatest value* kept one result and replaced it when a greater item turned up. Here a second result rides along: how many times the current greatest has been seen. The two depend on each other, and that is the new part.
+
+  On each round the current item is one of three things compared with `greatest`:
+
+  - Greater: this item is the new greatest. It has been seen once, so the count starts again at 1. Everything counted before belonged to a smaller value and no longer matters.
+  - Equal: one more appearance of the current greatest. The count goes up by 1.
+  - Smaller: nothing changes.
+
+  Before the loop, `greatest` is the first item and `greatest_count` is 1, because the first item has been seen once. The loop starts at position 1.
+
+  With `numbers = [4, 4, 4, 9, 2, 9]`:
+
+  | round | `position` | `numbers[position]` | `greatest` before | compared with `greatest` | `greatest`, `greatest_count` after |
+  |---|---|---|---|---|---|
+  | 1 | 1 | 4 | 4 | equal | 4, 2 |
+  | 2 | 2 | 4 | 4 | equal | 4, 3 |
+  | 3 | 3 | 9 | 4 | greater | 9, 1 |
+  | 4 | 4 | 2 | 9 | smaller | 9, 1 |
+  | 5 | 5 | 9 | 9 | equal | 9, 2 |
+
+  Round 3 is the one to look at. The count had reached 3, and all of it was for the value 4. When 9 takes over, that 3 is thrown away and the count starts again at 1. A program that keeps the 3 ends with a count of 4: the three 4s and the second 9.
+
+  Here "greater" and "equal" are two branches of one chain: `if` for greater, `elif` for equal. With two separate `if` statements in this order, the round that stores a new greatest would go on to the second `if`, find the item equal to the `greatest` stored a moment ago, and add 1 again. The count would then be 2 right after a new greatest, instead of 1.
+
+solution:
+  code: |
+    greatest = numbers[0]
+    greatest_count = 1
+    position = 1
+    while position < len(numbers):
+        if numbers[position] > greatest:
+            greatest = numbers[position]
+            greatest_count = 1
+        elif numbers[position] == greatest:
+            greatest_count = greatest_count + 1
+        position = position + 1
+  walkthrough: |
+    - `greatest = numbers[0]` and `greatest_count = 1` are the start values. The first item is the greatest so far, and it has been seen once.
+    - `position = 1` starts the loop at the second item. The first item is already accounted for, so starting at 0 would count it a second time.
+    - `if numbers[position] > greatest:` catches a new greatest. Both results change: `greatest` is replaced, and `greatest_count = 1` starts the count again, because the new greatest has been seen once.
+    - `elif numbers[position] == greatest:` is only reached when the first condition was False. One more appearance of the current greatest, so `greatest_count = greatest_count + 1`.
+    - A smaller item matches neither branch, and nothing changes on that round.
+    - `position = position + 1` is lined up with the `if`, outside both branches, so it runs on every round.
+
+    Another way that is equally correct: two loops, one after the other. The first loop is the one from *Find the greatest value* and finds `greatest`. The second loop then counts the items equal to `greatest`, the way *Count the slow responses* counts, with a count that starts at 0. The second loop needs a start of its own: `position` goes back to 0, so that the first item is looked at too. Two passes over the list instead of one, and no count to start again. The checker accepts both.
+
+    The shorthand `greatest_count += 1` means the same as `greatest_count = greatest_count + 1`.
+
+prerequisites: [greatest-value, count-matching]
+related: [first-greatest-position, conditions-separate-ifs]

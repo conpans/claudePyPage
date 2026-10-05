@@ -1,0 +1,178 @@
+id: conditions-inside-range
+title: Inside the range
+tier: exercise
+format: fill
+skill: conditions
+skills: [conditions]
+difficulty: 2
+source:
+  type: original
+
+goal: Store whether a number lies inside a range, with both ends of the range included.
+statement: |
+  Three whole numbers are given: `value`, `low` and `high`. Together `low` and `high` describe a range, and **both ends count as inside**.
+
+  Write the one line that stores `True` in `in_range` when `value` is inside the range, and `False` when it is not.
+
+  With `low = 2` and `high = 8`, the values 2, 5 and 8 are inside. The values 1 and 9 are outside.
+given:
+  - name: value
+    type: int
+    describe: the number to check
+    domain: { min: -50, max: 50 }
+  - name: low
+    type: int
+    describe: the lower end of the range
+    domain: { min: -50, max: 50 }
+  - name: high
+    type: int
+    describe: the upper end of the range
+    domain: { min: -50, max: 50 }
+where: low <= high
+create:
+  - name: in_range
+    describe: '`True` when `value` is from `low` to `high`, both ends included, and `False` otherwise'
+rules:
+  - '`value`, `low` and `high` are whole numbers from -50 to 50.'
+  - '`low` is never greater than `high`. The two can be equal, and then the range holds exactly one number.'
+  - 'Both ends are inside the range: a `value` equal to `low` or equal to `high` gives `True`.'
+  - '`in_range` must hold `True` or `False` in every case. These are the two Boolean values, written without quotation marks.'
+toWrite: One line, in place of the last comment.
+
+starter: |
+  # value, low and high are given.
+  # your line goes here: store True or False in in_range
+exampleGiven: { value: 5, low: 2, high: 8 }
+examples:
+  - given: { value: 5, low: 2, high: 8 }
+    result: { in_range: true }
+    why: 5 is at least 2 and at most 8.
+  - given: { value: 8, low: 2, high: 8 }
+    result: { in_range: true }
+    why: 8 is equal to `high`, and both ends count as inside.
+  - given: { value: 9, low: 2, high: 8 }
+    result: { in_range: false }
+    why: 9 is above `high`.
+
+tests:
+  - name: inside the range
+    given: { value: 5, low: 2, high: 8 }
+    expect: { in_range: true }
+    purpose: The first example from the task.
+  - name: equal to the low end
+    given: { value: 2, low: 2, high: 8 }
+    expect: { in_range: true }
+    purpose: The low end itself counts as inside.
+  - name: equal to the high end
+    given: { value: 8, low: 2, high: 8 }
+    expect: { in_range: true }
+    purpose: The high end itself counts as inside.
+  - name: one below the low end
+    given: { value: 1, low: 2, high: 8 }
+    expect: { in_range: false }
+    purpose: Catches a check that accepts numbers below the low end.
+  - name: one above the high end
+    given: { value: 9, low: 2, high: 8 }
+    expect: { in_range: false }
+    purpose: Catches a check that accepts numbers above the high end.
+  - name: a range that holds one number
+    given: { value: 4, low: 4, high: 4 }
+    expect: { in_range: true }
+    purpose: The two ends are equal here, and the value is equal to both of them.
+  - name: a range of negative numbers
+    given: { value: -7, low: -10, high: -3 }
+    expect: { in_range: true }
+    purpose: Negative numbers follow the same rule. -7 is at least -10 and at most -3.
+
+mistakes:
+  - id: ends-excluded
+    label: Leaves out the ends of the range
+    shows: wrong-result
+    code: |
+      in_range = low < value and value < high
+    feedback: |
+      `in_range` is `False` although `value` is exactly equal to one end of the range, and the rules count both ends as inside. A comparison written with `<` is False when its two sides are equal. Look at each comparison sign and try it with the end value itself.
+  - id: one-side-only
+    label: Checks only the low end
+    shows: wrong-result
+    code: |
+      in_range = low <= value
+    feedback: |
+      `in_range` is `True` although `value` is above `high`. That usually means nothing in your line compares `value` with `high`, so only the low end is checked. A value is inside only when two things are true at once: it is not below `low`, and it is not above `high`.
+  - id: or-instead-of-and
+    label: Joins the two comparisons with or
+    shows: wrong-result
+    code: |
+      in_range = low <= value or value <= high
+    feedback: |
+      `in_range` is `True` although `value` is below `low`. There are two usual causes. The two comparisons may be joined with `or`, which is True as soon as one side is True, and every number passes at least one of these two comparisons. Or nothing in the line compares `value` with `low`. Work out each comparison by hand with the numbers of this test.
+  - id: only-stores-true
+    label: Stores a result only when the value is inside
+    shows: wrong-result
+    code: |
+      if low <= value and value <= high:
+          in_range = True
+    feedback: |
+      For this test the checker found no `in_range` at all. That happens when the line that stores it sits under an `if`, so it only runs when the value is inside. `in_range` needs a value in every case: `True` when the value is inside, and `False` when it is not. A comparison already gives one of these two values, so its result can be stored directly.
+  - id: example-numbers
+    label: Compares with the example's numbers instead of low and high
+    shows: wrong-result
+    code: |
+      in_range = 2 <= value and value <= 8
+    feedback: |
+      `in_range` is `False` although -7 lies between `low` (-10) and `high` (-3). This is the first test whose range is not inside 2 to 8. A line that compares `value` with fixed numbers, such as 2 and 8 from the example, passes the earlier tests but not this one. The two ends change from test to test, so the line has to read them from `low` and `high`.
+  - id: comparison-reversed
+    label: One comparison points the wrong way
+    shows: wrong-result
+    code: |
+      in_range = low <= value and value >= high
+    feedback: |
+      `in_range` is `False` although `value` lies between `low` and `high`. Put the three numbers of this test into your line and work out each comparison on its own. For a value inside the range, the whole line has to come out True. The usual cause is a comparison sign that points the wrong way, or a line that describes the numbers outside the range.
+
+hints:
+  - |
+    With `low = 2` and `high = 8`: is 2 inside? Is 8? Is 9? Now say in words what must be true of `value` for it to be inside. Does your sentence have one part or two?
+  - |
+    Two things must be true at the same time: `value` is not below `low`, and `value` is not above `high`. Each of the two is one comparison. With `value = 5`, the comparisons are `2 <= 5` and `5 <= 8`, and both are True.
+  - |
+    The line has this shape: `in_range = (one comparison) and (another comparison)`. Because both ends count as inside, each comparison has to be True when its two sides are equal. A comparison already gives `True` or `False`, so the result can be stored without an `if`.
+
+explanation: |
+  A value is inside the range when two things are true at the same time: it is not below the low end, and it is not above the high end.
+
+  Each of the two is a comparison, and each comparison gives `True` or `False`. With `low = 2` and `high = 8`:
+
+  | `value` | not below `low`? | not above `high`? | inside? |
+  |---|---|---|---|
+  | 1 | False | True | False |
+  | 2 | True | True | True |
+  | 5 | True | True | True |
+  | 8 | True | True | True |
+  | 9 | True | False | False |
+
+  Three things to read off the table:
+
+  - The value is inside only in the rows where both answers are True. Joining two answers so that both are needed is the job of `and`.
+  - In every row at least one answer is True. So if the two comparisons were joined with `or`, the result would be True for every number.
+  - The rows for 2 and 8 are the two ends. They come out True only if each comparison is also True when its two sides are equal. That is the difference between `<=` and `<`.
+
+  The two comparisons joined together already give `True` or `False`. That result can be stored in `in_range` directly, the same way a number is stored.
+
+solution:
+  code: |
+    in_range = low <= value and value <= high
+  walkthrough: |
+    The missing line is `in_range = low <= value and value <= high`.
+
+    - `low <= value` is True when `value` is not below the low end. With `<=` it is also True when the two are equal, and that is what makes the low end count as inside.
+    - `value <= high` is True when `value` is not above the high end. Again `<=` includes the end itself.
+    - `and` joins the two. The result is True only when both comparisons are True.
+    - `in_range = ...` stores that result. Python works out the right side to `True` or `False` first, and then stores it. No `if` is needed.
+
+    The course's chained form says the same in fewer words: `in_range = low <= value <= high`. Python reads it as the two comparisons joined with `and`, and the checker accepts it too.
+
+    An `if` with an `else` that stores `True` in one branch and `False` in the other also passes. It takes four lines to do what this one line does.
+
+prerequisites: []
+related: [values-in-range, conditions-status-category]
+next: conditions-status-category

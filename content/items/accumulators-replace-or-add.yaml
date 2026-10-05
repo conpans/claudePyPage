@@ -1,0 +1,93 @@
+id: accumulators-replace-or-add
+title: Replace or add?
+tier: exercise
+format: predict
+skill: accumulators
+skills: [accumulators, positions, loops]
+difficulty: 1
+source:
+  type: original
+
+goal: Tell a variable that keeps only the newest value from one that adds up every value.
+statement: |
+  Two variables are updated inside the same loop. One of the lines replaces, the other accumulates.
+
+  Read the program and work out what it prints. Tracing on paper helps: write one row per round, with a column each for `position`, `latest` and `total`.
+rules:
+  - There is nothing to run here. Predict first, then check your prediction.
+toWrite: Nothing. You type what the program prints.
+
+program: |
+  numbers = [4, 6, 5]
+  latest = 0
+  total = 0
+  position = 0
+  while position < len(numbers):
+      latest = numbers[position]
+      total = total + numbers[position]
+      position = position + 1
+  print(latest)
+  print(total)
+
+questions:
+  - ask: What does the program print? Put each printed line on its own line.
+    about: output
+    answer: |
+      5
+      15
+    wrong:
+      - answer: |
+          15
+          15
+        feedback: |
+          Look at `latest = numbers[position]`. There is no `latest` on the right side, so this line does not build on the old value. On each round it drops what `latest` held and keeps only the current item.
+      - answer: |
+          5
+          5
+        feedback: |
+          Look at `total = total + numbers[position]`. The old `total` is on the right side, so each round adds the current item to everything added before: first 4, then 10, then 15.
+      - answer: |
+          4
+          15
+        feedback: |
+          `latest` is replaced on every round, so the first item does not survive. After the last round it holds the item at position 2.
+  - ask: What is the value of `position` after the loop has ended?
+    about: value
+    expression: position
+    answer: '3'
+    wrong:
+      - answer: '2'
+        feedback: |
+          2 is the last position that has an item. After that round, `position = position + 1` still runs and makes it 3. The loop ends because `3 < len(numbers)` is False.
+
+hints:
+  - |
+    Look at the two update lines inside the loop. On which of them does the name on the left of the `=` also appear on the right?
+  - |
+    Round 1, with `position` at 0: `latest` becomes 4, and `total` becomes 0 + 4. Work through round 2 the same way, using the item at position 1.
+  - |
+    After round 2, `latest` is 6 and `total` is 10. One round is left, with the item at position 2.
+
+explanation: |
+  The loop runs three rounds, one for each item of `numbers`.
+
+  | round | `position` | `numbers[position]` | `latest` after | `total` after |
+  |---|---|---|---|---|
+  | 1 | 0 | 4 | 4 | 4 |
+  | 2 | 1 | 6 | 6 | 10 |
+  | 3 | 2 | 5 | 5 | 15 |
+
+  `latest` is replaced each time, so it only ever holds one item. `total` is built from its own old value, so it grows: 0 + 4, then 4 + 6, then 10 + 5.
+
+solution:
+  walkthrough: |
+    The program prints `5` and then `15`.
+
+    - `latest = numbers[position]` replaces. After the third round `latest` holds the item at position 2, which is 5.
+    - `total = total + numbers[position]` accumulates: 4, then 10, then 15.
+    - After the third round `position` becomes 3. The condition `3 < len(numbers)` is `3 < 3`, which is False, so the loop ends with `position` at 3.
+
+    Use the step-through to see every round with the real values.
+
+prerequisites: [positions-read-values, loops-count-rounds]
+related: [accumulators-add-up, assign-snapshot]

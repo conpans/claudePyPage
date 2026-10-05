@@ -1,0 +1,243 @@
+id: conditions
+order: 4
+title: Conditions and Boolean expressions
+shortTitle: Conditions
+summary: >-
+  Ask a True-or-False question about your values, and use the answer to choose which lines run.
+mixups:
+  - Reading two separate `if` statements as one `if`/`elif` chain, or a chain as separate statements.
+  - Expecting `not paused` to change the value stored in `paused`.
+  - Joining two comparisons with `or` when both have to be True at the same time.
+  - Choosing between `>` and `>=` without trying the value that sits exactly on the limit.
+
+sections:
+  - title: A comparison gives True or False
+    body: |
+      A comparison is a question that Python answers with one of two values: `True` or `False`. The course calls these two values Boolean values.
+
+      Suppose `response_time` holds how long a server took to answer, in milliseconds, and `limit` holds the longest time that still counts as fast.
+
+      ```python
+      response_time > limit
+      ```
+
+      If `response_time` is `850` and `limit` is `500`, the question is `850 > 500`, and the answer is `True`. If `response_time` is `320`, the question is `320 > 500`, and the answer is `False`.
+
+      `True` and `False` are values, the same way `850` and `"slow"` are values. So the answer can be stored in a variable:
+
+      ```python
+      is_slow = response_time > limit
+      ```
+
+      Python works out the right side first and then stores the result. After this line `is_slow` holds `True` or `False`. It does not hold the comparison. If `response_time` changes later, `is_slow` keeps the answer it was given.
+
+      An `if` uses this kind of value to decide. `if response_time > limit:` and `if is_slow:` decide in the same way: the indented lines under the `if` run when the value is `True`.
+
+      The names `response_time`, `limit` and `is_slow` were chosen for this example. What Python defines is `>`, `True` and `False`.
+    demo:
+      title: Storing the answer to a comparison
+      given: { response_time: 850, limit: 500 }
+      code: |
+        is_slow = response_time > limit
+        print(is_slow)
+        if is_slow:
+            print("Slow response")
+      note: Line 1 works out the comparison once and stores the answer. Line 3 uses the stored answer.
+
+  - title: 'One chain: if, elif, else'
+    body: |
+      Part 2 of the course adds `elif` and `else` to `if`. Together they form one chain, and Python treats the chain as a single statement with several branches. A branch is the indented block of lines under an `if`, `elif` or `else` line.
+
+      Python goes down the chain from the top and checks one condition at a time. As soon as a condition is `True`, it runs that branch and skips the rest of the chain. The conditions further down are not checked at all.
+
+      ```python
+      if disk_used >= 90:
+          level = "critical"
+      elif disk_used >= 70:
+          level = "warning"
+      else:
+          level = "ok"
+      ```
+
+      Suppose `disk_used` says what percentage of a disk is full. Here is the chain for three values:
+
+      | `disk_used` | `disk_used >= 90` | `disk_used >= 70` | `level` |
+      |---|---|---|---|
+      | 95 | True | not checked | `"critical"` |
+      | 75 | False | True | `"warning"` |
+      | 40 | False | False | `"ok"` |
+
+      Look at the first row. `95 >= 70` would be True as well, but Python never gets that far, because the first branch has already run.
+
+      So the order of the conditions matters. A chain runs at most one of its branches. With an `else` at the end it runs exactly one, because `else` takes every case that no condition above it took.
+    demo:
+      title: The first True condition wins
+      given: { disk_used: 95 }
+      code: |
+        if disk_used >= 90:
+            level = "critical"
+        elif disk_used >= 70:
+            level = "warning"
+        else:
+            level = "ok"
+        print(f"Level: {level}")
+      note: After line 2, watch which line runs next. The condition on line 3 is never checked.
+
+  - title: Separate if statements are separate questions
+    body: |
+      Every line that starts with the word `if` begins a new statement. When two `if` statements stand one after the other, at the same indentation, Python checks the second condition whatever happened in the first. So both of their branches can run.
+
+      Here are both shapes, with `disk_used` at `95`.
+
+      Two separate `if` statements:
+
+      ```python
+      if disk_used >= 70:
+          print("warning")
+      if disk_used >= 90:
+          print("critical")
+      ```
+
+      Both conditions are checked, and both are True for 95. This prints `warning` and then `critical`.
+
+      One chain:
+
+      ```python
+      if disk_used >= 90:
+          print("critical")
+      elif disk_used >= 70:
+          print("warning")
+      ```
+
+      The first condition is True, so the chain ends there. This prints only `critical`.
+
+      To tell the two shapes apart, look at the first word of each line that holds a condition. `if` starts a new question, and Python asks it every time the program reaches that line. `elif` and `else` continue the chain above them. They only get a turn when every condition above them in that chain was False.
+
+      An `else` belongs to one chain only: the one directly above it. After two separate `if` statements, an `else` is part of the second one. It runs whenever the second condition is False, whatever the first `if` did.
+    demo:
+      title: One value, two shapes
+      given: { disk_used: 95 }
+      code: |
+        print("Two separate ifs:")
+        if disk_used >= 70:
+            print("warning")
+        if disk_used >= 90:
+            print("critical")
+
+        print("One chain:")
+        if disk_used >= 90:
+            print("critical")
+        elif disk_used >= 70:
+            print("warning")
+      note: The conditions on lines 2 and 4 are both checked. In the chain, the condition on line 10 is never checked, because the one on line 8 was True.
+
+  - title: 'Combining conditions: and, or, not'
+    body: |
+      `and`, `or` and `not` take True/False values and give a True/False value back.
+
+      - `a and b` is True only when both sides are True.
+      - `a or b` is True when at least one side is True.
+      - `not a` is the opposite of `a`: `not True` is `False`, and `not False` is `True`.
+
+      A common use of `and` is to check that a value lies between two limits. Suppose a server room should be at 18 to 27 degrees, with 18 and 27 both allowed:
+
+      ```python
+      temperature_ok = 18 <= temperature and temperature <= 27
+      ```
+
+      The left comparison says "not too cold". The right one says "not too hot". The room is fine only when both are True.
+
+      | `temperature` | `18 <= temperature` | `temperature <= 27` | joined with `and` | joined with `or` |
+      |---|---|---|---|---|
+      | 10 | False | True | False | True |
+      | 22 | True | True | True | True |
+      | 30 | True | False | False | True |
+
+      The last column shows why `or` does not fit here. Every number passes at least one of the two comparisons: 30 is at least 18, and 10 is at most 27. With `or` the result would be True for every temperature.
+
+      When the two ends are held in variables, the same check reads `low <= value and value <= high`. That is the shape to look for whenever a task says "from one limit to another, both included".
+
+      The course shows a shorter way to write the same check: `18 <= temperature <= 27`, or `low <= value <= high` with variables. Python reads it as the two comparisons joined with `and`, so both forms mean the same.
+    demo:
+      title: The same two comparisons, joined two ways
+      given: { temperature: 30 }
+      code: |
+        with_and = 18 <= temperature and temperature <= 27
+        with_or = 18 <= temperature or temperature <= 27
+        print(with_and)
+        print(with_or)
+      note: Lines 1 and 2 use the same two comparisons. Only the word between them differs.
+
+  - title: Flipping with not leaves the variable unchanged
+    body: |
+      `not` works out the opposite of a True/False value. The result is a new value. The variable that was read keeps what it had.
+
+      ```python
+      paused = False
+      if not paused:
+          print("working")
+      print(paused)
+      ```
+
+      `paused` holds `False`. For the `if`, Python first works out `not paused`. That is `not False`, which is `True`. The `if` receives `True`, so its branch runs and `working` is printed.
+
+      Nothing was stored along the way. The last line prints `False`, because `paused` still holds what line 1 put there.
+
+      It can help to read the second line aloud as "if it is not paused".
+
+      It is the same with numbers. `count + 1` works out a new number, and `count` stays as it was. A variable that holds a number or `True`/`False` changes only when a line stores a new value in it, with the variable's name on the left of an `=`, as in `paused = True`.
+    demo:
+      title: Reading a variable through not
+      code: |
+        paused = False
+        if not paused:
+            print("working")
+        print(paused)
+
+        paused = True
+        if not paused:
+            print("working")
+        print(paused)
+      note: Watch `paused` in the table of variables. It changes only on lines 1 and 6, the two assignments. The `if not paused:` lines read it and leave it as it is.
+
+  - title: 'Boundaries: > or >='
+    body: |
+      `>` and `>=` give the same answer for almost every pair of numbers. They differ in one case only: when the two sides are equal.
+
+      | `response_time` | `response_time > 500` | `response_time >= 500` |
+      |---|---|---|
+      | 499 | False | False |
+      | 500 | False | True |
+      | 501 | True | True |
+
+      So to choose between them, take the value that sits exactly on the limit and ask what the task wants for that one value.
+
+      - "A response is slow when it takes more than 500 milliseconds." Is exactly 500 slow? No. The comparison is `response_time > 500`.
+      - "Send an alert when 3 or more checks have failed." Is exactly 3 enough for an alert? Yes. The comparison is `failed_count >= 3`.
+
+      `<` and `<=` work the same way. Here are some wordings and what they mean for the limit itself:
+
+      | the task says | does the limit itself count? | comparison |
+      |---|---|---|
+      | more than 500, over 500, above 500 | no | `>` |
+      | 500 or more, at least 500 | yes | `>=` |
+      | less than 500, under 500, below 500 | no | `<` |
+      | 500 or less, at most 500 | yes | `<=` |
+
+      The same question comes back at the end of a loop. `position < len(numbers)` and `position <= len(numbers)` differ only when `position` is equal to the length, and that one case decides whether the loop stops in time.
+    demo:
+      title: The same number on both sides
+      given: { response_time: 500, limit: 500 }
+      code: |
+        over_limit = response_time > limit
+        reached_limit = response_time >= limit
+        print(over_limit)
+        print(reached_limit)
+      note: Both lines compare 500 with 500. Only the comparison sign differs.
+
+exercises:
+  - conditions-separate-ifs
+  - conditions-not-keeps-value
+  - conditions-inside-range
+  - conditions-grade-order
+  - conditions-status-category

@@ -1,0 +1,182 @@
+id: positions-neighbors
+title: Two neighbors
+tier: exercise
+format: write
+skill: positions
+skills: [positions]
+difficulty: 2
+source:
+  type: original
+
+goal: Read an item and the item right after it, and work out the difference between them.
+statement: |
+  A list `numbers` and a `position` are given. `position` points at one item of the list.
+
+  Store that item in `current`, the item right after it in `following`, and the difference between the two in `gap`, where `gap` is `following` minus `current`.
+
+  With `numbers = [40, 10, 30, 20]` and `position = 1`, the item at position 1 is 10 and the item right after it is 30. So `current` is 10, `following` is 30 and `gap` is 20.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers
+    domain: { minLen: 2, maxLen: 10, min: -50, max: 50 }
+  - name: position
+    type: int
+    describe: a position of `numbers`, never the last one
+    domain: { min: 0, max: 8 }
+where: 0 <= position < len(numbers) - 1
+create:
+  - name: current
+    describe: the item at `position`
+  - name: following
+    describe: the item at the position right after `position`
+  - name: gap
+    describe: '`following` minus `current`'
+rules:
+  - '`numbers` has from 2 to 10 items, each a whole number from -50 to 50.'
+  - '`position` is a position of `numbers`: 0 or more, and less than `len(numbers) - 1`. It is never the last position, so there is always a following item.'
+  - '`gap` is `following` minus `current`. It is negative when the following item is smaller than the current one, and 0 when the two are equal.'
+  - Leave `numbers` unchanged.
+toWrite: Three short lines, one for each result variable.
+unchanged: [numbers]
+
+starter: |
+  # numbers and position are given. Leave your answers in current, following and gap.
+exampleGiven: { numbers: [40, 10, 30, 20], position: 1 }
+examples:
+  - given: { numbers: [40, 10, 30, 20], position: 1 }
+    result: { current: 10, following: 30, gap: 20 }
+    why: Position 1 holds 10. The position right after it is 2, which holds 30. 30 - 10 is 20.
+  - given: { numbers: [6, 20, -5], position: 1 }
+    result: { current: 20, following: -5, gap: -25 }
+    why: Position 1 holds 20 and position 2 holds -5. -5 - 20 is -25, so the gap is negative.
+
+tests:
+  - name: values far from their positions
+    given: { numbers: [40, 10, 30, 20], position: 1 }
+    expect: { current: 10, following: 30, gap: 20 }
+    purpose: The example from the task. Catches storing the positions 1 and 2 instead of the items there, and adding 1 to the item instead of to the position.
+  - name: two items, position 0
+    given: { numbers: [-8, 15], position: 0 }
+    expect: { current: -8, following: 15, gap: 23 }
+    purpose: The shortest list allowed and the smallest position. With two items, position 0 is the only position allowed, and the following item is the last item, at position 1.
+  - name: the second-to-last position
+    given: { numbers: [3, 9, 4, 15], position: 2 }
+    expect: { current: 4, following: 15, gap: 11 }
+    purpose: The largest position this list allows. The following item is the last item, at position 3.
+  - name: equal neighbors
+    given: { numbers: [2, 7, 7, 4], position: 1 }
+    expect: { current: 7, following: 7, gap: 0 }
+    purpose: Two neighbors can hold the same value. The gap is then 0.
+  - name: a negative gap
+    given: { numbers: [6, 20, -5], position: 1 }
+    expect: { current: 20, following: -5, gap: -25 }
+    purpose: The following item is smaller, so the gap is negative. Catches subtracting the wrong way round.
+  - name: the longest list and the largest position allowed
+    given: { numbers: [3, 9, 4, 15, 6, 2, 11, 8, 50, -50], position: 8 }
+    expect: { current: 50, following: -50, gap: -100 }
+    purpose: Ten items and position 8. The following item is at position 9, the last position, and the values are at the edges of what the task allows.
+
+mistakes:
+  - id: adds-to-value
+    label: Adds 1 to the item instead of to the position
+    shows: wrong-result
+    code: |
+      current = numbers[position]
+      following = numbers[position] + 1
+      gap = following - current
+    feedback: |
+      Your `following` is exactly one more than `current`, and your `gap` is 1, whatever the list holds. The `+ 1` is being added to the item after it has been read. To move to the next item, the number inside the brackets has to change, not the number that comes out of them.
+  - id: stores-position
+    label: Stores the next position instead of the item there
+    shows: wrong-result
+    code: |
+      current = numbers[position]
+      following = position + 1
+      gap = following - current
+    feedback: |
+      Your `following` is one more than `position`. That is the next position, not the item stored there. `position + 1` says where the following item is. Reading it still takes the list name and brackets.
+  - id: stores-both-positions
+    label: Stores the two positions instead of the items there
+    shows: wrong-result
+    code: |
+      current = position
+      following = position + 1
+      gap = following - current
+    feedback: |
+      Your `current` equals `position`, your `following` is one more than that, and your `gap` is 1, whatever the list holds. Those two numbers are positions: they say where the two neighbors are. An item only comes out of the list when a position stands inside brackets after the list name.
+  - id: gap-reversed
+    label: Takes the following item away from the current one
+    shows: wrong-result
+    code: |
+      current = numbers[position]
+      following = numbers[position + 1]
+      gap = current - following
+    feedback: |
+      `current` and `following` are right, but your `gap` has the wrong sign. The rules say the gap is `following` minus `current`: the item that comes later, minus the item that comes first.
+  - id: same-item
+    label: Reads the item at the same position twice
+    shows: wrong-result
+    code: |
+      current = numbers[position]
+      following = numbers[position]
+      gap = following - current
+    feedback: |
+      Your `following` is the same item as `current`, so the gap is 0 even when the two neighbors differ. The line for `following` reads the item at `position` again. The following item sits one position further along the list.
+  - id: round-brackets
+    label: Uses round brackets to read an item
+    shows: error
+    errorType: TypeError
+    errorContains: not callable
+    code: |
+      current = numbers(position)
+      following = numbers(position + 1)
+      gap = following - current
+    feedback: |
+      The error says the list was called, the way a function such as `len()` is called. Round brackets after a name mean "call this", and a list cannot be called. Reading an item from a list takes square brackets after the list name, with the position inside them.
+
+hints:
+  - |
+    `position` says where `current` is. Where is the item right after it? Think of its position, not its value.
+  - |
+    If `position` is 1, the following item sits at position 2, and 2 is `position + 1`. Whatever stands inside the brackets is worked out first, and the result is used as a position.
+  - |
+    Three lines. Read the item at `position`. Read the item at `position + 1`. Take the first of those away from the second. Check where your `+ 1` stands: inside the brackets it moves to the next position, outside them it adds 1 to a value.
+
+explanation: |
+  The whole exercise turns on one question: what does the `+ 1` change?
+
+  With `numbers = [40, 10, 30, 20]` and `position = 1`:
+
+  | expression | what it is | value |
+  |---|---|---|
+  | `position` | a position | 1 |
+  | `position + 1` | a position | 2 |
+  | `numbers[position]` | the item at position 1 | 10 |
+  | `numbers[position + 1]` | the item at position 2 | 30 |
+  | `numbers[position] + 1` | the item at position 1, plus 1 | 11 |
+
+  Inside the brackets, `+ 1` moves one place along the list. Outside the brackets, `+ 1` adds 1 to an item and does not look at the list again. The last two rows look alike and mean different things.
+
+  Python works out what is inside the brackets first. For `numbers[position + 1]` it works out 1 + 1, gets 2, and then reads the item at position 2.
+
+  The gap is the later item minus the earlier one: 30 - 10, which is 20. When the following item is smaller, the gap is negative. When the neighbors are equal, it is 0.
+
+  The rules promise that `position` is never the last position. That matters, because `position + 1` has to be a position that exists. On the last position it would equal `len(numbers)`, and asking for it raises `IndexError`.
+
+solution:
+  code: |
+    current = numbers[position]
+    following = numbers[position + 1]
+    gap = following - current
+  walkthrough: |
+    - `numbers[position]` reads the item at the given position.
+    - `numbers[position + 1]` first works out `position + 1`, the next position, and then reads the item there. The `+ 1` stands inside the brackets, so it changes where to look, not what was found.
+    - `gap = following - current` takes the current item away from the following one, as the rules say. With 10 and 30 that is 20. With 20 and -5 it is -25.
+
+    The rules promise that `position` is less than `len(numbers) - 1`, so `position + 1` is at most the last position, and the second line never asks for an item that is not there.
+
+    `gap = numbers[position + 1] - numbers[position]` gives the same number. The checker reads all three names, so `current` and `following` have to be stored either way, and using them makes the subtraction easier to read.
+
+prerequisites: [positions-read-values, positions-first-and-last]
+related: [positions-last-item, copy-list-backwards]

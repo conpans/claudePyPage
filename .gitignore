@@ -1,0 +1,12 @@
+node_modules/
+dist/
+# Copied from node_modules/pyodide by scripts/copy-pyodide.mjs
+public/pyodide/
+# Local-only tools for the browser tests (see scripts/setup-e2e.sh)
+.local/
+test-results/
+playwright-report/
+*.log
+# Written by Python when the native checks import harness.py and the oracles
+__pycache__/
+*.pyc

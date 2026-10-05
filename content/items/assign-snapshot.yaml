@@ -1,0 +1,94 @@
+id: assign-snapshot
+title: After the price changes
+tier: exercise
+format: predict
+skill: assignment
+skills: [assignment]
+difficulty: 1
+source:
+  type: original
+
+goal: Work out what two variables hold after one of them has been given a new value.
+statement: |
+  The program below works out one variable from another. Then the other variable is given a new value.
+
+  Read the program and work out what it prints. Tracing on paper helps: write one row per line of the program, with a column each for `price` and `doubled`.
+rules:
+  - There is nothing to run here. Predict first, then check your prediction.
+toWrite: Nothing. You type what the program prints.
+
+program: |
+  price = 10
+  doubled = price * 2
+  price = 25
+  print(doubled)
+  print(price)
+
+questions:
+  - ask: What does the program print? Put each printed line on its own line.
+    about: output
+    answer: |
+      20
+      25
+    wrong:
+      - answer: |
+          50
+          25
+        feedback: |
+          50 would be right if `doubled` kept following `price`. It does not. Line 2 ran once, while `price` was still 10, and stored the number that came out. Line 3 changes `price`, but it does not make line 2 run again. Is there any line after line 2 that assigns to `doubled`?
+      - answer: |
+          20
+          10
+        feedback: |
+          Your first line is right. For the second, look at line 3: `price = 25` is an assignment to a name that already holds a value. A variable holds one value at a time, so the 10 does not stay.
+      - answer: |
+          25
+          20
+        feedback: |
+          These are the right two numbers in the wrong order. Lines run from top to bottom: line 4 prints `doubled` and line 5 prints `price`, so the value of `doubled` goes on the first line of your answer.
+      - answer: |
+          20
+          35
+        feedback: |
+          Your first line is right. For the second: `price = 25` does not add 25 to the old price. The right side of that line is `25` alone, with no `price` in it, so the old value plays no part.
+
+hints:
+  - |
+    Go through the program one line at a time. After each line, write down what `price` holds and what `doubled` holds. Which of the five lines change `doubled`?
+  - |
+    Line 2 is `doubled = price * 2`. Python works out the right side with the value `price` holds at that moment, which is 10. What gets stored under `doubled` is a number, not a rule.
+  - |
+    After line 2, `price` is 10 and `doubled` is 20. Line 3 has `price` on the left of the `=`, so it changes `price` and nothing else. No later line has `doubled` on the left of an `=`.
+
+explanation: |
+  An assignment runs once. It works out its right side with the values the variables hold at that moment, and stores the result. The stored value then stays until another assignment to the same name replaces it.
+
+  | line | what runs | `price` after | `doubled` after |
+  |---|---|---|---|
+  | 1 | `price = 10` | 10 | not created yet |
+  | 2 | `doubled = price * 2` | 10 | 20 |
+  | 3 | `price = 25` | 25 | 20 |
+  | 4 | `print(doubled)` | 25 | 20 |
+  | 5 | `print(price)` | 25 | 20 |
+
+  Line 2 is the only line that assigns to `doubled`. It ran when `price` was 10, so it stored 20.
+
+  Line 3 replaces the 10 in `price` with 25. It does not touch `doubled`, and it does not make line 2 run again. After line 3, `doubled` still holds 20, although `price * 2` would now be 50.
+
+  If the program needed `doubled` to fit the new price, it would have to work it out again after line 3, with another assignment to `doubled`.
+
+solution:
+  walkthrough: |
+    The program prints `20` and then `25`.
+
+    - Line 2, `doubled = price * 2`, runs while `price` holds 10. It stores 20 under `doubled`.
+    - Line 3, `price = 25`, replaces the 10 with 25. `doubled` is not on the left side of that line, so it stays at 20.
+    - Line 4 prints the value of `doubled`, which is 20. Line 5 prints the value of `price`, which is 25.
+
+    `doubled` is a snapshot of `price * 2`, taken on line 2. It is not a formula that keeps itself up to date.
+
+    Use the step-through to see every line with the real values.
+
+prerequisites: []
+related: [accumulators-replace-or-add, conditions-not-keeps-value]
+next: assign-saved-length

@@ -1,0 +1,138 @@
+id: loops-one-too-far
+title: One round too many
+tier: exercise
+format: fix
+skill: loops
+skills: [loops, positions]
+difficulty: 2
+source:
+  type: original
+
+goal: Repair a loop that asks for a position one past the end of the list.
+statement: |
+  This program is meant to walk through `numbers` from the first item to the last, keeping the item it looked at most recently in `last_seen`. When the loop ends, `last_seen` should hold the last item of the list.
+
+  Instead, the program stops with an error, whatever the list. Run it, read the error message, find the cause and repair it.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers
+    domain: { minLen: 1, maxLen: 8, min: -20, max: 20 }
+create:
+  - name: last_seen
+    describe: the item the loop looked at most recently; after the loop, the last item of `numbers`
+rules:
+  - '`numbers` has from 1 to 8 items, each a whole number from -20 to 20. It is never empty.'
+  - After the loop, `last_seen` holds the last item of `numbers`. With one item, it holds that item.
+  - An item can be negative, an item can be 0, and the same value can appear more than once.
+  - Keep the loop. Reading the last item directly would give the right value, but the point here is to make the loop stop at the right place.
+  - Leave `numbers` unchanged.
+toWrite: A small change to the program you are given. Most of it is already right.
+unchanged: [numbers]
+
+starter: |
+  position = 0
+  while position <= len(numbers):
+      last_seen = numbers[position]
+      position = position + 1
+exampleGiven: { numbers: [3, 1, 4] }
+examples:
+  - given: { numbers: [3, 1, 4] }
+    result: { last_seen: 4 }
+    why: The loop looks at 3, then 1, then 4. The last item it looks at is 4, at position 2.
+
+tests:
+  - name: three items
+    given: { numbers: [3, 1, 4] }
+    expect: { last_seen: 4 }
+    purpose: The example from the task. A loop that stops one round early ends with 1 instead.
+  - name: two items
+    given: { numbers: [5, 9] }
+    expect: { last_seen: 9 }
+    purpose: The positions are 0 and 1, and the loop has to run for both.
+  - name: one item
+    given: { numbers: [7] }
+    expect: { last_seen: 7 }
+    purpose: The shortest list allowed. A loop that stops one round early runs no round at all here, so last_seen is never created.
+  - name: the last item is 0
+    given: { numbers: [4, -20, 0] }
+    expect: { last_seen: 0 }
+    purpose: 0 and negative numbers are ordinary items, and -20 is the smallest value allowed. The last item is 0, and that is the answer.
+  - name: the last item equals the first
+    given: { numbers: [5, 8, 5] }
+    expect: { last_seen: 5 }
+    purpose: The loop still has to reach the last position. Stopping after position 1 would give 8.
+  - name: eight items far from their positions
+    given: { numbers: [13, 14, 15, 16, 17, 18, 19, 20] }
+    expect: { last_seen: 20 }
+    purpose: The longest list allowed, ending with the largest value allowed. The values differ from the positions 0 to 7, so storing a position instead of an item cannot pass.
+
+mistakes:
+  - id: one-too-far
+    label: Runs one round too many and asks for a position past the end
+    shows: error
+    errorType: IndexError
+    code: |
+      position = 0
+      while position <= len(numbers):
+          last_seen = numbers[position]
+          position = position + 1
+    feedback: |
+      The error says `list index out of range`: the loop asked for a position that has no item. With 3 items the positions are 0, 1 and 2, and `len(numbers)` is 3. The last round ran with `position` at 3, one past the last position. Compare the last position that exists with the value of `len(numbers)`, then look again at the comparison in the `while` line.
+  - id: stops-one-early
+    label: Stops one round too early
+    shows: wrong-result
+    code: |
+      position = 0
+      while position < len(numbers) - 1:
+          last_seen = numbers[position]
+          position = position + 1
+    feedback: |
+      `last_seen` holds the item before the last one. The usual cause is a condition that went from one round too many to one round too few. With 3 items the positions are 0, 1 and 2, and the loop has to run for all three. On a list with one item, a loop that stops one round early runs no round at all, and `last_seen` is never created. Which values of `position` should make the condition True?
+
+hints:
+  - |
+    Read the error message, and look at the value of `position` at the moment the error happened. The step-through shows it line by line. How does that value compare with `len(numbers)`?
+  - |
+    With `numbers = [3, 1, 4]`, the positions that have an item are 0, 1 and 2, and `len(numbers)` is 3. Which values of `position` should make the condition True, and which value should make it False?
+  - |
+    The condition has to be True for 0, 1 and 2 and False for 3. A single comparison sign does that, with `len(numbers)` kept on the right.
+
+explanation: |
+  With `numbers = [3, 1, 4]`, `len(numbers)` is 3 and the last position is 2. Here is the program as given:
+
+  | check | `position` | `position <= 3` | `numbers[position]` | `last_seen` after |
+  |---|---|---|---|---|
+  | 1 | 0 | True | 3 | 3 |
+  | 2 | 1 | True | 1 | 1 |
+  | 3 | 2 | True | 4 | 4 |
+  | 4 | 3 | True | no item at position 3, so IndexError | 4 |
+
+  The first three rounds are right. The fourth check, `3 <= 3`, is True, so a fourth round starts and asks for `numbers[3]`. The list has no position 3.
+
+  The condition should be True for the positions that exist, 0, 1 and 2, and False for 3. Then the fourth check ends the loop, and `last_seen` keeps the 4 stored on round 3.
+
+  Going one step too far in the other direction is also possible. A condition that is already False at 2 ends the loop after two rounds, with `last_seen` at 1, the item before the last. On a one-item list that loop would not run at all.
+
+  Two facts to keep together: the last position of a list is `len(numbers) - 1`, and after a loop with `<` ends, `position` equals `len(numbers)`.
+
+solution:
+  code: |
+    position = 0
+    while position < len(numbers):
+        last_seen = numbers[position]
+        position = position + 1
+  walkthrough: |
+    Only the comparison in the `while` line changes: `<` in place of `<=`.
+
+    - With `numbers = [3, 1, 4]`, the condition `position < 3` is True for 0, 1 and 2, so the loop runs three rounds and looks at every item.
+    - On the third round `last_seen` becomes 4. The update makes `position` 3, the check `3 < 3` is False, and the loop ends. `last_seen` keeps the 4.
+    - With one item, `position < 1` is True for 0 only. One round runs, and `last_seen` holds that item.
+
+    The pattern `while position < len(numbers)` visits exactly the positions that exist, 0 up to `len(numbers) - 1`, for a list of any length.
+
+    Keeping `<=` and reading `numbers[position - 1]` also leaves the right value in `last_seen`, but it hides the problem instead of repairing it. The loop still runs four rounds for three items, and its first round reads `numbers[-1]`. Python reads a negative position from the end of the list, so that is the last item, not the first.
+
+prerequisites: [loops-count-rounds, positions-length-and-last]
+related: [loops-missing-step, running-totals]
+next: loops-two-counters

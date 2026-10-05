@@ -1,0 +1,292 @@
+id: failed-so-far
+title: Failures so far
+tier: variation
+variationOf: running-totals
+format: write
+order: 2
+skills: [positions, loops, conditions, accumulators, append]
+difficulty: 3
+newIdea: >-
+  The count goes up only on some rounds, but a value is recorded on every round.
+source:
+  type: original
+
+goal: Build a list that shows, after every check, how many checks have failed so far.
+statement: |
+  A monitoring script has recorded the result of several health checks, in the order they ran. Each result is the text `"pass"` or the text `"fail"`.
+
+  Given the list `checks`, build a new list `failed_so_far` with the same number of items. The item at each position of `failed_so_far` is the number of `"fail"` results in `checks` from position 0 up to and including that position.
+
+  With `checks = ["pass", "fail", "fail", "pass"]` the counts so far are 0, then 1, then 2, then 2 again. So `failed_so_far` must be `[0, 1, 2, 2]`. The last check passed, so the count stays at 2, and that 2 is still recorded.
+given:
+  - name: checks
+    type: list[str]
+    describe: a list of check results, in the order the checks ran
+    domain: { minLen: 1, maxLen: 12, oneOf: ['pass', 'fail'] }
+create:
+  - name: failed_so_far
+    describe: a new list with one count for every item of `checks`
+rules:
+  - '`checks` has from 1 to 12 items. Every item is exactly `"pass"` or `"fail"`, in small letters.'
+  - '`failed_so_far` has exactly as many items as `checks`. There is one count for every check, whether it passed or failed.'
+  - The count at a position includes the item at that position itself.
+  - If nothing has failed up to a position, the count there is `0`. So the list can start with one or more zeros.
+  - A count is never smaller than the one before it. After a `"pass"` it stays the same, and after a `"fail"` it is 1 higher.
+  - Leave `checks` unchanged, and make `failed_so_far` a new list.
+toWrite: A short program of about eight lines. It needs two start values, one loop, and an `if` inside the loop.
+unchanged: [checks]
+fresh: [failed_so_far]
+
+starter: |
+  # checks is given. Leave your answer in failed_so_far.
+exampleGiven: { checks: ['pass', 'fail', 'fail', 'pass'] }
+examples:
+  - given: { checks: ['pass', 'fail', 'fail', 'pass'] }
+    result: { failed_so_far: [0, 1, 2, 2] }
+    why: Nothing has failed at position 0, so the first count is 0. Then 1, then 2. The last check passed, so the count stays at 2 and is recorded again.
+  - given: { checks: ['fail', 'pass', 'pass'] }
+    result: { failed_so_far: [1, 1, 1] }
+    why: The first check failed, so the count is 1 from the start. Nothing fails after that, and the 1 is still recorded on every round.
+
+tests:
+  - name: four checks, two failed
+    given: { checks: ['pass', 'fail', 'fail', 'pass'] }
+    expect: { failed_so_far: [0, 1, 2, 2] }
+    purpose: The first example from the task. The last check passed, and its count is still recorded.
+  - name: one passed check
+    given: { checks: ['pass'] }
+    expect: { failed_so_far: [0] }
+    purpose: The shortest list allowed, with nothing failed. The answer is a list holding one 0, not an empty list.
+  - name: one failed check
+    given: { checks: ['fail'] }
+    expect: { failed_so_far: [1] }
+    purpose: The shortest list allowed, with a failure. The count at a position includes the item at that position.
+  - name: nothing failed
+    given: { checks: ['pass', 'pass', 'pass'] }
+    expect: { failed_so_far: [0, 0, 0] }
+    purpose: The count never goes up, and it is still recorded three times.
+  - name: everything failed
+    given: { checks: ['fail', 'fail', 'fail', 'fail'] }
+    expect: { failed_so_far: [1, 2, 3, 4] }
+    purpose: The count goes up on every round.
+  - name: twelve checks
+    given: { checks: ['fail', 'pass', 'pass', 'pass', 'fail', 'pass', 'pass', 'fail', 'fail', 'pass', 'pass', 'pass'] }
+    expect: { failed_so_far: [1, 1, 1, 1, 2, 2, 2, 3, 4, 4, 4, 4] }
+    purpose: The longest list allowed. The same count is recorded again on every round where nothing new failed.
+
+mistakes:
+  - id: never-moves-on
+    label: Only moves to the next position when the item is "fail"
+    shows: never-stops
+    code: |
+      failed_so_far = []
+      failed_count = 0
+      position = 0
+      while position < len(checks):
+          if checks[position] == "fail":
+              failed_count = failed_count + 1
+              failed_so_far.append(failed_count)
+              position = position + 1
+    feedback: |
+      The program had to be stopped because the loop never ended. Look at `checks` among the variables at the moment it stopped. If it still holds only the items it was given, the line that moves `position` on is missing, or it is indented under the `if`, where it only runs for a `"fail"` item: on a `"pass"` item the loop then stays at the same position forever. If `checks` has become very long, the `append` adds to `checks` instead of `failed_so_far`: the list the loop walks through grows by one item on every round, so its end is never reached. Two lines have to run on every round, whatever the item is: the `append` to `failed_so_far` and the step to the next position.
+  - id: one-too-far
+    label: Asks for a position one past the end
+    shows: error
+    errorType: IndexError
+    code: |
+      failed_so_far = []
+      failed_count = 0
+      position = 0
+      while position <= len(checks):
+          if checks[position] == "fail":
+              failed_count = failed_count + 1
+          failed_so_far.append(failed_count)
+          position = position + 1
+    feedback: |
+      The loop asked for a position that has no item. With 4 checks the positions are 0, 1, 2 and 3. `len(checks)` is 4, which is one past the last position. The usual cause is a loop that runs one round too far. Look at the comparison in your `while` line.
+  - id: append-swapped
+    label: Writes the count before .append and the list inside the parentheses
+    shows: error
+    errorType: AttributeError
+    errorContains: "'int' object has no attribute 'append'"
+    code: |
+      failed_so_far = []
+      failed_count = 0
+      position = 0
+      while position < len(checks):
+          if checks[position] == "fail":
+              failed_count = failed_count + 1
+          failed_count.append(failed_so_far)
+          position = position + 1
+    feedback: |
+      The error says that an `int`, a whole number, has no `append`. Only a list can be appended to. In your `append` line, look at what stands before the dot and what stands inside the parentheses. The list that receives the value goes before `.append`, and the value to add goes inside the parentheses.
+  - id: assigns-append
+    label: Stores the result of .append back in the list variable
+    shows: error
+    errorType: AttributeError
+    errorContains: NoneType
+    code: |
+      failed_so_far = []
+      failed_count = 0
+      position = 0
+      while position < len(checks):
+          if checks[position] == "fail":
+              failed_count = failed_count + 1
+          failed_so_far = failed_so_far.append(failed_count)
+          position = position + 1
+    feedback: |
+      The error says that `None` has no `append`, and it happens on the second round. `.append()` changes the list itself and gives back nothing, which Python writes as `None`. If that nothing is stored under the list's name with an `=`, the list is gone, and the next round has no list to append to. Look at your `append` line: it does its work by itself and needs no `=`.
+  - id: adds-the-item
+    label: Adds the item itself to the count, the way running totals added each number
+    shows: error
+    errorType: TypeError
+    errorContains: "'int' and 'str'"
+    code: |
+      failed_so_far = []
+      failed_count = 0
+      position = 0
+      while position < len(checks):
+          if checks[position] == "fail":
+              failed_count = failed_count + checks[position]
+          failed_so_far.append(failed_count)
+          position = position + 1
+    feedback: |
+      The error says that Python cannot use `+` on a whole number and a text. In *Running totals* each item was a number, and the item itself was added to the total. Here each item is the text `"pass"` or `"fail"`, and the count is a whole number, so the two cannot be added together. What the count needs on a round with a failure is to go up by 1. Look at what the line under your `if` adds to the count.
+  - id: appends-only-failures
+    label: Records a count only when the item is "fail"
+    shows: wrong-result
+    code: |
+      failed_so_far = []
+      failed_count = 0
+      position = 0
+      while position < len(checks):
+          if checks[position] == "fail":
+              failed_count = failed_count + 1
+              failed_so_far.append(failed_count)
+          position = position + 1
+    feedback: |
+      Your list is shorter than `checks`: it has one item for each `"fail"` and none for a `"pass"`. That happens when the `append` is indented under the `if`, so it only runs on rounds where the item is `"fail"`. The count changes only on some rounds, but it has to be recorded on every round. Look at how far your `append` line is indented.
+  - id: records-one-or-zero
+    label: Records 1 or 0 for each item instead of the count so far
+    shows: wrong-result
+    code: |
+      failed_so_far = []
+      position = 0
+      while position < len(checks):
+          failed_count = 0
+          if checks[position] == "fail":
+              failed_count = failed_count + 1
+          failed_so_far.append(failed_count)
+          position = position + 1
+    feedback: |
+      Your list holds a 1 at every position where the check failed and a 0 where it passed. That shows what happened on that one round, not the count so far. There are two usual causes. Either the count is set back to 0 inside the loop, so it never grows past 1, or `append()` is given a 1 or a 0 directly instead of the count. Look at where the count gets its start value, and at what goes inside the parentheses of your `append`.
+  - id: stores-one
+    label: Stores 1 in the count instead of adding 1
+    shows: wrong-result
+    code: |
+      failed_so_far = []
+      failed_count = 0
+      position = 0
+      while position < len(checks):
+          if checks[position] == "fail":
+              failed_count = 1
+          failed_so_far.append(failed_count)
+          position = position + 1
+    feedback: |
+      Your list reaches 1 at the first `"fail"` and never gets any higher, however many checks fail after that. That happens when the line under the `if` stores the number 1 in the count instead of adding 1 to what the count already holds. Look at that line: does the name on the left of the `=` also appear on the right?
+  - id: counts-every-check
+    label: Adds 1 on every round, whatever the item is
+    shows: wrong-result
+    code: |
+      failed_so_far = []
+      failed_count = 0
+      position = 0
+      while position < len(checks):
+          failed_count = failed_count + 1
+          failed_so_far.append(failed_count)
+          position = position + 1
+    feedback: |
+      Your list goes up by 1 at every position, so each count is the number of checks so far, passed or failed, and not the number of failures. The count went up on every round, whatever the check said. Adding 1 should happen only on the rounds where the item at the current position is `"fail"`. Check that the line which adds 1 sits under an `if` that asks about that item.
+  - id: records-before-counting
+    label: Records the count before looking at the current item
+    shows: wrong-result
+    code: |
+      failed_so_far = []
+      failed_count = 0
+      position = 0
+      while position < len(checks):
+          failed_so_far.append(failed_count)
+          if checks[position] == "fail":
+              failed_count = failed_count + 1
+          position = position + 1
+    feedback: |
+      Your list is one step behind: each position holds the count as it was before the item at that position was looked at. So a failure only shows up one position later, and a failure in the last item never shows up at all. The order inside the loop matters. Bring the count up to date first, then record it.
+  - id: records-position
+    label: Records the position instead of the count
+    shows: wrong-result
+    code: |
+      failed_so_far = []
+      failed_count = 0
+      position = 0
+      while position < len(checks):
+          if checks[position] == "fail":
+              failed_count = failed_count + 1
+          failed_so_far.append(position)
+          position = position + 1
+    feedback: |
+      Your list holds the positions 0, 1, 2, 3 and so on, one higher at every position, whatever the checks say. `position` says where the loop is. The value to record is the count of failures so far, which only goes up on a `"fail"`.
+
+hints:
+  - |
+    In *Running totals*, two things happened on every round: the total changed, and the total was recorded. Here one of those two still happens on every round, and the other only on some rounds. Which is which?
+  - |
+    Keep the number of failures so far in a variable, the way *Count the failed checks* does. With `checks = ["pass", "fail"]` that count is 0 after the first round and 1 after the second. Both numbers go into the list. The 0 is recorded too, even though nothing was counted on that round.
+  - |
+    In words: start with a count of 0, an empty list, and position 0. On each round: if the item at the current position equals `"fail"`, add 1 to the count. Then, whatever the item was, append the count to the list and move to the next position.
+
+explanation: |
+  This is *Running totals* with one change. There, the total grew on every round. Here, the count grows only on the rounds where the item is `"fail"`. The recording does not change: one value is appended on every round.
+
+  With `checks = ["pass", "fail", "fail", "pass"]`:
+
+  | round | `position` | `checks[position]` | equal to `"fail"`? | `failed_count` after | `failed_so_far` after appending |
+  |---|---|---|---|---|---|
+  | 1 | 0 | `"pass"` | False | 0 | `[0]` |
+  | 2 | 1 | `"fail"` | True | 1 | `[0, 1]` |
+  | 3 | 2 | `"fail"` | True | 2 | `[0, 1, 2]` |
+  | 4 | 3 | `"pass"` | False | 2 | `[0, 1, 2, 2]` |
+
+  Look at rounds 1 and 4. The comparison is False, so the count does not change. The append still happens, and it records the count as it stands: 0 in round 1, and 2 in round 4.
+
+  So three things can happen in a round, and they do not all depend on the item:
+
+  - adding 1 to the count happens only when the item is `"fail"`, so it belongs under the `if`;
+  - appending the count happens on every round;
+  - moving to the next position happens on every round.
+
+  Indentation is how Python knows which lines belong to the `if`. A line indented under the `if` runs only when the comparison is True. A line lined up with the `if` runs on every round.
+
+  The order matters too, as it did in *Running totals*. The count is brought up to date first and recorded after that. That is why the count at a position includes the item at that position.
+
+solution:
+  code: |
+    failed_so_far = []
+    failed_count = 0
+    position = 0
+    while position < len(checks):
+        if checks[position] == "fail":
+            failed_count = failed_count + 1
+        failed_so_far.append(failed_count)
+        position = position + 1
+  walkthrough: |
+    - `failed_so_far = []` and `failed_count = 0` are the two start values. Both sit before the loop, so they run once.
+    - `if checks[position] == "fail":` asks one question about the current item. Only one line is indented under it, the line that adds 1 to `failed_count`. So only the counting depends on the answer.
+    - `failed_so_far.append(failed_count)` is lined up with the `if`, not inside it. It runs on every round and records the count as it stands at that moment, changed or not. The list that receives the value is written before `.append`, and the value goes inside the parentheses.
+    - `position = position + 1` is lined up with the `if` as well. It runs on every round, so the loop always moves on and ends after the last item.
+
+    The order inside a round is: bring the count up to date, record it, move on. Because the counting comes first, the count at a position includes the item at that position.
+
+    `checks` is only read, never changed, and `failed_so_far` is a new list.
+
+prerequisites: [running-totals, accumulators-count-failed]
+related: [running-products, count-matching]

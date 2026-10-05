@@ -1,0 +1,98 @@
+id: positions-length-and-last
+title: Length and last position
+tier: exercise
+format: predict
+skill: positions
+skills: [positions, assignment]
+difficulty: 1
+source:
+  type: original
+
+goal: Work out the last position of a list from its length, whatever the position variable is called.
+statement: |
+  The program stores three temperatures in a list. It then stores a number in a variable called `spot`, and uses it.
+
+  `spot` is a name the programmer chose. It means nothing special to Python, so Python treats it like any other variable.
+
+  Read the program and work out what it prints.
+rules:
+  - There is nothing to run here. Predict first, then check your prediction.
+toWrite: Nothing. You type what the program prints.
+
+program: |
+  temperatures = [18, 21, 19]
+  spot = len(temperatures) - 1
+  print(len(temperatures))
+  print(spot)
+  print(temperatures[spot])
+
+questions:
+  - ask: What does the program print? Put each printed line on its own line.
+    about: output
+    answer: |
+      3
+      2
+      19
+    wrong:
+      - answer: |
+          3
+          3
+          19
+        feedback: |
+          Look at line 2 again. `len(temperatures)` is 3, and the line takes 1 away before storing the result, so `spot` holds 2. Three items sit at the positions 0, 1 and 2. There is no position 3, so the last position and the length are not the same number.
+      - answer: |
+          3
+          2
+          21
+        feedback: |
+          Positions start at 0, so 21 sits at position 1, not at position 2. Count the positions once more from 0: 18 is at position 0, 21 at position 1, and the last item is at position 2.
+      - answer: |
+          2
+          2
+          19
+        feedback: |
+          `len(temperatures)` counts the items, and there are 3 of them. It does not give the last position. Line 2 works out the last position from the length by taking 1 away, and that is the number in `spot`.
+      - answer: |
+          3
+          2
+          2
+        feedback: |
+          Line 5 has brackets around `spot`, so it prints the item at position 2, not the number 2. Line 4 printed the position. Line 5 prints what is stored there.
+
+hints:
+  - |
+    `len(temperatures)` counts the items. How many are there? And what are the positions of those items?
+  - |
+    Three items sit at the positions 0, 1 and 2. Line 2 works out `len(temperatures) - 1`, which is 3 - 1, and stores that number in `spot`.
+  - |
+    `spot` is a name the programmer chose. Python treats it exactly like `position`. Line 5 reads the item at the position that `spot` holds. Which item sits at position 2?
+
+explanation: |
+  Line 2 is an assignment: the right side is worked out first, and the result is stored under the name `spot`.
+
+  | expression | value | what it is |
+  |---|---|---|
+  | `len(temperatures)` | 3 | how many items there are |
+  | `len(temperatures) - 1` | 2 | the last position |
+  | `spot` | 2 | the last position, stored |
+  | `temperatures[spot]` | 19 | the item at position 2 |
+
+  With three items, the positions are 0, 1 and 2. The length, 3, is one more than the last position, 2. In every list with at least one item those two numbers are one apart, and that is why the program takes 1 away.
+
+  `spot` is a name we chose. The program would print the same three lines with `position`, `last` or `where` in its place, because the brackets and `len()` are Python's and do not care what the variable is called.
+
+solution:
+  walkthrough: |
+    The program prints `3`, `2` and `19`.
+
+    - `len(temperatures)` counts the items: 3.
+    - `spot = len(temperatures) - 1` stores 3 - 1, which is 2, in `spot`. That is the last position, because three items sit at the positions 0, 1 and 2.
+    - `temperatures[spot]` reads the item at position 2, which is 19.
+
+    The name `spot` means nothing to Python. `temperatures[spot]` works like `numbers[position]`: a list name, then a position inside square brackets.
+
+    Use the step-through to see the value of `spot` appear on line 2 and be used on line 5.
+
+prerequisites: [positions-read-values]
+related: [positions-last-item, assign-saved-length]
+next: positions-last-item

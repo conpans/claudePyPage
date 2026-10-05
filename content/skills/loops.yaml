@@ -1,0 +1,169 @@
+id: loops
+order: 3
+title: Loop progression and stopping conditions
+shortTitle: Loops
+summary: >-
+  A while loop repeats while its condition is True. One position variable, moved on every round, says where to look and decides when the loop stops.
+mixups:
+  - Leaving out the update (`position = position + 1`), or writing it without indentation, so that `position` stays at 0 and the loop never ends.
+  - Writing `<=` where `<` belongs, which runs one round too many and asks for `numbers[len(numbers)]`, an item that does not exist.
+  - Keeping a second counter next to `position`, when `position` already says where to look and how many rounds have run.
+  - Expecting `position` to end at the last position (2 for three items), when the update makes it equal to `len(numbers)`.
+
+sections:
+  - title: A loop repeats while its condition is True
+    body: |
+      A `while` loop has a condition and a body. The body is the indented lines under the `while` line.
+
+      ```python
+      rounds = 0
+      while rounds < 3:
+          rounds = rounds + 1
+      ```
+
+      Before every round, Python checks the condition. If it is True, the body runs once more. If it is False, the loop ends, and the program carries on with the first line after the body that is not indented. One pass through the body is a round (the course calls a round an iteration).
+
+      The check comes first, and it comes every time. A loop whose condition is False at the very start runs no rounds at all. A loop whose condition is still True after a round runs another round.
+
+      Step through the example below and count. The condition is checked four times, and the body runs three times. The fourth check, `3 < 3`, is False, and that is what ends the loop.
+    demo:
+      title: A loop that runs three rounds
+      code: |
+        rounds = 0
+        while rounds < 3:
+            rounds = rounds + 1
+            print(f"Round {rounds}")
+        print("The loop has ended")
+      note: 'Watch `rounds` each time the `while` line runs: 0, 1, 2 and then 3. Only the last of those makes the condition False.'
+
+  - title: 'Three parts: start, condition, update'
+    body: |
+      Most loops that work through a list are built from three parts (the course says initialisation, condition and update):
+
+      ```python
+      position = 0                       # start
+      while position < len(numbers):     # condition
+          print(numbers[position])
+          position = position + 1        # update
+      ```
+
+      - The **start** gives the loop variable its first value. For a list that is 0, because the first item sits at position 0 (the course calls a position the index).
+      - The **condition** says when another round may run: while `position` is still a position that has an item.
+      - The **update** moves `position` to the next item. It is the last line of the body, so it runs at the end of every round.
+
+      Each part has one job. When a loop misbehaves, ask which of the three is missing or wrong. The sections below take them one at a time.
+
+      `position` is a name chosen by the programmer, like `rounds` above. The brackets in `numbers[position]` and the call `len(numbers)` belong to Python, and what they do is fixed: `numbers[position]` is the item stored at that position, and `len(numbers)` is the number of items.
+    demo:
+      title: Walking a list
+      given: { numbers: [5, 8, 6] }
+      code: |
+        position = 0
+        while position < len(numbers):
+            print(f"Position {position} holds {numbers[position]}")
+            position = position + 1
+      note: 'Watch `position` and `numbers[position]` side by side. On the three rounds the position is 0, 1 and 2, and the items are 5, 8 and 6. The items have nothing to do with the position numbers.'
+
+  - title: Without the update, the loop never ends
+    body: |
+      Take the update away and the loop still looks right at first glance:
+
+      ```python
+      position = 0
+      while position < len(numbers):
+          print(numbers[position])
+      ```
+
+      With `numbers = [5, 8, 6]`, `position` is 0 on the first round, and `numbers[0]`, which is 5, is printed. Nothing in the body changes `position`, so it is still 0 when the condition is checked again. `0 < 3` is True again, the body runs again, and 5 is printed again. No round is different from the one before, so the loop has no last round.
+
+      The same happens when the update line exists but is not indented. Then it is not part of the body. It waits for a loop that never finishes.
+
+      Running such a program here is safe. The app stops it after a few seconds, or as soon as it has printed more than 20,000 characters, or when you press Stop. It then shows the output so far and the variables at the moment it stopped. When that happens, look at the variable in the condition. A `position` that still holds 0 is the usual culprit: nothing inside the loop moved it.
+
+      This section has no prepared step-through, because a prepared example has to end on its own. The exercise *A loop that never ends* gives you one to run, step through and repair.
+
+  - title: '< or <=: where does the loop stop?'
+    body: |
+      With `numbers = [7, 4, 9]`, `len(numbers)` is 3, and the positions that have an item are 0, 1 and 2. The last position is always one less than the length.
+
+      ```python
+      while position < len(numbers):
+      ```
+
+      This condition is True for 0, 1 and 2 and False for 3. So the last round uses position 2, which is `len(numbers) - 1` and holds the last item, 9. There is no round for position 3.
+
+      ```python
+      while position <= len(numbers):
+      ```
+
+      With `<=` the condition is also True for 3. One more round runs, and `numbers[3]` asks for an item that is not there. Python stops the program with `IndexError: list index out of range`. The message says that a position was asked for that has no item. In a loop like this one, it is the sign of one round too many.
+
+      One more thing to notice: after a loop with `<` ends, `position` equals `len(numbers)`, not the last position. On the last round `position` was 2, the update made it 3, and `3 < 3` was False. Step through the example and watch the last two lines.
+    demo:
+      title: Where position ends up
+      given: { numbers: [7, 4, 9] }
+      code: |
+        position = 0
+        while position < len(numbers):
+            print(f"Round with position {position}")
+            position = position + 1
+        print(f"After the loop, position is {position}")
+        print(f"len(numbers) is {len(numbers)}")
+      note: The last round runs with `position` at 2. After the loop, `position` is 3, the same as `len(numbers)`.
+
+  - title: One position variable is enough
+    body: |
+      It is tempting to keep a second variable to count the rounds:
+
+      ```python
+      position = 0
+      count = 0
+      while count < len(numbers):
+          print(numbers[position])
+          count = count + 1
+          position = position + 1
+      ```
+
+      This works, but it uses two variables where one is enough. `position` starts at 0 and goes up by 1 on every round, so it already counts the rounds: on the first round it is 0, on the second it is 1, and after the loop it equals the number of rounds that ran.
+
+      Two counters have to be kept in step by hand. If the update of `position` is forgotten, the two drift apart: the condition watches `count`, which keeps moving, while `position` stays at 0 and the same item is printed on every round. One variable cannot drift away from itself.
+
+      So a loop over a list needs one loop variable. It says where to look, it decides when to stop, and when the loop has ended it says how many rounds ran.
+    demo:
+      title: One variable, both jobs
+      given: { numbers: [6, 3, 8] }
+      code: |
+        position = 0
+        while position < len(numbers):
+            print(f"Position {position} holds {numbers[position]}")
+            position = position + 1
+        print(f"Rounds run: {position}")
+      note: '`position` picks the item on every round, and after the loop it holds the number of rounds that ran: 3.'
+
+  - title: 'Other directions: counting down'
+    body: |
+      Nothing says a loop variable has to start at 0 and go up. A countdown turns all three parts around:
+
+      - the **start** is a high value, such as `seconds = 3`;
+      - the **condition** keeps the loop going while the value is still above the end, `seconds > 0` or `seconds >= 0`;
+      - the **update** subtracts 1 in place of adding 1: `seconds = seconds - 1`.
+
+      The condition still decides where the loop stops. With `seconds > 0` the last round is for 1, because `0 > 0` is False. With `seconds >= 0` the last round is for 0, because `0 >= 0` is True. The example below uses `>=`, so 0 gets a round.
+
+      What stays the same is the shape: start, condition, update, with the update as the last line of the body. Checking the condition before every round and moving the variable on every round work in any direction.
+    demo:
+      title: Counting down to 0
+      code: |
+        seconds = 3
+        while seconds >= 0:
+            print(f"{seconds} left")
+            seconds = seconds - 1
+        print("Go")
+      note: 'Watch `seconds` fall: 3, 2, 1, 0. When it reaches -1, the check `-1 >= 0` is False and the loop ends. With `seconds > 0` in the condition, the round for 0 would not run.'
+
+exercises:
+  - loops-count-rounds
+  - loops-missing-step
+  - loops-one-too-far
+  - loops-two-counters
+  - loops-countdown

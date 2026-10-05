@@ -1,0 +1,190 @@
+id: running-totals
+title: Running totals
+tier: challenge
+format: write
+order: 3
+skills: [positions, loops, accumulators, append]
+difficulty: 2
+newIdea: >-
+  Two results grow in the same loop: a number that holds the total so far, and a list that records that total after every item.
+source:
+  type: leetcode-adaptation
+  number: 1480
+  title: Running Sum of 1d Array
+  url: https://leetcode.com/problems/running-sum-of-1d-array/
+  interfaceNote: |
+    This is a practice adaptation written for this app, not LeetCode's own text.
+
+    Here you write a plain script: `numbers` is already given, and you leave the answer in `running_totals`. On LeetCode the same idea is submitted as a method named `runningSum`, inside `class Solution`, which receives the list as `nums` and returns the new list. The loop in the middle is the same in both.
+
+goal: Build a list of totals so far, with one total for each item of the list.
+statement: |
+  A running total is the sum of everything up to and including the current item.
+
+  Given a list `numbers`, build a new list `running_totals` with the same number of items. The item at each position of `running_totals` is the sum of the items of `numbers` from position 0 up to and including that position.
+
+  With `numbers = [3, 1, 4]` the totals so far are 3, then 3 + 1, then 3 + 1 + 4. So `running_totals` must be `[3, 4, 8]`.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers
+    domain: { minLen: 1, maxLen: 1000, min: -1000000, max: 1000000 }
+create:
+  - name: running_totals
+    describe: a new list with one total for every item of `numbers`
+rules:
+  - '`numbers` has at least 1 item and at most 1000. Each item is a whole number from -1,000,000 to 1,000,000.'
+  - '`running_totals` has exactly as many items as `numbers`.'
+  - The first total is the first item itself.
+  - An item can be negative, so a total can be smaller than the one before it.
+  - Leave `numbers` unchanged, and make `running_totals` a new list.
+toWrite: A short program of about seven lines. It needs two start values, one loop, and two updates inside the loop.
+unchanged: [numbers]
+fresh: [running_totals]
+
+starter: |
+  # numbers is given. Leave your answer in running_totals.
+exampleGiven: { numbers: [3, 1, 4] }
+examples:
+  - given: { numbers: [3, 1, 4] }
+    result: { running_totals: [3, 4, 8] }
+    why: 3, then 3 + 1 is 4, then 4 + 4 is 8.
+  - given: { numbers: [5, -2, -4] }
+    result: { running_totals: [5, 3, -1] }
+    why: A negative item makes the total go down. 5, then 5 - 2 is 3, then 3 - 4 is -1.
+
+tests:
+  - name: three items
+    given: { numbers: [3, 1, 4] }
+    expect: { running_totals: [3, 4, 8] }
+    purpose: The first example from the task.
+  - name: one item
+    given: { numbers: [9] }
+    expect: { running_totals: [9] }
+    purpose: The shortest list allowed. The only total is the item itself.
+  - name: negative items
+    given: { numbers: [5, -2, -4] }
+    expect: { running_totals: [5, 3, -1] }
+    purpose: Totals can go down, and can drop below zero.
+  - name: the same value four times
+    given: { numbers: [2, 2, 2, 2] }
+    expect: { running_totals: [2, 4, 6, 8] }
+    purpose: Equal items still give different totals.
+  - name: zeros in the list
+    given: { numbers: [0, 7, 0, 1] }
+    expect: { running_totals: [0, 7, 7, 8] }
+    purpose: A zero item repeats the total before it. A list that starts with 0 has 0 as its first total.
+  - name: the largest and smallest values allowed
+    given: { numbers: [1000000, 1000000, -1000000] }
+    expect: { running_totals: [1000000, 2000000, 1000000] }
+    purpose: The values at the edge of what the task allows.
+
+mistakes:
+  - id: one-too-far
+    label: Asks for a position one past the end
+    shows: error
+    errorType: IndexError
+    code: |
+      running_totals = []
+      total = 0
+      position = 0
+      while position <= len(numbers):
+          total = total + numbers[position]
+          running_totals.append(total)
+          position = position + 1
+    feedback: |
+      The loop asked for a position that has no item. With 3 items the positions are 0, 1 and 2. `len(numbers)` is 3, which is one past the last position. Look at the comparison in your `while` line.
+  - id: records-current-item
+    label: Records the current item instead of the total so far
+    shows: wrong-result
+    code: |
+      running_totals = []
+      position = 0
+      while position < len(numbers):
+          running_totals.append(numbers[position])
+          position = position + 1
+    feedback: |
+      Your list is a copy of `numbers`: each item is the current item, not the total so far. There are two usual causes. Either `append()` is given `numbers[position]` instead of the total, or the total is set back to 0 inside the loop, so it never grows.
+  - id: only-final-total
+    label: Records the total once, after the loop
+    shows: wrong-result
+    code: |
+      running_totals = []
+      total = 0
+      position = 0
+      while position < len(numbers):
+          total = total + numbers[position]
+          position = position + 1
+      running_totals.append(total)
+    feedback: |
+      `running_totals` holds a single item, the final total. A total has to be recorded on every round, so the `append` belongs inside the loop, indented like the other lines of the loop.
+  - id: records-before-adding
+    label: Records the total before adding the current item
+    shows: wrong-result
+    code: |
+      running_totals = []
+      total = 0
+      position = 0
+      while position < len(numbers):
+          running_totals.append(total)
+          total = total + numbers[position]
+          position = position + 1
+    feedback: |
+      Your list starts with 0 and is one step behind: each total is recorded before the current item has been added. The order inside the loop matters. Add first, then record.
+  - id: records-position
+    label: Records the position instead of the total
+    shows: wrong-result
+    code: |
+      running_totals = []
+      total = 0
+      position = 0
+      while position < len(numbers):
+          total = total + numbers[position]
+          running_totals.append(position)
+          position = position + 1
+    feedback: |
+      Your list holds the positions 0, 1, 2 and so on. `position` says where the loop is. The value to record is the total so far.
+
+hints:
+  - |
+    Which two things change on every round of the loop? One of them is a number, and the other is a list.
+  - |
+    Keep the total so far in a variable, the way *Add up a list* does. Right after you have added the current item, that variable holds exactly the value that belongs in `running_totals` for this position.
+  - |
+    In words: start with a total of 0, an empty list, and position 0. On each round, first add the current item to the total, then append the total to the list, then move to the next position.
+
+explanation: |
+  You already have both halves of this. *Add up a list* keeps a total that grows by one item per round. *Building lists* appends one value per round. Here both happen in the same round.
+
+  With `numbers = [3, 1, 4]`:
+
+  | round | `numbers[position]` | `total` after adding | `running_totals` after appending |
+  |---|---|---|---|
+  | 1 | 3 | 3 | `[3]` |
+  | 2 | 1 | 4 | `[3, 4]` |
+  | 3 | 4 | 8 | `[3, 4, 8]` |
+
+  The order inside a round matters. The current item is added to the total first. Then the total, which now includes the current item, is appended.
+
+  The list receives the number that `total` holds at that moment. Later rounds change `total`, but the numbers already in the list stay as they are.
+
+solution:
+  code: |
+    running_totals = []
+    total = 0
+    position = 0
+    while position < len(numbers):
+        total = total + numbers[position]
+        running_totals.append(total)
+        position = position + 1
+  walkthrough: |
+    - `running_totals = []` and `total = 0` are the two start values. Both sit before the loop, so they run once.
+    - `total = total + numbers[position]` adds the current item to the total so far.
+    - `running_totals.append(total)` records that total. The list that receives the value is written before `.append`, and the value goes inside the parentheses.
+    - `position = position + 1` moves to the next item. The loop ends when `position` equals `len(numbers)`.
+
+    `numbers` is only read, never changed, and `running_totals` is a new list.
+
+prerequisites: [accumulators-add-up, append-add-shipping, loops-one-too-far]
+related: [copy-list, greatest-value]
+next: running-products

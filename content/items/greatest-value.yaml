@@ -1,0 +1,240 @@
+id: greatest-value
+title: Find the greatest value
+tier: challenge
+format: write
+order: 6
+skills: [positions, loops, conditions]
+difficulty: 2
+newIdea: >-
+  A result variable that is replaced rather than added to, but only on the rounds where an `if` says the current item is greater than the value kept so far.
+source:
+  type: original
+
+goal: Find the largest item of a list by comparing every item with the greatest seen so far.
+statement: |
+  A list of whole numbers, `numbers`, is given. Find its largest item and leave that value in `greatest`.
+
+  With `numbers = [4, 9, 2, 7]` the answer is 9. The task asks for the value itself, not for the place where it sits: the answer is 9, not position 1.
+
+  Python has a built-in `max()` that would answer this in one line. Do not use it here. This challenge is about the loop that compares each item with the greatest seen so far, which is the work `max()` does out of sight.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers
+    domain: { minLen: 1, maxLen: 20, min: -1000, max: 1000 }
+create:
+  - name: greatest
+    describe: the largest value in `numbers`
+rules:
+  - '`numbers` has from 1 to 20 items, each a whole number from -1000 to 1000.'
+  - The list always has at least one item, so there is always a greatest value. With one item, that item is the answer.
+  - If the greatest value appears more than once, the answer is still that value. With `[5, 8, 3, 8, 1]` the answer is 8.
+  - 'All the items may be negative. The answer is then negative too: with `[-4, -9, -2]` it is -2, because -2 is greater than -4 and -9.'
+  - The items are in no particular order.
+  - Do not use `max()`, `sorted()` or `.sort()`. They would do the comparing for you, and the loop that compares is what this challenge is for.
+  - Leave `numbers` unchanged.
+toWrite: A short program of about six lines. It needs a start value taken from the list, a loop over the positions, and an `if` inside the loop.
+unchanged: [numbers]
+forbid: ['max()', 'sorted()', '.sort()']
+
+starter: |
+  # numbers is given. Leave your answer in greatest.
+exampleGiven: { numbers: [4, 9, 2, 7] }
+examples:
+  - given: { numbers: [4, 9, 2, 7] }
+    result: { greatest: 9 }
+    why: 9 is greater than 4, 2 and 7. The answer is the value 9, not the position 1 where it sits.
+  - given: { numbers: [-400, -900, -200, -700] }
+    result: { greatest: -200 }
+    why: Every item is negative. -200 is greater than -400, -900 and -700, so it is the greatest. The answer is not 0, because 0 is not in the list.
+
+tests:
+  - name: greatest in the middle
+    given: { numbers: [4, 9, 2, 7] }
+    expect: { greatest: 9 }
+    purpose: The first example from the task. The greatest is neither first nor last, so the loop has to find it on a middle round and then keep it.
+  - name: all items negative
+    given: { numbers: [-400, -900, -200, -700] }
+    expect: { greatest: -200 }
+    purpose: The second example from the task. No item is greater than 0. A program whose `greatest` starts at 0 answers 0 here, and 0 is not in the list.
+  - name: one item
+    given: { numbers: [7] }
+    expect: { greatest: 7 }
+    purpose: The shortest list allowed. The only item is the answer, and a loop that starts at position 1 runs no rounds at all.
+  - name: the greatest appears twice
+    given: { numbers: [5, 8, 3, 8, 1] }
+    expect: { greatest: 8 }
+    purpose: 8 sits at positions 1 and 3. The answer is 8 either way.
+  - name: greatest first
+    given: { numbers: [30, 10, 20] }
+    expect: { greatest: 30 }
+    purpose: The answer is the first item, and no later item beats it. Catches a program that never looks at the first item, and one that ends with the last item.
+  - name: greatest last
+    given: { numbers: [-1000, 250, 1000] }
+    expect: { greatest: 1000 }
+    purpose: The largest value allowed sits at the last position, and the smallest allowed sits first. Catches a loop that stops one item early.
+  - name: all items equal
+    given: { numbers: [6, 6, 6] }
+    expect: { greatest: 6 }
+    purpose: Every item is 6, so no item is greater than another. The answer is still 6, because a tie never changes which value is the greatest.
+  - name: the longest list allowed
+    given: { numbers: [-35, 120, 47, 120, -880, 15, 610, 3, 609, -12, 77, 610, 0, 145, -999, 640, 52, 18, -6, 233] }
+    expect: { greatest: 640 }
+    purpose: Twenty items. The greatest so far changes from -35 to 120, then to 610, and last to 640 at position 15.
+
+mistakes:
+  - id: starts-at-zero
+    label: Starts the greatest at 0
+    shows: wrong-result
+    code: |
+      greatest = 0
+      position = 0
+      while position < len(numbers):
+          if numbers[position] > greatest:
+              greatest = numbers[position]
+          position = position + 1
+    feedback: |
+      Your `greatest` is 0, and 0 is not in the list. That happens when `greatest` starts at 0 and every item is negative: no item is greater than 0, so the `if` is never True and the start value survives to the end. A start value taken from the list is safe whatever the list holds, and there is one item that is always there.
+  - id: replaces-every-round
+    label: Stores the current item on every round
+    shows: wrong-result
+    code: |
+      greatest = numbers[0]
+      position = 1
+      while position < len(numbers):
+          greatest = numbers[position]
+          position = position + 1
+    feedback: |
+      Your `greatest` is the last item of the list. That happens when the line that stores the current item runs on rounds where it should not. Either there is no `if` in front of it, or the `if` compares the current item with something other than the greatest so far, such as the first item, the item before it, or the position, so it is True too often. The `if` has to ask whether the current item is greater than the value `greatest` holds right now.
+  - id: keeps-smallest
+    label: Keeps the smallest item instead of the greatest
+    shows: wrong-result
+    code: |
+      greatest = numbers[0]
+      position = 1
+      while position < len(numbers):
+          if numbers[position] < greatest:
+              greatest = numbers[position]
+          position = position + 1
+    feedback: |
+      Your `greatest` is the smallest item of the list. The program replaces the value kept so far when the current item is less than it, which is the comparison the wrong way round. Read your `if` aloud with concrete numbers: with `greatest` at 4 and the current item 9, should 9 take over, and does your comparison say so?
+  - id: stores-position
+    label: Stores the position of the greatest instead of its value
+    shows: wrong-result
+    code: |
+      greatest = 0
+      position = 0
+      while position < len(numbers):
+          if numbers[position] > numbers[greatest]:
+              greatest = position
+          position = position + 1
+    feedback: |
+      Your `greatest` is the position where the greatest item sits, not the item itself. In the first example that gives 1, the position of the 9, instead of 9. `position` says where the loop is, and `numbers[position]` is the value stored there. Check what the line under your `if` stores in `greatest`.
+  - id: position-in-place-of-item
+    label: Stores the position, and then compares the items with it
+    shows: wrong-result
+    code: |
+      greatest = numbers[0]
+      position = 1
+      while position < len(numbers):
+          if numbers[position] > greatest:
+              greatest = position
+          position = position + 1
+    feedback: |
+      Your `greatest` ended up as a position, a small whole number that says where in the list something is, rather than an item of the list. Look at the line under your `if`, the one that stores the new greatest. If it stores `position`, then from that round on every item is compared with a position instead of with the greatest so far, and the result stops meaning anything. The value to store is the item at that position.
+  - id: stops-one-early
+    label: Stops the loop before the last position
+    shows: wrong-result
+    code: |
+      greatest = numbers[0]
+      position = 1
+      while position < len(numbers) - 1:
+          if numbers[position] > greatest:
+              greatest = numbers[position]
+          position = position + 1
+    feedback: |
+      Your `greatest` is 250, but the last item, 1000, is greater. The last item was never compared, because the loop stopped one position early. With 3 items the positions are 0, 1 and 2, and position 2 needs a round too. Look at the condition in your `while` line and work out which positions it lets through.
+  - id: adds-instead-of-replacing
+    label: Adds the greater item to the greatest instead of replacing it
+    shows: wrong-result
+    code: |
+      greatest = numbers[0]
+      position = 1
+      while position < len(numbers):
+          if numbers[position] > greatest:
+              greatest = greatest + numbers[position]
+          position = position + 1
+    feedback: |
+      Your `greatest` is not an item of the list. In the first example it is 13, which is 4 + 9. That happens when the line under the `if` adds the current item to `greatest`, the way `total` grows in *Add up a list*. Here the old value is not part of the new one: when an item is greater, it takes the place of the greatest so far.
+  - id: never-moves-on
+    label: Only moves to the next position when a new greatest is found
+    shows: never-stops
+    code: |
+      greatest = numbers[0]
+      position = 1
+      while position < len(numbers):
+          if numbers[position] > greatest:
+              greatest = numbers[position]
+              position = position + 1
+    feedback: |
+      The program had to be stopped because the loop never ended. Look for the line that moves `position` on. If it is missing, the loop looks at the same item forever. If it is indented under the `if`, it only runs on the rounds where a new greatest is found, and on any other round the loop stays at the same item forever. Moving to the next position has to happen on every round, whatever the comparison says.
+  - id: one-too-far
+    label: Asks for a position one past the end
+    shows: error
+    errorType: IndexError
+    code: |
+      greatest = numbers[0]
+      position = 1
+      while position <= len(numbers):
+          if numbers[position] > greatest:
+              greatest = numbers[position]
+          position = position + 1
+    feedback: |
+      The program asked for a position that has no item. With 4 items the positions are 0 to 3, and with one item only position 0 exists. Python names the line where it happened: work out the number inside the brackets there at that moment, and compare it with the last position. The usual cause is a `while` line that lets the loop run one round too far, because `len(numbers)` is one past the last position.
+
+hints:
+  - |
+    Imagine reading the list aloud one item at a time while keeping the greatest item so far in your head. When does the number in your head change, and when does it stay as it is?
+  - |
+    Keep the greatest so far in `greatest`, and compare each item with it: `numbers[position] > greatest`. With `greatest` at 4 and the current item 9, that is True, so 9 takes over. With the current item 2 it is False, and `greatest` stays 9. Then think about what `greatest` should hold before the first comparison.
+  - |
+    In words: start `greatest` at the first item of the list (the item itself, not its position) and `position` at 1. While the position is less than the length of the list: if the item at that position is greater than `greatest`, store that item in `greatest`. Then move to the next position, on every round.
+
+explanation: |
+  In *Add up a list*, `total` changed on every round, and its old value was part of the new one: `total = total + numbers[position]`. That is accumulating.
+
+  Here the result is not built up. It is replaced. The line `greatest = numbers[position]` has no `greatest` on the right side, so the old value is thrown away. In *Add up a list* a line like that would have been a mistake, because it throws the total away. Here it is the right move, with one condition: it may only run on a round where the current item is greater than the value kept so far. The `if` in front of the line is what makes the replacing safe.
+
+  With `numbers = [4, 9, 2, 7]`, `greatest` starts as the first item, 4, and the loop starts at position 1:
+
+  | round | `position` | `numbers[position]` | `greatest` before | greater than `greatest`? | `greatest` after |
+  |---|---|---|---|---|---|
+  | 1 | 1 | 9 | 4 | `9 > 4` is True | 9 |
+  | 2 | 2 | 2 | 9 | `2 > 9` is False | 9 |
+  | 3 | 3 | 7 | 9 | `7 > 9` is False | 9 |
+
+  `greatest` changed once, on round 1, and kept its value on the other two rounds. What is compared with it is the item at the current position, not the position. On round 1 the question is whether the item 9 is greater than 4, and it is. Asking about the position instead, `1 > 4` is False, and the 9 would be missed.
+
+  **Why the start value is the first item, not 0.** *Add up a list* starts `total` at 0, because adding 0 changes nothing. Here the start value takes part in the comparisons instead: it is what `greatest` holds when the first comparison happens, and it survives to the end if nothing beats it. Take `numbers = [-400, -900, -200, -700]` with a start value of 0: `-400 > 0` is False, and so are the other three comparisons. Nothing is ever stored, and the program answers 0, a value that is not in the list. The first item is a safe start: it is in the list, and every other item gets compared with it. With a one-item list the loop runs no rounds, and the first item is already the answer.
+
+solution:
+  code: |
+    greatest = numbers[0]
+    position = 1
+    while position < len(numbers):
+        if numbers[position] > greatest:
+            greatest = numbers[position]
+        position = position + 1
+  walkthrough: |
+    - `greatest = numbers[0]` is the start value: the first item is the greatest so far. It comes from the list, so it can never be a value the list does not hold.
+    - `position = 1` starts the loop at the second item, because the first item is already in `greatest`. Starting at 0 would also work: the first round would then compare the first item with itself, and `4 > 4` is False, so nothing would change.
+    - `while position < len(numbers):` keeps the loop going while there is an item at `position`. The last position is `len(numbers) - 1`, so `<` stops the loop right after it. With `<=` the loop would ask for one position too many.
+    - `if numbers[position] > greatest:` compares the item at the current position with the greatest so far.
+    - `greatest = numbers[position]` is indented under the `if`, so it runs only when the current item is greater. It replaces the old value instead of adding to it, and here that is the right move.
+    - `position = position + 1` is lined up with the `if`, so it runs on every round, and the loop ends after the last item.
+
+    With `>=` in place of `>` the program would give the same answers in this task: replacing 8 with another 8 changes nothing. The follow-up shows a task where the two differ.
+
+prerequisites: [accumulators-replace-or-add, conditions-separate-ifs, positions-first-and-last]
+related: [running-totals]
+next: first-greatest-position

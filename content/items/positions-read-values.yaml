@@ -1,0 +1,103 @@
+id: positions-read-values
+title: Read the value at a position
+tier: exercise
+format: predict
+skill: positions
+skills: [positions]
+difficulty: 1
+source:
+  type: original
+
+goal: Tell a position apart from the value stored at that position.
+statement: |
+  The program stores a list of four numbers in `numbers`, and one position of that list in `position`.
+
+  Read the program and work out what it prints. Writing the list down with the positions under the items helps: the first item sits at position 0.
+rules:
+  - There is nothing to run here. Predict first, then check your prediction.
+toWrite: Nothing. You type what the program prints.
+
+program: |
+  numbers = [40, 10, 30, 20]
+  position = 2
+  print(position)
+  print(numbers[position])
+  print(numbers[0])
+
+questions:
+  - ask: What does the program print? Put each printed line on its own line.
+    about: output
+    answer: |
+      2
+      30
+      40
+    wrong:
+      - answer: |
+          30
+          30
+          40
+        feedback: |
+          Line 3 prints `position` itself, without brackets. `position` holds the number 2, which says where to look in the list. The item stored at that place is only read when the brackets are used, as on line 4.
+      - answer: |
+          2
+          10
+          40
+        feedback: |
+          Positions start at 0, not at 1. Position 0 holds 40 and position 1 holds 10, so 10 is the item at position 1. Count once more from 0 to find the item at position 2.
+      - answer: |
+          2
+          2
+          0
+        feedback: |
+          Lines 4 and 5 have brackets after the list name, so they print items of the list, not positions. `numbers[0]` means "the item of `numbers` at position 0", and that item is 40, not 0.
+  - ask: The program never prints `numbers[3]`. What is its value?
+    about: value
+    expression: numbers[3]
+    answer: '20'
+    wrong:
+      - answer: '3'
+        feedback: |
+          3 is the position, the number inside the brackets. `numbers[3]` asks for the item stored at position 3, which is a different number.
+      - answer: '30'
+        feedback: |
+          30 is the third item, and it sits at position 2. Positions start at 0, so position 3 is the fourth place in the list.
+
+hints:
+  - |
+    Line 3 prints `position`, and line 4 prints `numbers[position]`. One of them is a place in the list and the other is what is stored at that place.
+  - |
+    Write the items with their positions under them: 40 at position 0, 10 at position 1, 30 at position 2, 20 at position 3. `position` holds 2.
+  - |
+    `numbers[position]` with `position` at 2 is the same as `numbers[2]`. Line 5 reads position 0, which is the first place in the list.
+
+explanation: |
+  The list has four items, at the positions 0 to 3:
+
+  | position | item |
+  |---|---|
+  | 0 | 40 |
+  | 1 | 10 |
+  | 2 | 30 |
+  | 3 | 20 |
+
+  - Line 3 prints the number stored in `position`, which is 2. There are no brackets, so no item is read.
+  - Line 4 prints `numbers[position]`. Python first looks up `position` and gets 2, then reads the item at position 2, which is 30.
+  - Line 5 prints `numbers[0]`, the item at position 0. That is the first item, 40.
+
+  The last position of this list is 3, one less than the number of items. `numbers[3]` is 20.
+
+solution:
+  walkthrough: |
+    The program prints `2`, `30` and `40`.
+
+    - `print(position)` shows the position itself. Nothing is read from the list.
+    - `print(numbers[position])` reads the item at position 2. The brackets mean "the item at", and position 2 is the third place in the list, where 30 sits.
+    - `print(numbers[0])` reads the first item, because counting starts at 0.
+
+    Reading an item does not change `position`. After line 4 it still holds 2. The last position is 3, and `numbers[3]` is 20.
+
+    Use the step-through to see each line with the real values.
+
+prerequisites: []
+related: [positions-length-and-last, positions-neighbors]
+next: positions-last-item

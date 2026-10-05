@@ -1,0 +1,105 @@
+id: conditions-not-keeps-value
+title: Paused or running?
+tier: exercise
+format: predict
+skill: conditions
+skills: [conditions]
+difficulty: 1
+source:
+  type: original
+
+goal: Predict which branch runs when a condition starts with not, and what the variable holds afterwards.
+statement: |
+  This program uses `not` in the condition of an `if`.
+
+  Work out two things: which branch runs, and what `paused` holds at the end.
+
+  It helps to take line 2 in two steps. First work out the value of `not paused`. Then let the `if` decide with that value.
+rules:
+  - There is nothing to run here. Predict first, then check your prediction.
+  - Write `True` and `False` the way Python prints them, with a capital first letter.
+toWrite: Nothing. You type what the program prints, and then one more value.
+
+program: |
+  paused = False
+  if not paused:
+      print("running")
+  else:
+      print("paused")
+  print(paused)
+
+questions:
+  - ask: What does the program print? Put each printed line on its own line.
+    about: output
+    answer: |
+      running
+      False
+    wrong:
+      - answer: |
+          running
+          True
+        feedback: |
+          Look at line 6. For the `if` on line 2, Python worked out `not paused` and got a new value. That value went to the `if` and nowhere else. `paused` changes only when a line stores a new value in it, with `paused` on the left of an `=`. Which lines of this program do that?
+      - answer: |
+          paused
+          False
+        feedback: |
+          Look at line 2 again. The `if` does not decide with `paused` on its own. It decides with the value of the whole expression `not paused`. `paused` holds `False`, so first work out what `not False` is. That result chooses the branch.
+      - answer: |
+          paused
+          True
+        feedback: |
+          Take line 2 in two steps. First, `not paused` is worked out from what `paused` holds, and the result goes to the `if`. Nothing is stored, so this does not change `paused`. Second, the `if` runs its own branch when the value it received is `True`, and the `else` branch when it is `False`. What does `paused` hold on line 1, and what is `not` of that value?
+      - answer: |
+          running
+          paused
+        feedback: |
+          Look at the quotation marks. Line 5, `print("paused")`, prints the word *paused*, and it belongs to the `else` branch. Line 6, `print(paused)`, has no quotation marks, so it prints the value stored in the variable `paused`. What does the variable hold when line 6 runs?
+  - ask: Suppose one more line, `print(not paused)`, were added at the end of the program. What would that line print?
+    about: value
+    expression: not paused
+    answer: 'True'
+    wrong:
+      - answer: 'False'
+        feedback: |
+          The added line prints the value of `not paused`, which is the opposite of what `paused` holds. Line 2 worked out `not paused` once already, but that stored nothing, so at the end `paused` holds what line 1 put there. Python works the expression out again from that value.
+
+hints:
+  - |
+    `not paused` is an expression, like `3 + 4`. Python works it out to a single value first, and only then does the `if` decide. What does `paused` hold when line 2 runs?
+  - |
+    `not` gives the opposite of a True/False value: `not True` is `False`, and `not False` is `True`. The `if` branch runs when the value the `if` receives is `True`. Otherwise the `else` branch runs.
+  - |
+    For line 6: `paused` keeps its value until a line stores a new one in it, with `paused` on the left of an `=`. Look for such a line after line 1.
+
+explanation: |
+  Python handles line 2 in two steps. First it works out the expression after the word `if`. Then it uses the result to choose a branch.
+
+  | line | what Python does | `paused` afterwards |
+  |---|---|---|
+  | 1 | stores `False` in `paused` | `False` |
+  | 2 | works out `not paused`: `not False` is `True`, so the `if` branch is chosen | `False` |
+  | 3 | prints `running` | `False` |
+  | 6 | reads `paused` and prints it | `False` |
+
+  The right-hand column never changes. `not paused` reads `paused`, works out the opposite value and hands that value to the `if`. It stores nothing.
+
+  It is the same with numbers: `count + 1` works out a new number, and `count` stays as it was. A variable that holds a number or `True`/`False` changes only when a line stores a new value in it, with the variable's name on the left of an `=`. In this program only line 1 does that for `paused`.
+
+  It can help to read line 2 aloud as "if it is not paused". The program is not paused, so it is running.
+
+solution:
+  walkthrough: |
+    The program prints `running` and then `False`. An added `print(not paused)` would print `True`.
+
+    - Line 1 stores `False` in `paused`.
+    - Line 2 works out `not paused`. That is `not False`, which is `True`. The `if` receives `True`, so line 3 runs and prints `running`. The `else` branch on lines 4 and 5 is skipped.
+    - Line 6 prints `False`. No line after line 1 has `paused` on the left of an `=`, so the variable never changed.
+    - `not paused` gives a new value each time Python works it out, and it stores nothing. At the end `paused` still holds `False`, so `not paused` is `True` once more.
+
+    To change `paused` itself, the program would need an assignment such as `paused = True`.
+
+    Use the step-through to watch `paused`: from line 1 on, it holds `False` on every step.
+
+prerequisites: []
+related: [assign-snapshot, conditions-separate-ifs]

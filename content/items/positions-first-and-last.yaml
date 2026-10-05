@@ -1,0 +1,176 @@
+id: positions-first-and-last
+title: First and last item
+tier: exercise
+format: fix
+skill: positions
+skills: [positions]
+difficulty: 2
+source:
+  type: original
+
+goal: Repair a program that should store the first and the last item of a list.
+statement: |
+  This program is meant to store the first item of `numbers` in `first_value` and the last item in `last_value`.
+
+  It runs without an error, but the answers are wrong. With `numbers = [40, 10, 30, 20]` it leaves `first_value` at 0 and `last_value` at 3, and neither of those is an item of the list. Find the cause and repair it.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers
+    domain: { minLen: 1, maxLen: 10, min: -50, max: 50 }
+create:
+  - name: first_value
+    describe: the item at position 0 of `numbers`
+  - name: last_value
+    describe: the item at the last position of `numbers`
+rules:
+  - '`numbers` has from 1 to 10 items, each a whole number from -50 to 50.'
+  - With one item, `first_value` and `last_value` are that same item.
+  - Leave `numbers` unchanged.
+toWrite: A small change to each of the two lines. Most of each line is already right.
+unchanged: [numbers]
+
+starter: |
+  first_value = 0
+  last_value = len(numbers) - 1
+exampleGiven: { numbers: [40, 10, 30, 20] }
+examples:
+  - given: { numbers: [40, 10, 30, 20] }
+    result: { first_value: 40, last_value: 20 }
+    why: 40 sits at position 0. The list has 4 items, so the last position is 3, and 20 sits there.
+  - given: { numbers: [7] }
+    result: { first_value: 7, last_value: 7 }
+    why: With one item, position 0 is both the first and the last position.
+
+tests:
+  - name: four items
+    given: { numbers: [40, 10, 30, 20] }
+    expect: { first_value: 40, last_value: 20 }
+    purpose: The example from the task. The items are far from the positions 0 and 3.
+  - name: one item
+    given: { numbers: [7] }
+    expect: { first_value: 7, last_value: 7 }
+    purpose: The shortest list allowed. Both answers are the item at position 0.
+  - name: negative values
+    given: { numbers: [-5, -12, -3] }
+    expect: { first_value: -5, last_value: -3 }
+    purpose: Every item is negative, so both answers are negative, while the first and last positions are 0 and 2.
+  - name: the same value at both ends
+    given: { numbers: [8, 3, 8] }
+    expect: { first_value: 8, last_value: 8 }
+    purpose: Two different positions can hold the same value.
+  - name: the smallest and largest values allowed
+    given: { numbers: [-50, 0, 50] }
+    expect: { first_value: -50, last_value: 50 }
+    purpose: The edges of what the task allows.
+  - name: the longest list allowed
+    given: { numbers: [2, 9, 4, 7, 1, 8, 6, 3, 5, 11] }
+    expect: { first_value: 2, last_value: 11 }
+    purpose: Ten items sit at the positions 0 to 9. Catches storing the last position, 9, instead of the item there.
+
+mistakes:
+  - id: stores-positions
+    label: Stores the two positions instead of the items there
+    shows: wrong-result
+    code: |
+      first_value = 0
+      last_value = len(numbers) - 1
+    feedback: |
+      `first_value` is 0 and `last_value` is one less than the number of items, whatever the list holds. Compare those two numbers with the list in this test. Are they items of the list, or something else?
+  - id: last-still-position
+    label: Reads the first item but still stores the last position
+    shows: wrong-result
+    code: |
+      first_value = numbers[0]
+      last_value = len(numbers) - 1
+    feedback: |
+      `first_value` is right now. `last_value` is still one less than the number of items: that is the last position, not the item stored there. The line for `last_value` works out the right position and then stops short of reading the item at it.
+  - id: first-still-position
+    label: Reads the last item but still stores the first position
+    shows: wrong-result
+    code: |
+      first_value = 0
+      last_value = numbers[len(numbers) - 1]
+    feedback: |
+      `last_value` is right now. `first_value` is still 0, whatever the list holds: 0 is the first position, not the item stored there. The line for `first_value` names the right position and then stops short of reading the item at it.
+  - id: one-too-far
+    label: Asks for the position equal to the length
+    shows: error
+    errorType: IndexError
+    code: |
+      first_value = numbers[0]
+      last_value = numbers[len(numbers)]
+    feedback: |
+      The program asked for a position the list does not have. The usual cause is `len(numbers)` inside the brackets: with 4 items the positions are 0, 1, 2 and 3, and `len(numbers)` is 4, one past the end. On the line the error names, work out the number inside the brackets for the list in this test, and compare it with the last position.
+  - id: round-brackets
+    label: Uses round brackets to read an item
+    shows: error
+    errorType: TypeError
+    errorContains: not callable
+    code: |
+      first_value = numbers(0)
+      last_value = numbers(len(numbers) - 1)
+    feedback: |
+      The error says the list was called, the way a function such as `len()` is called. Round brackets after a name mean "call this", and a list cannot be called. Reading an item from a list takes square brackets after the list name, with the position inside them.
+  - id: counts-from-one
+    label: Counts positions from 1
+    shows: wrong-result
+    code: |
+      first_value = numbers[1]
+      last_value = numbers[len(numbers) - 1]
+    feedback: |
+      Your `first_value` is the second item of the list. Positions start at 0, so the first item sits at position 0 and position 1 is the second place. On a list with one item, position 1 does not exist at all.
+  - id: minus-inside-len
+    label: Takes 1 away from the list or from len, not from the length
+    shows: error
+    errorType: TypeError
+    errorContains: 'for -:'
+    code: |
+      first_value = numbers[0]
+      last_value = numbers[len(numbers - 1)]
+    feedback: |
+      The error says Python was asked to take 1 away from something that is not a number. There are two usual causes. Either the `- 1` ended up inside the parentheses of `len(...)`, so Python tried to take 1 away from the list itself, or `len` has no list in parentheses after it. `len()` needs the whole list inside its parentheses, and the subtraction belongs to the number that comes out of it.
+
+hints:
+  - |
+    Run the program with `numbers = [40, 10, 30, 20]`. It leaves 0 in `first_value` and 3 in `last_value`. Where in the list do you see 0 and 3? Are they items, or something else?
+  - |
+    0 is the first position, and `len(numbers) - 1` is the last position. Both lines store a position. The task asks for the items stored at those positions, and reading an item takes the list name and brackets.
+  - |
+    Keep both positions as they are, and put each one inside square brackets after `numbers`, so that each line reads an item instead of storing a position.
+
+explanation: |
+  Both lines work out the right position and then stop. A position is a number that says where to look. The task wants what is stored there.
+
+  With `numbers = [40, 10, 30, 20]`:
+
+  | expression | what it is | value |
+  |---|---|---|
+  | `0` | the first position | 0 |
+  | `numbers[0]` | the item at position 0 | 40 |
+  | `len(numbers) - 1` | the last position | 3 |
+  | `numbers[3]` | the item at position 3 | 20 |
+
+  The program as given stores the numbers from the first and third rows. The repaired program has to store the numbers from the second and fourth rows, and the brackets are what moves from one kind of number to the other.
+
+  The positions themselves do not need any change. In every list with at least one item, 0 is the first position and `len(numbers) - 1` is the last one. Only the reading is missing.
+
+  With one item, `len(numbers) - 1` is 0, so both lines read position 0 and both answers are the same item. With `numbers = [7]`, both are 7.
+
+solution:
+  code: |
+    first_value = numbers[0]
+    last_value = numbers[len(numbers) - 1]
+  walkthrough: |
+    Each line changes in the same way: the position it already worked out goes inside brackets after `numbers`.
+
+    - `numbers[0]` reads the item at position 0, the first item.
+    - `numbers[len(numbers) - 1]` first works out the last position, then reads the item there. With 4 items that is `numbers[3]`, which is 20.
+
+    `numbers[len(numbers)]` would ask for position 4 on a four-item list. That position does not exist, and Python would stop with `IndexError: list index out of range`.
+
+    Python also accepts `numbers[-1]` for the last item. That is a separate feature, counting from the end, and the checker accepts it.
+
+prerequisites: [positions-last-item]
+related: [positions-read-values, positions-neighbors]
+next: positions-neighbors

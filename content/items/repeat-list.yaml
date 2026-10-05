@@ -1,0 +1,260 @@
+id: repeat-list
+title: Repeat a list
+tier: challenge
+format: write
+order: 2
+skills: [positions, loops, append]
+difficulty: 2
+newIdea: >-
+  The same walk over the list happens twice, and both walks append to one result list.
+source:
+  type: leetcode-adaptation
+  number: 1929
+  title: Concatenation of Array
+  url: https://leetcode.com/problems/concatenation-of-array/
+  interfaceNote: |
+    This is a practice adaptation written for this app, not LeetCode's own text.
+
+    Here you write a plain script: `numbers` is already given, and you leave the answer in `repeated`. On LeetCode the same idea is submitted as a method named `getConcatenation`, inside `class Solution`, which receives the list as `nums` and returns the new list. LeetCode's text calls that new list `ans`. The loops in the middle are the same in both.
+
+goal: Build a new list that holds all the items of a list, followed by all of them again.
+statement: |
+  Given a list `numbers`, build a new list `repeated` that is twice as long. It holds all the items of `numbers` in their order, and then all the items of `numbers` in the same order again.
+
+  With `numbers = [3, 1, 4]`, `repeated` must be `[3, 1, 4, 3, 1, 4]`.
+
+  A walk over a list is one loop that visits every position, from 0 to the last one. One walk that appends each item it visits builds `[3, 1, 4]`. A second walk that appends to the same list adds 3, 1 and 4 once more.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers
+    domain: { minLen: 1, maxLen: 1000, min: 1, max: 1000 }
+create:
+  - name: repeated
+    describe: a new list, twice as long as `numbers`, with all the items of `numbers` in order and then all of them again
+rules:
+  - '`numbers` is never empty. It has at least 1 item and at most 1000. Each item is a whole number from 1 to 1000, and both 1 and 1000 can appear.'
+  - '`repeated` has exactly twice as many items as `numbers`.'
+  - 'The order matters: first every item of `numbers` from position 0 to the last position, then every item again in the same order.'
+  - 'A value can appear more than once in `numbers`. Every item is copied, whether or not its value appeared before.'
+  - 'Leave `numbers` unchanged, and make `repeated` a new list, not a second name for `numbers`. The checker tests both.'
+  - '`numbers + numbers` and `numbers * 2` also give this list, and the checker accepts them. They are worth knowing. The practice here is building the list yourself, with a loop and `append()`.'
+toWrite: A short program of about nine lines. It needs an empty list and two loops, one after the other.
+unchanged: [numbers]
+fresh: [repeated]
+
+starter: |
+  # numbers is given. Leave your answer in repeated.
+exampleGiven: { numbers: [3, 1, 4] }
+examples:
+  - given: { numbers: [3, 1, 4] }
+    result: { repeated: [3, 1, 4, 3, 1, 4] }
+    why: The first walk appends 3, 1 and 4. The second walk appends 3, 1 and 4 again.
+  - given: { numbers: [8] }
+    result: { repeated: [8, 8] }
+    why: With one item, each walk appends that one item.
+
+tests:
+  - name: three items
+    given: { numbers: [3, 1, 4] }
+    expect: { repeated: [3, 1, 4, 3, 1, 4] }
+    purpose: The first example from the task.
+  - name: one item
+    given: { numbers: [8] }
+    expect: { repeated: [8, 8] }
+    purpose: The shortest list allowed. Each walk runs a single round.
+  - name: two equal items
+    given: { numbers: [5, 5] }
+    expect: { repeated: [5, 5, 5, 5] }
+    purpose: Equal items are still separate items, so each one is copied in each walk.
+  - name: the largest and smallest values allowed
+    given: { numbers: [1000, 1] }
+    expect: { repeated: [1000, 1, 1000, 1] }
+    purpose: The values at the edge of what the task allows.
+  - name: five items with repeats
+    given: { numbers: [2, 7, 2, 2, 9] }
+    expect: { repeated: [2, 7, 2, 2, 9, 2, 7, 2, 2, 9] }
+    purpose: A longer list in which one value comes back. Every item is copied, in its own place.
+
+mistakes:
+  - id: each-item-twice
+    label: Appends each item twice in a row
+    shows: wrong-result
+    code: |
+      repeated = []
+      position = 0
+      while position < len(numbers):
+          repeated.append(numbers[position])
+          repeated.append(numbers[position])
+          position = position + 1
+    feedback: |
+      Your list has the right items and the right length, but the copies sit in the wrong places: each item is followed at once by its own copy, as in 3, 3, 1, 1, 4, 4. That happens when one round of the loop appends the current item twice. The order matters here: the whole list, then the whole list again. The copy of the first item can only be appended after the first walk has reached the last item.
+  - id: one-copy
+    label: Ends with only one copy of the items
+    shows: wrong-result
+    code: |
+      repeated = []
+      position = 0
+      while position < len(numbers):
+          repeated.append(numbers[position])
+          position = position + 1
+      while position < len(numbers):
+          repeated.append(numbers[position])
+          position = position + 1
+    feedback: |
+      `repeated` holds the items of `numbers` once, so the second half is missing. One loop makes one walk, and this task needs two. If your program already has a second loop, look at the value `position` holds at the moment that loop starts, right after the first loop has ended. Is it a position that has an item?
+  - id: same-list-two-names
+    label: Appends to the given list itself, so the loop never reaches its end
+    shows: never-stops
+    code: |
+      repeated = numbers
+      position = 0
+      while position < len(numbers):
+          repeated.append(numbers[position])
+          position = position + 1
+    feedback: |
+      The program had to be stopped because a loop never ended. The variables at the moment it stopped show the cause. If `position` is still 0, the step that moves it on is missing from a loop. If `position` is large, the loop did move on, but its end moved away as fast as `position` moved toward it: the loop appends to the same list whose length its `while` line uses, so that list grows by one item per round. When that list is `numbers`, look at the name written before `.append`, and at any line such as `repeated = numbers`, which does not make a second list: it gives the one list a second name.
+  - id: assigns-into-empty
+    label: Stores into a position of the new list before that position exists
+    shows: error
+    errorType: IndexError
+    errorContains: assignment
+    code: |
+      repeated = []
+      position = 0
+      while position < len(numbers):
+          repeated[position] = numbers[position]
+          position = position + 1
+      position = 0
+      while position < len(numbers):
+          repeated[position + len(numbers)] = numbers[position]
+          position = position + 1
+    feedback: |
+      The message says `list assignment index out of range`. It comes from a line that stores into a position of a list, such as `repeated[position] = ...`. Square brackets can replace the item at a position that already exists, but they cannot create a new one. A new empty list has no positions at all, not even 0, and a list with 3 items has no position 3. A list gets a new position at its end only when something is appended to it.
+  - id: one-too-far
+    label: Asks for a position one past the end
+    shows: error
+    errorType: IndexError
+    code: |
+      repeated = []
+      position = 0
+      while position <= len(numbers):
+          repeated.append(numbers[position])
+          position = position + 1
+      position = 0
+      while position <= len(numbers):
+          repeated.append(numbers[position])
+          position = position + 1
+    feedback: |
+      The program asked for a position that has no item. With 3 items the positions are 0, 1 and 2, and `len(numbers)`, which is 3, is one past the last position. Look at the comparison in each `while` line. With `<=`, `position` reaches 3. A single loop that runs 6 rounds, to fill all 6 places of `repeated`, reaches 3 as well, because it still reads from `numbers`, which has only 3 items. If the error came from reading `repeated` while it was still empty, the two lists have swapped places on the `append` line.
+  - id: wrong-receiver
+    label: Writes the item before .append and the list inside the parentheses
+    shows: error
+    errorType: AttributeError
+    errorContains: "'int' object"
+    code: |
+      repeated = []
+      position = 0
+      while position < len(numbers):
+          numbers[position].append(repeated)
+          position = position + 1
+      position = 0
+      while position < len(numbers):
+          numbers[position].append(repeated)
+          position = position + 1
+    feedback: |
+      The message says `'int' object has no attribute 'append'`: the thing written before `.append` is a whole number, and a whole number cannot receive an item. On an `append` line, the list that grows comes before the dot, and the item it receives goes inside the parentheses. Look at each of your `append` lines and ask of each part: which one is the list, and which one is the item?
+  - id: appends-position
+    label: Appends the position instead of the value
+    shows: wrong-result
+    code: |
+      repeated = []
+      position = 0
+      while position < len(numbers):
+          repeated.append(position)
+          position = position + 1
+      position = 0
+      while position < len(numbers):
+          repeated.append(position)
+          position = position + 1
+    feedback: |
+      Your list holds the positions 0, 1, 2 and so on, twice over, and not the items of `numbers`. `position` says where the loop is. `numbers[position]` is the value stored there.
+  - id: keeps-last-item
+    label: Stores the current item in the name instead of appending it
+    shows: wrong-result
+    code: |
+      repeated = []
+      position = 0
+      while position < len(numbers):
+          repeated = numbers[position]
+          position = position + 1
+      position = 0
+      while position < len(numbers):
+          repeated = numbers[position]
+          position = position + 1
+    feedback: |
+      `repeated` ends up as a single number, the last item of `numbers`, and not as a list. That happens when a line in a loop stores into the name itself, as in `repeated = numbers[position]`: each round replaces what `repeated` held with the current item. To collect the items, `repeated` has to stay one list that receives one more item on every round.
+  - id: appends-whole-list
+    label: Appends the whole list as one item, twice
+    shows: wrong-result
+    code: |
+      repeated = []
+      repeated.append(numbers)
+      repeated.append(numbers)
+    feedback: |
+      `repeated` has two items, and each of them is the whole list `numbers`: look at the double square brackets in your result. That happens when the entire list is appended in one go, as in `repeated.append(numbers)`. `.append()` adds exactly one item each time it runs, so six separate items take six appends, each with the value stored at one position.
+
+hints:
+  - |
+    One loop that visits every position of `numbers` and appends the item it finds there builds a copy of the list. For `[3, 1, 4]` that copy is `[3, 1, 4]`. What is still missing from `repeated` at that point?
+  - |
+    The missing part is the same three items again, and they belong at the end. `append()` always adds at the end. So a second walk over `numbers` that appends to the same `repeated` turns `[3, 1, 4]` into `[3, 1, 4, 3]`, then `[3, 1, 4, 3, 1]`, then `[3, 1, 4, 3, 1, 4]`.
+  - |
+    In words: start with an empty list and position 0. While the position is less than the length of `numbers`, append the item at that position to `repeated` and move to the next position. Then set the position back to 0 and write the same loop a second time. The second loop needs that fresh start, because after the first loop the position is no longer 0.
+
+explanation: |
+  You already know the walk itself: a loop that visits every position of `numbers` and appends the item stored there. One walk builds a copy of the list. This challenge asks for the same walk twice, with both walks appending to the same `repeated`.
+
+  With `numbers = [3, 1, 4]`:
+
+  | walk | `position` | `numbers[position]` | `repeated` after appending |
+  |---|---|---|---|
+  | first | 0 | 3 | `[3]` |
+  | first | 1 | 1 | `[3, 1]` |
+  | first | 2 | 4 | `[3, 1, 4]` |
+  | second | 0 | 3 | `[3, 1, 4, 3]` |
+  | second | 1 | 1 | `[3, 1, 4, 3, 1]` |
+  | second | 2 | 4 | `[3, 1, 4, 3, 1, 4]` |
+
+  `repeated` is created once, as an empty list, before the first walk. Both walks append to that one list.
+
+  `append()` always adds at the end. So everything the second walk appends lands behind what the first walk appended. That gives the order the task asks for: the whole list, then the whole list again.
+
+  `position` has to start at 0 twice. When the first loop ends, `position` holds 3, which is the length of the list. That is why the loop ended. A variable keeps its value after a loop, so a second loop with the same condition would end at once, without running a single round, unless `position` is set back to 0 before it.
+
+  `numbers` is only read. `repeated` has to be a list of its own, and in this program it starts empty. Writing `repeated = numbers` would not make a second list. It would give the one list a second name, and every append would then make `numbers` longer as well.
+
+solution:
+  code: |
+    repeated = []
+    position = 0
+    while position < len(numbers):
+        repeated.append(numbers[position])
+        position = position + 1
+    position = 0
+    while position < len(numbers):
+        repeated.append(numbers[position])
+        position = position + 1
+  walkthrough: |
+    - `repeated = []` creates a new, empty list. It sits before the first loop and runs once, so both walks add to the same list.
+    - The first loop is one walk over `numbers`, from position 0 to the last position. In `repeated.append(numbers[position])`, the list that receives the item is written before `.append`. The item, `numbers[position]`, goes inside the parentheses after `.append`.
+    - `position = 0` between the loops starts the second walk at the first item. Without that line, `position` would still hold `len(numbers)`, the condition would be False at once, and the second loop would not run a single round.
+    - The second loop is the same walk again. It appends to the same `repeated`, and `append()` adds at the end, so the second copy lands behind the first.
+
+    `numbers` is only read, never changed, and `repeated` is a new list.
+
+    `numbers + numbers` builds the same list in one line. The two loops show the work behind that line: every item is appended in order, and then every item again.
+
+prerequisites: [copy-list, append-add-shipping, loops-count-rounds]
+related: [running-totals]
+next: repeat-each-item

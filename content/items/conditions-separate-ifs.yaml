@@ -1,0 +1,112 @@
+id: conditions-separate-ifs
+title: Separate ifs or one chain?
+tier: exercise
+format: predict
+skill: conditions
+skills: [conditions]
+difficulty: 1
+source:
+  type: original
+
+goal: Tell two separate if statements from one if/elif chain.
+statement: |
+  The same score goes through two pieces of code. Lines 2 to 5 are two separate `if` statements. Lines 7 to 10 are one `if` with an `elif`.
+
+  Read the program and work out what it prints. For each of the four conditions, ask two questions. Does Python check this condition at all? And if it does, is the condition True?
+rules:
+  - There is nothing to run here. Predict first, then check your prediction.
+  - Type each line exactly as the program prints it. Capital and small letters count.
+toWrite: Nothing. You type what the program prints.
+
+program: |
+  score = 85
+  if score >= 50:
+      print("pass")
+  if score >= 80:
+      print("merit")
+
+  if score >= 50:
+      print("PASS")
+  elif score >= 80:
+      print("MERIT")
+
+questions:
+  - ask: What does the program print? Put each printed line on its own line.
+    about: output
+    answer: |
+      pass
+      merit
+      PASS
+    wrong:
+      - answer: |
+          pass
+          merit
+          PASS
+          MERIT
+        feedback: |
+          Look at lines 7 to 10. Line 9 starts with `elif`, so it belongs to the `if` on line 7. An `elif` is only checked when the condition above it in the same chain was False. What is `score >= 50` for a score of 85?
+      - answer: |
+          pass
+          PASS
+        feedback: |
+          Look at line 4. It starts with the word `if`, so it begins a new statement, and Python checks it whatever line 2 did. Only an `elif` or an `else` can be skipped because of a True condition above it. Is `score >= 80` True for 85?
+      - answer: |
+          merit
+          MERIT
+        feedback: |
+          This would be the output if Python picked the one branch that fits 85 best. Python does not compare branches with each other. It goes down the program line by line: every `if` is checked on its own, and in a chain the first True condition wins. Start again at line 2. Is `score >= 50` True for 85?
+      - answer: |
+          pass
+          merit
+          MERIT
+        feedback: |
+          Look at lines 7 to 10, the chain. Python does not look for the condition that fits best, and a later True condition does not replace an earlier one. It takes the first condition that is True, from the top, and skips the rest of the chain. Which condition comes first here?
+      - answer: |
+          pass
+          PASS
+          MERIT
+        feedback: |
+          Your answer reads the two pieces the other way round, as if lines 2 to 5 were one chain and lines 7 to 10 were separate statements. Look at the first word of lines 4 and 9. Which of the two starts a new question, and which one continues the chain above it?
+
+hints:
+  - |
+    Look at the first word of lines 2, 4, 7 and 9. Three of them start with `if` and one starts with `elif`. What is the difference between starting with `if` and continuing with `elif`?
+  - |
+    A line that starts with `if` begins a new question. Python checks it whatever happened above it. With `score` at 85, work out `score >= 50` and `score >= 80` for lines 2 and 4.
+  - |
+    Lines 7 to 10 are one chain. Python takes the first branch whose condition is True and skips the rest of that chain. An `elif` is only checked when the condition above it was False.
+
+explanation: |
+  The program asks about the same score four times, but Python does not check all four conditions.
+
+  With `score` at 85:
+
+  | line | first word | condition | checked? | value | printed |
+  |---|---|---|---|---|---|
+  | 2 | `if` | `score >= 50` | yes | True | `pass` |
+  | 4 | `if` | `score >= 80` | yes | True | `merit` |
+  | 7 | `if` | `score >= 50` | yes | True | `PASS` |
+  | 9 | `elif` | `score >= 80` | no | not worked out | nothing |
+
+  Lines 2 and 4 both start with `if`. Each one is a statement of its own, so each condition is checked. Both are True for 85, and both branches run.
+
+  Lines 7 to 10 are one chain. Its first condition is True, so that branch runs and the chain is finished. The `elif` on line 9 never gets a turn.
+
+  Line 9 would only be checked for a score below 50, because only then is the condition on line 7 False. No score below 50 is 80 or more. So in this chain `MERIT` can never be printed, whatever the score is.
+
+solution:
+  walkthrough: |
+    The program prints `pass`, `merit` and `PASS`.
+
+    - Line 2: `score >= 50` is `85 >= 50`, which is True. Line 3 prints `pass`.
+    - Line 4 starts with `if`, so it begins a new statement and is checked whatever line 2 did. `85 >= 80` is True. Line 5 prints `merit`.
+    - Line 7 starts the chain. `85 >= 50` is True, so line 8 prints `PASS`, and Python skips the rest of the chain.
+    - Line 9 belongs to that chain. Its condition is never checked, so `MERIT` is not printed.
+
+    Both pieces use the same two conditions and the same score. The only difference is the word `elif` on line 9, and that word is what joins two questions into one chain.
+
+    Use the step-through to watch Python go from line 8 straight to the end, past lines 9 and 10.
+
+prerequisites: []
+related: [conditions-grade-order, count-three-groups]
+next: conditions-grade-order

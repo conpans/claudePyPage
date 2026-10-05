@@ -1,0 +1,143 @@
+id: accumulators-add-up
+title: Add up a list
+tier: exercise
+format: fill
+skill: accumulators
+skills: [accumulators, positions, loops]
+difficulty: 1
+source:
+  type: original
+
+goal: Write the one line that adds each item to the total so far.
+statement: |
+  The program in the editor visits every item of `numbers`, but the line that does the adding is missing.
+
+  Write that line, so that when the loop ends `total` holds the sum of all the items.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers
+    domain: { minLen: 1, maxLen: 20, min: -100, max: 100 }
+create:
+  - name: total
+    describe: the sum of all the items of `numbers`
+rules:
+  - '`numbers` has from 1 to 20 items, each a whole number from -100 to 100. An item can be negative, and an item can be 0.'
+  - Do not use `sum()`. The point of this exercise is to write the update yourself.
+  - Leave `numbers` unchanged.
+toWrite: One line, in place of the comment inside the loop.
+unchanged: [numbers]
+forbid: ['sum()']
+
+starter: |
+  total = 0
+  position = 0
+  while position < len(numbers):
+      # your line goes here
+      position = position + 1
+exampleGiven: { numbers: [3, 1, 4] }
+examples:
+  - given: { numbers: [3, 1, 4] }
+    result: { total: 8 }
+    why: 0 + 3 is 3, then 3 + 1 is 4, then 4 + 4 is 8.
+
+tests:
+  - name: three items
+    given: { numbers: [3, 1, 4] }
+    expect: { total: 8 }
+    purpose: The example from the task.
+  - name: one item
+    given: { numbers: [7] }
+    expect: { total: 7 }
+    purpose: The shortest list allowed. The loop runs a single round.
+  - name: a negative item
+    given: { numbers: [5, -8, 2] }
+    expect: { total: -1 }
+    purpose: Adding a negative number makes the total smaller.
+  - name: values far from their positions
+    given: { numbers: [10, 20, 30, 40] }
+    expect: { total: 100 }
+    purpose: Catches adding the positions (0, 1, 2, 3) instead of the values stored there.
+  - name: zeros in the list
+    given: { numbers: [0, 0, 6, 0] }
+    expect: { total: 6 }
+    purpose: Zero is an ordinary item. Adding it changes nothing.
+
+mistakes:
+  - id: replaces
+    label: Stores the current item instead of adding it
+    shows: wrong-result
+    code: |
+      total = 0
+      position = 0
+      while position < len(numbers):
+          total = numbers[position]
+          position = position + 1
+    feedback: |
+      Your `total` ends up equal to the last item of the list. That happens when the line stores the current item and drops the old total, as in `total = numbers[position]`. To keep what was added so far, the old `total` has to appear on the right side of the `=` as well.
+  - id: adds-position
+    label: Adds the position instead of the value
+    shows: wrong-result
+    code: |
+      total = 0
+      position = 0
+      while position < len(numbers):
+          total = total + position
+          position = position + 1
+    feedback: |
+      Your `total` is the sum of the positions (0 + 1 + 2 and so on), not of the items. `position` says where to look. `numbers[position]` is the value stored there.
+  - id: computes-without-storing
+    label: Works out the sum but never stores it
+    shows: wrong-result
+    code: |
+      total = 0
+      position = 0
+      while position < len(numbers):
+          total + numbers[position]
+          position = position + 1
+    feedback: |
+      `total` is still 0 at the end. A line such as `total + numbers[position]` works out a number and then lets it go, because nothing stores it. An assignment (`name = ...`) is what keeps a result.
+
+hints:
+  - |
+    Suppose `numbers` is `[3, 1, 4]`. What should `total` hold after the first round of the loop? And after the second?
+  - |
+    The line has two things to do: read the item at the current position, and combine it with the total so far. The item at the current position is written `numbers[position]`.
+  - |
+    The line has this shape: `total = total + (the current item)`. The old `total` is on the right side, so nothing that was added earlier is lost.
+
+explanation: |
+  Think of `total` as a note that you keep correcting while you walk along the list.
+
+  With `numbers = [3, 1, 4]`:
+
+  | round | `position` | `numbers[position]` | `total` before | `total` after |
+  |---|---|---|---|---|
+  | 1 | 0 | 3 | 0 | 3 |
+  | 2 | 1 | 1 | 3 | 4 |
+  | 3 | 2 | 4 | 4 | 8 |
+
+  Every round does the same three things: take the old `total`, add the item at the current position, and store the result back in `total`.
+
+  Python works out the right side of the `=` first, using the old value. Only then does it store the new value.
+
+solution:
+  code: |
+    total = 0
+    position = 0
+    while position < len(numbers):
+        total = total + numbers[position]
+        position = position + 1
+  walkthrough: |
+    The missing line is `total = total + numbers[position]`.
+
+    - `numbers[position]` reads the value stored at the current position.
+    - `total + numbers[position]` adds it to everything added so far.
+    - `total = ...` stores that new sum under the same name, ready for the next round.
+
+    `total` starts at 0 before the loop, because adding 0 leaves the first item as it is.
+
+    The shorthand `total += numbers[position]` does exactly the same thing.
+
+prerequisites: [positions-read-values, loops-count-rounds]
+related: [accumulators-replace-or-add, accumulators-product-start]

@@ -1,0 +1,143 @@
+id: accumulators-product-start
+title: A product that is always 0
+tier: exercise
+format: fix
+skill: accumulators
+skills: [accumulators, positions, loops]
+difficulty: 2
+source:
+  type: original
+
+goal: Repair a program that should multiply all the items of a list together.
+statement: |
+  The program in the editor is meant to multiply all the items of `numbers` together and leave the answer in `product`.
+
+  It runs without an error, but the answer comes out as `0` for every list. Find the cause and repair it.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers
+    domain: { minLen: 1, maxLen: 8, min: -9, max: 9 }
+create:
+  - name: product
+    describe: all the items of `numbers` multiplied together
+rules:
+  - '`numbers` has from 1 to 8 items, each a whole number from -9 to 9.'
+  - If one of the items is 0, the correct product really is 0.
+  - With one item, the product is that item.
+  - Leave `numbers` unchanged.
+toWrite: A small change to the program you are given. Most of it is already right.
+unchanged: [numbers]
+
+starter: |
+  product = 0
+  position = 0
+  while position < len(numbers):
+      product = product * numbers[position]
+      position = position + 1
+exampleGiven: { numbers: [2, 5, 3] }
+examples:
+  - given: { numbers: [2, 5, 3] }
+    result: { product: 30 }
+    why: 2 times 5 is 10, and 10 times 3 is 30.
+
+tests:
+  - name: three items
+    given: { numbers: [2, 5, 3] }
+    expect: { product: 30 }
+    purpose: The example from the task.
+  - name: one item
+    given: { numbers: [7] }
+    expect: { product: 7 }
+    purpose: With one item the product is that item, so a wrong start value shows at once.
+  - name: one negative item
+    given: { numbers: [4, -2] }
+    expect: { product: -8 }
+    purpose: A positive number times a negative number is negative.
+  - name: two negative items
+    given: { numbers: [-3, -3] }
+    expect: { product: 9 }
+    purpose: Two negative numbers multiply to a positive number.
+  - name: a zero in the list
+    given: { numbers: [6, 0, 2] }
+    expect: { product: 0 }
+    purpose: Here 0 is the correct answer.
+  - name: all ones
+    given: { numbers: [1, 1, 1] }
+    expect: { product: 1 }
+    purpose: Catches adding instead of multiplying, which would give 3.
+
+mistakes:
+  - id: starts-at-zero
+    label: Starts the product at 0
+    shows: wrong-result
+    code: |
+      product = 0
+      position = 0
+      while position < len(numbers):
+          product = product * numbers[position]
+          position = position + 1
+    feedback: |
+      `product` is 0 whatever the list holds. Follow the first round by hand: what is `product * numbers[position]` when `product` is 0?
+  - id: adds-instead
+    label: Adds the items instead of multiplying them
+    shows: wrong-result
+    code: |
+      product = 0
+      position = 0
+      while position < len(numbers):
+          product = product + numbers[position]
+          position = position + 1
+    feedback: |
+      Your result is the sum of the items, not their product. The `*` inside the loop was right. The fault is somewhere else: look at the value `product` has before the loop starts.
+  - id: start-inside-loop
+    label: Sets the start value again on every round
+    shows: wrong-result
+    code: |
+      position = 0
+      while position < len(numbers):
+          product = 1
+          product = product * numbers[position]
+          position = position + 1
+    feedback: |
+      `product` ends up equal to the last item. The start value is being set again on every round, which wipes out the result so far. A start value belongs before the loop, where it runs once.
+
+hints:
+  - |
+    Trace the first round with `numbers = [2, 5, 3]`. What does `product` hold before that round, and what does it hold after?
+  - |
+    Anything multiplied by 0 is 0. Once `product` is 0, no later round can turn it into anything else.
+  - |
+    The start value should leave the first item unchanged when the two are multiplied. Which number times 2 is still 2?
+
+explanation: |
+  The loop itself is right: it visits every position and multiplies. The fault is in the value `product` has before the first round.
+
+  With `numbers = [2, 5, 3]` and a start value of 0:
+
+  | round | `numbers[position]` | `product` before | `product` after |
+  |---|---|---|---|
+  | 1 | 2 | 0 | 0 |
+  | 2 | 5 | 0 | 0 |
+  | 3 | 3 | 0 | 0 |
+
+  `0 * 2` is 0, so the first round already loses the first item, and 0 stays 0 for the rest of the loop.
+
+  A start value has to leave the first item as it is. For adding that value is 0, because `0 + 2` is 2. For multiplying it is 1, because `1 * 2` is 2.
+
+solution:
+  code: |
+    product = 1
+    position = 0
+    while position < len(numbers):
+        product = product * numbers[position]
+        position = position + 1
+  walkthrough: |
+    Only the first line changes: `product = 1` in place of `product = 0`.
+
+    With `numbers = [2, 5, 3]` the rounds now give `1 * 2` = 2, then `2 * 5` = 10, then `10 * 3` = 30.
+
+    If the list holds a 0, the product becomes 0 on that round and stays 0. That is the correct answer for such a list, and it comes from the item, not from the start value.
+
+prerequisites: [accumulators-add-up]
+related: [accumulators-replace-or-add, running-products]

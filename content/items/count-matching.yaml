@@ -1,0 +1,274 @@
+id: count-matching
+title: Count the slow responses
+tier: challenge
+format: write
+order: 4
+skills: [positions, loops, conditions, accumulators]
+difficulty: 2
+newIdea: >-
+  The count goes up only when a comparison with a given limit is True, and the task spells out exactly what happens to an item equal to that limit.
+source:
+  type: original
+
+goal: Count how many response times are greater than a given limit.
+statement: |
+  A web service has recorded how long each of its responses took, in milliseconds (1000 milliseconds are 1 second). A response counts as slow when it took longer than a limit.
+
+  The times and the limit are both given. Write a program that counts how many of the times in `response_times` are greater than `limit`, and leaves that number in `slow_count`.
+
+  A time that is exactly equal to `limit` is not slow. With `limit = 300`, a time of 300 is not counted, and a time of 301 is.
+given:
+  - name: response_times
+    type: list[int]
+    describe: a list of response times in milliseconds
+    domain: { minLen: 1, maxLen: 20, min: 0, max: 5000 }
+  - name: limit
+    type: int
+    describe: the limit in milliseconds; a time greater than it is slow
+    domain: { min: 0, max: 5000 }
+create:
+  - name: slow_count
+    describe: how many items of `response_times` are greater than `limit`
+rules:
+  - '`response_times` has from 1 to 20 items. Each item is a whole number of milliseconds from 0 to 5000.'
+  - '`limit` is a whole number from 0 to 5000.'
+  - A response is slow when its time is greater than `limit`. A time exactly equal to `limit` is not slow.
+  - If no time is greater than `limit`, `slow_count` must be `0`.
+  - The times are in no particular order, and the same time can appear more than once. Every slow item counts, so two slow items of 450 add 2 to the count.
+  - Leave `response_times` unchanged.
+toWrite: A short program of about six lines. It needs a start value, a loop over the positions, and an `if` inside the loop.
+unchanged: [response_times]
+
+starter: |
+  # response_times and limit are given. Leave your answer in slow_count.
+exampleGiven: { response_times: [120, 300, 80, 450, 210, 95, 610], limit: 300 }
+examples:
+  - given: { response_times: [120, 300, 80, 450, 210, 95, 610], limit: 300 }
+    result: { slow_count: 2 }
+    why: Only 450 and 610 are greater than 300. The time 300 is equal to the limit, so it is not counted.
+  - given: { response_times: [300, 301], limit: 300 }
+    result: { slow_count: 1 }
+    why: 300 is equal to the limit, so it is not slow. 301 is greater than the limit, even if only by 1, so it is slow.
+
+tests:
+  - name: two of seven are slow
+    given: { response_times: [120, 300, 80, 450, 210, 95, 610], limit: 300 }
+    expect: { slow_count: 2 }
+    purpose: The first example from the task. Slow and fast times are mixed, and one time is exactly equal to the limit.
+  - name: nothing is slow
+    given: { response_times: [1200, 5000, 30, 4999, 250], limit: 5000 }
+    expect: { slow_count: 0 }
+    purpose: The largest limit allowed. 5000 is equal to the limit and 4999 is 1 below it, so no time is greater than 5000. The count has to exist and be 0.
+  - name: everything is slow
+    given: { response_times: [900, 650, 900], limit: 500 }
+    expect: { slow_count: 3 }
+    purpose: The comparison is True on every round, and the repeated 900 is counted both times.
+  - name: one time, equal to the limit
+    given: { response_times: [300], limit: 300 }
+    expect: { slow_count: 0 }
+    purpose: The shortest list allowed. Its only time is exactly equal to the limit, so it is not slow.
+  - name: one time, 1 above the limit
+    given: { response_times: [301], limit: 300 }
+    expect: { slow_count: 1 }
+    purpose: The shortest list allowed. 301 is greater than 300, even if only by 1.
+  - name: a limit of 0
+    given: { response_times: [0, 25, 0, 4], limit: 0 }
+    expect: { slow_count: 2 }
+    purpose: The smallest limit allowed. A time of 0 is equal to the limit, so it is not slow. Every time above 0 is.
+
+mistakes:
+  - id: never-moves-on
+    label: Only moves to the next position when the time is slow
+    shows: never-stops
+    code: |
+      slow_count = 0
+      position = 0
+      while position < len(response_times):
+          if response_times[position] > limit:
+              slow_count = slow_count + 1
+              position = position + 1
+    feedback: |
+      The program had to be stopped because the loop never ended. Look for the line that moves `position` on. If it is missing, or if it is indented under the `if`, the loop gets stuck: under the `if` it only runs for a slow time, and on any other time the loop stays at the same position forever. Moving to the next position has to happen on every round, whatever the time is.
+  - id: one-too-far
+    label: Asks for a position one past the end
+    shows: error
+    errorType: IndexError
+    code: |
+      slow_count = 0
+      position = 0
+      while position <= len(response_times):
+          if response_times[position] > limit:
+              slow_count = slow_count + 1
+          position = position + 1
+    feedback: |
+      The program asked for a position that has no item. With 7 items the positions are 0 to 6, and `len(response_times)` is 7, which is one past the last position. The usual cause is a loop that runs one round too far. This program has two comparisons with different jobs: the one under the `if` decides which times are counted, and the one in the `while` line decides when the loop ends. The one in the `while` line is the one to look at.
+  - id: compares-whole-list
+    label: Compares the whole list with the limit instead of one time
+    shows: error
+    errorType: TypeError
+    errorContains: "'list' and 'int'"
+    code: |
+      slow_count = 0
+      position = 0
+      while position < len(response_times):
+          if response_times > limit:
+              slow_count = slow_count + 1
+          position = position + 1
+    feedback: |
+      The error says that `>` cannot compare a list with a whole number. The name `response_times` on its own stands for the whole list, all the times at once. On each round the `if` has to compare one time with `limit`: the time stored at the current position. Look at what stands on the left of the `>` in your `if` line.
+  - id: counts-equal
+    label: Counts a time that is equal to the limit
+    shows: wrong-result
+    code: |
+      slow_count = 0
+      position = 0
+      while position < len(response_times):
+          if response_times[position] >= limit:
+              slow_count = slow_count + 1
+          position = position + 1
+    feedback: |
+      Your count is too high: it also includes the times that are exactly equal to `limit`. The task says a time equal to the limit is not slow, so the comparison under your `if` has to be False for it. Try it by hand with a time of 300 and a limit of 300: does your comparison give True or False?
+  - id: counts-every-item
+    label: Adds 1 for every item
+    shows: wrong-result
+    code: |
+      slow_count = 0
+      position = 0
+      while position < len(response_times):
+          slow_count = slow_count + 1
+          position = position + 1
+    feedback: |
+      Your count is the number of items in the list, so it went up on every round. The line that adds 1 should only run when the current time is greater than `limit`. Check that it sits under an `if`, and that the `if` compares the time at the current position with `limit`.
+  - id: stores-one
+    label: Stores 1 in the count instead of adding 1
+    shows: wrong-result
+    code: |
+      slow_count = 0
+      position = 0
+      while position < len(response_times):
+          if response_times[position] > limit:
+              slow_count = 1
+          position = position + 1
+    feedback: |
+      Your count is 1, although more than one time is greater than `limit`. Three different causes give this result. The line under the `if` may store the number 1 in `slow_count` instead of adding 1 to what it already holds, so the count can never get past 1. The count may get its start value of 0 inside the loop, so every round throws away what the rounds before it counted. Or the loop may stop one position early, so the last time is never looked at. Check those three places: the line under the `if` (does the name on the left of the `=` also appear on the right?), where `slow_count` is set to 0, and the comparison in the `while` line.
+  - id: adds-the-time
+    label: Adds the slow time itself instead of 1
+    shows: wrong-result
+    code: |
+      slow_count = 0
+      position = 0
+      while position < len(response_times):
+          if response_times[position] > limit:
+              slow_count = slow_count + response_times[position]
+          position = position + 1
+    feedback: |
+      Your count is the slow times added together, not how many slow times there are. That is the adding-up loop from *Add up a list*, where each round added the item itself. A count is different: each slow time adds 1 to it, whatever that time is. Look at what the line under your `if` adds to `slow_count`.
+  - id: counts-not-slow
+    label: Counts the times that are not slow
+    shows: wrong-result
+    code: |
+      slow_count = 0
+      position = 0
+      while position < len(response_times):
+          if response_times[position] <= limit:
+              slow_count = slow_count + 1
+          position = position + 1
+    feedback: |
+      Your count is the number of times that are not slow: the ones less than `limit` or equal to it. The comparison under your `if` is True for the items that should be left out. Read it aloud with real numbers, for example a time of 450 and a limit of 300. Should 450 be counted, and does your comparison say so?
+  - id: counts-below-limit
+    label: Counts the times that are less than the limit
+    shows: wrong-result
+    code: |
+      slow_count = 0
+      position = 0
+      while position < len(response_times):
+          if response_times[position] < limit:
+              slow_count = slow_count + 1
+          position = position + 1
+    feedback: |
+      Your count is the number of times that are less than `limit`. Those are the fast responses. The comparison under your `if` points the wrong way. Read it aloud with real numbers, for example a time of 450 and a limit of 300. Should 450 be counted, and does your comparison say so?
+  - id: compares-position
+    label: Compares the position with the limit instead of the time
+    shows: wrong-result
+    code: |
+      slow_count = 0
+      position = 0
+      while position < len(response_times):
+          if position > limit:
+              slow_count = slow_count + 1
+          position = position + 1
+    feedback: |
+      Your count is still 0 at the end, although some of the times are greater than the limit. There are two usual causes. The comparison under the `if` may never be True. Check what it compares with `limit`: `position` only says where the loop is, and with 7 items it goes from 0 to 6, so none of those numbers is greater than 300. The value to compare is the time stored at that position. Or the line under the `if` may work out `slow_count + 1` without storing the result: a variable changes only when a line stores a value in it, with its name on the left of an `=`.
+  - id: fixed-limit
+    label: Compares with the number 300 instead of the variable limit
+    shows: wrong-result
+    code: |
+      slow_count = 0
+      position = 0
+      while position < len(response_times):
+          if response_times[position] > 300:
+              slow_count = slow_count + 1
+          position = position + 1
+    feedback: |
+      This test uses a limit other than 300, and your count did not follow it: it is the number of times greater than 300. The tests give `limit` different values, and only some of them use 300. A number typed into the comparison stays the same whatever the test gives, so the comparison has to use the variable `limit`.
+
+hints:
+  - |
+    *Count the failed checks* asked one question about every item: is it equal to `"fail"`? What is the question to ask about every time here, and which two values does it compare?
+  - |
+    The time at the current position is `response_times[position]`. The question is whether that time is greater than `limit`. Try it with a limit of 300: is `450 > 300` True or False? And what about `300 > 300`?
+  - |
+    In words: start the count at 0 and the position at 0. While the position is less than the length of `response_times`: if the time at that position is greater than `limit`, add 1 to the count. Then move to the next position, and do that on every round.
+
+explanation: |
+  This program has the same shape as *Count the failed checks*: a count that starts at 0, a loop that visits every position, and an `if` that decides whether this round adds 1.
+
+  What changes is the question under the `if`. There it asked whether the item was equal to the text `"fail"`. Here it asks whether the item is greater than a number, and that number comes from the variable `limit`.
+
+  With `response_times = [120, 300, 80, 450, 210, 95, 610]` and `limit = 300`:
+
+  | round | `position` | `response_times[position]` | greater than `limit`? | `slow_count` after |
+  |---|---|---|---|---|
+  | 1 | 0 | 120 | `120 > 300` is False | 0 |
+  | 2 | 1 | 300 | `300 > 300` is False | 0 |
+  | 3 | 2 | 80 | `80 > 300` is False | 0 |
+  | 4 | 3 | 450 | `450 > 300` is True | 1 |
+  | 5 | 4 | 210 | `210 > 300` is False | 1 |
+  | 6 | 5 | 95 | `95 > 300` is False | 1 |
+  | 7 | 6 | 610 | `610 > 300` is True | 2 |
+
+  Round 2 is the one to look at closely. 300 is not greater than 300, so the count does not change. That is where `>` and `>=` differ:
+
+  - `300 > 300` is False. "Greater than" leaves out a time equal to the limit.
+  - `300 >= 300` is True. "Greater than or equal to" lets it in.
+
+  For every other time in this list the two give the same answer. They only disagree when the time is exactly equal to the limit, and that is why the task says what should happen in that case.
+
+  Two different numbers are in play on every round, and they have different jobs:
+
+  - `position` says where the loop is: 0, 1, 2 and so on, up to 6. It is compared with the length of the list, in the `while` line.
+  - `response_times[position]` is the time stored at that position: 120, 300, 80 and so on. It is compared with `limit`, under the `if`.
+
+solution:
+  code: |
+    slow_count = 0
+    position = 0
+    while position < len(response_times):
+        if response_times[position] > limit:
+            slow_count = slow_count + 1
+        position = position + 1
+  walkthrough: |
+    - `slow_count = 0` sits before the loop. If no time is greater than the limit, the answer is this start value.
+    - `response_times[position] > limit` compares the time at the current position with the limit. It is False for a time equal to the limit, as the task asks: `300 > 300` is False.
+    - `slow_count = slow_count + 1` is indented under the `if`, so it runs only on rounds where the comparison is True.
+    - `position = position + 1` is lined up with the `if`, not inside it. It runs on every round, so the loop always moves on and ends after the last item.
+
+    The program has two comparisons, and each has its own job. `position < len(response_times)` decides when the loop ends. `response_times[position] > limit` decides which times are counted.
+
+    The comparison uses the variable `limit`, not a number typed into the program. The tests give `limit` different values (300, 5000, 500 and 0), and the comparison follows whatever value `limit` holds.
+
+    The shorthand `slow_count += 1` means the same as `slow_count = slow_count + 1`.
+
+prerequisites: [accumulators-count-failed, conditions-inside-range, loops-missing-step]
+related: [values-in-range, accumulators-count-failed]
+next: count-three-groups

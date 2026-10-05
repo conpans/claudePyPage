@@ -1,0 +1,254 @@
+id: copy-list
+title: Copy a list
+tier: challenge
+format: write
+order: 1
+skills: [positions, loops, append]
+difficulty: 1
+newIdea: >-
+  One loop visits every position of a list and builds a second list from the values found there.
+source:
+  type: original
+
+goal: Build a new list that holds the same items as a given list, in the same order.
+statement: |
+  Given a list `numbers`, build a new list `copied` that holds the same items in the same order.
+
+  With `numbers = [8, 3, 5]`, `copied` must be `[8, 3, 5]`.
+
+  The line `copied = numbers` does not make a copy: it gives a second name to the one list that already exists. After that line, `copied.append(9)` would put the 9 into `numbers` too, because both names lead to the same list.
+
+  A copy is a second, separate list that holds the same values. Changing one of the two lists later leaves the other as it was.
+
+  The practice here is a `while` loop that visits every position of `numbers`, from 0 to the last one, and appends the value stored there to `copied`. The checker accepts any program that meets the rules below, with or without a loop.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers, which may be empty
+    domain: { minLen: 0, maxLen: 10, min: -100, max: 100 }
+create:
+  - name: copied
+    describe: a new list with the same items as `numbers`, in the same order
+rules:
+  - '`numbers` has from 0 to 10 items. Each item is a whole number from -100 to 100, with both ends included.'
+  - '`numbers` can be empty. The answer is then an empty list, `[]`. An empty list has no positions, so a loop over its positions runs zero rounds.'
+  - '`copied` has exactly as many items as `numbers`, in the same order. A value that appears more than once in `numbers` appears that many times in `copied`.'
+  - 'Leave `numbers` unchanged. When your program ends, `numbers` must hold exactly the items it held at the start, in the same order. The checker tests this.'
+  - '`copied` must be a new list, not a second name for `numbers`. The checker tests this and tells you if it finds one list with two names.'
+  - 'Python also has one-step ways to copy a list: `numbers.copy()`, `list(numbers)` and `numbers[:]`. They meet all the rules above, so the checker accepts them. The loop is still worth writing, because the later challenges build on it.'
+toWrite: A short program of about five lines. It needs an empty list, a start position, and a loop with two lines inside it.
+unchanged: [numbers]
+fresh: [copied]
+
+starter: |
+  # numbers is given. Leave your answer in copied.
+exampleGiven: { numbers: [8, 3, 5] }
+examples:
+  - given: { numbers: [8, 3, 5] }
+    result: { copied: [8, 3, 5] }
+    why: Position 0 holds 8, position 1 holds 3, and position 2 holds 5. The values are appended in that order.
+  - given: { numbers: [] }
+    result: { copied: [] }
+    why: An empty list has no positions, so a loop over its positions runs zero rounds and appends nothing. The copy of an empty list is an empty list.
+
+tests:
+  - name: three items
+    given: { numbers: [8, 3, 5] }
+    expect: { copied: [8, 3, 5] }
+    purpose: The first example from the task.
+  - name: an empty list
+    given: { numbers: [] }
+    expect: { copied: [] }
+    purpose: The shortest list allowed. The loop runs zero rounds, and the answer still has to exist as an empty list.
+  - name: one item
+    given: { numbers: [7] }
+    expect: { copied: [7] }
+    purpose: A single item, stored at position 0. Catches a loop that stops one item early or starts at position 1.
+  - name: repeated values
+    given: { numbers: [4, 4, 9, 4] }
+    expect: { copied: [4, 4, 9, 4] }
+    purpose: A value that appears three times is copied three times.
+  - name: negative values and zero
+    given: { numbers: [-100, 0, 45, -6] }
+    expect: { copied: [-100, 0, 45, -6] }
+    purpose: Zero and negative numbers are ordinary items. -100 is the smallest value allowed.
+  - name: ten values far from their positions
+    given: { numbers: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100] }
+    expect: { copied: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100] }
+    purpose: The longest list allowed, ending with the largest value allowed. No value equals its position, so appending the positions 0 to 9 cannot pass.
+
+mistakes:
+  - id: appends-positions
+    label: Appends the position instead of the value stored there
+    shows: wrong-result
+    code: |
+      copied = []
+      position = 0
+      while position < len(numbers):
+          copied.append(position)
+          position = position + 1
+    feedback: |
+      Your list holds the positions (0, 1, 2 and so on), not the items. `position` says where the loop is looking. `numbers[position]` is the value stored there, and that value is what the copy needs. Look at what is inside the parentheses of your `.append()`.
+  - id: assigns-into-empty
+    label: Stores into a position of the new list before that position exists
+    shows: error
+    errorType: IndexError
+    errorContains: assignment
+    code: |
+      copied = []
+      position = 0
+      while position < len(numbers):
+          copied[position] = numbers[position]
+          position = position + 1
+    feedback: |
+      The error message says `list assignment index out of range`. It comes from a line that stores into a list position, such as `copied[position] = ...`. Square brackets can replace the item at a position that already exists, but a new empty list has no positions yet, not even position 0. A list gets a new position when an item is appended to it: the first append makes position 0, the next one position 1, and so on.
+  - id: one-too-far
+    label: Asks for a position one past the end
+    shows: error
+    errorType: IndexError
+    code: |
+      copied = []
+      position = 0
+      while position <= len(numbers):
+          copied.append(numbers[position])
+          position = position + 1
+    feedback: |
+      The program asked for a position that has no item. With 3 items the positions are 0, 1 and 2, so position 3, which equals `len(numbers)`, is one past the end. Usually the comparison in the `while` line still lets a round run when `position` is 3. The same error comes when the line that moves `position` on stands before the line that reads the item, so that each round reads the next position. If the list it read from was empty, check that the brackets read from `numbers`, and that the length is checked before the first item is read.
+  - id: append-backwards
+    label: Writes the item before .append and the list inside the parentheses
+    shows: error
+    errorType: AttributeError
+    errorContains: "'int' object"
+    code: |
+      copied = []
+      position = 0
+      while position < len(numbers):
+          numbers[position].append(copied)
+          position = position + 1
+    feedback: |
+      The message says `'int' object has no attribute 'append'`. Python looked at what stands before the dot in your `append` line and found a whole number. A whole number has no `append`: only a list can receive an item. That usually means the two parts of the line have swapped places. The list that receives stands before the dot, and the item to add goes inside the parentheses. Look at what is written before `.append`: is it the list that grows, or an item?
+  - id: stops-one-early
+    label: Stops before the last item
+    shows: wrong-result
+    code: |
+      copied = []
+      position = 0
+      while position < len(numbers) - 1:
+          copied.append(numbers[position])
+          position = position + 1
+    feedback: |
+      Your list is missing the last item of `numbers`. With 3 items the positions are 0, 1 and 2, and the loop has to run a round for each of them. Look at the comparison in your `while` line: does it still let the round for the last position run?
+  - id: starts-at-one
+    label: Starts at position 1 and skips the first item
+    shows: wrong-result
+    code: |
+      copied = []
+      position = 1
+      while position < len(numbers):
+          copied.append(numbers[position])
+          position = position + 1
+    feedback: |
+      Your list is missing the first item of `numbers`. The first item is stored at position 0, so a loop that begins at position 1 never reads it. Look at the value `position` has when the loop reads from `numbers` for the first time.
+  - id: second-counter
+    label: Moves a second counter on, but not the position
+    shows: wrong-result
+    code: |
+      copied = []
+      position = 0
+      count = 0
+      while count < len(numbers):
+          copied.append(numbers[position])
+          count = count + 1
+    feedback: |
+      Your list has the right number of items, but every one of them is the first item of `numbers`. The loop ran a round for each item, yet every round read position 0. That happens when one variable counts the rounds and decides when the loop ends, while `position`, which picks the item, is never moved on. One variable can do both jobs: the position that picks the item can also decide when the loop ends.
+  - id: keeps-last-item
+    label: Stores the current item in the name instead of appending it
+    shows: wrong-result
+    code: |
+      copied = []
+      position = 0
+      while position < len(numbers):
+          copied = numbers[position]
+          position = position + 1
+    feedback: |
+      `copied` ends up as a single number, the last item of `numbers`, not as a list. That happens when a line in the loop stores into the name itself, as in `copied = numbers[position]`: each round drops what `copied` held and keeps only the current item. To collect the items, `copied` has to stay a list that receives one more value on every round.
+  - id: empties-every-round
+    label: Makes the empty list inside the loop
+    shows: wrong-result
+    code: |
+      position = 0
+      while position < len(numbers):
+          copied = []
+          copied.append(numbers[position])
+          position = position + 1
+    feedback: |
+      Your list holds only the last item of `numbers`. Every round did append its item, but the line that makes the empty list ran again at the start of the next round and threw that item away. So only the item from the last round is left. The empty list is a start value, like a total that starts at 0: look at where the line that makes it stands, and how often it runs.
+  - id: appends-whole-list
+    label: Appends the whole list as one item
+    shows: wrong-result
+    code: |
+      copied = []
+      copied.append(numbers)
+    feedback: |
+      `copied` has one item, and that item is the whole list `numbers`: look at the double square brackets in your result. That happens when the entire list is appended in one go, as in `copied.append(numbers)`. `.append()` adds exactly one item each time it runs, so three separate items take three appends, one for each position, each with the value stored there.
+  - id: never-moves-on
+    label: Never moves to the next position
+    shows: never-stops
+    code: |
+      copied = []
+      position = 0
+      while position < len(numbers):
+          copied.append(numbers[position])
+    feedback: |
+      The loop never ended, so the program had to be stopped. The variables at that moment show why. If `position` is still 0, no line inside the loop moves it on, so every round reads position 0 again. If `numbers` has grown far beyond the list you were given, the loop is appending to `numbers` itself: each round makes `numbers` one item longer while `position` moves on by one, so `position` never reaches `len(numbers)`. Check which list is written before `.append`, and whether an earlier line made `copied` a second name for `numbers`.
+
+hints:
+  - |
+    A list with three items has the positions 0, 1 and 2. If a loop visits those positions one after the other, what could it do at each one so that `copied` grows by one item?
+  - |
+    Start with an empty list: `copied = []`. Then take the positions in order. With `numbers = [8, 3, 5]`, the value at position 0 is `numbers[0]`, which is 8. Appending it makes `copied` equal to `[8]`. The value at position 1 is 3, and appending it makes `copied` equal to `[8, 3]`.
+  - |
+    In words: start with an empty list and with the position at 0. While the position is less than the length of `numbers`, do two things: append the value stored at that position to `copied`, then move to the next position. The appending line has this shape: `copied.append(the value at the current position)`.
+
+explanation: |
+  Copying a list by hand goes like this: look at the first item, write it on a new sheet, look at the next item, write it below, and go on until no items are left. The loop does the same. `position` says where it is looking, and `copied` is the new sheet.
+
+  With `numbers = [8, 3, 5]`:
+
+  | round | `position` | `numbers[position]` | `copied` after appending |
+  |---|---|---|---|
+  | 1 | 0 | 8 | `[8]` |
+  | 2 | 1 | 3 | `[8, 3]` |
+  | 3 | 2 | 5 | `[8, 3, 5]` |
+
+  After round 3, `position` becomes 3. `len(numbers)` is 3 as well, so `3 < 3` is False and the loop ends. Position 3 is never read, and that is right: it has no item.
+
+  Compare the two middle columns. `position` goes 0, 1, 2. It says where the loop is looking. `numbers[position]` goes 8, 3, 5. It is the value stored there, and the copy needs the values.
+
+  `copied` has to start as a new, empty list before the loop. That is what makes it a second list. `copied = numbers` would not do that: assignment stores what the right side gives, and here the right side gives the list itself, not a fresh list with the same items. There would still be one list, now with two names.
+
+  If `numbers` is empty, its length is 0. The condition `0 < 0` is False before the first round, so nothing is appended and `copied` stays `[]`. That is the right answer for an empty list.
+
+solution:
+  code: |
+    copied = []
+    position = 0
+    while position < len(numbers):
+        copied.append(numbers[position])
+        position = position + 1
+  walkthrough: |
+    - `copied = []` makes a new, empty list. It sits before the loop, so it runs once. Because it is a new list, nothing that is appended to `copied` can change `numbers`.
+    - `position = 0` starts at the first position.
+    - `while position < len(numbers):` keeps going as long as `position` is a position that has an item. With 3 items those are 0, 1 and 2. With `<=` the loop would also ask for position 3, which has no item.
+    - `copied.append(numbers[position])` reads the value stored at the current position and adds it to the end of `copied`. The list that receives the value is written before `.append`, and the value goes inside the parentheses.
+    - `position = position + 1` moves to the next position. Without this line the loop would read position 0 again and again, and it would never end.
+
+    `position` does two jobs: it picks the item to read, and it decides when the loop ends. A second counter is not needed. The name `position` was chosen for this program, and another name would work the same way. The square brackets, `len()` and `.append()` are Python's own, so they are written exactly as shown.
+
+    If `numbers` is empty, `0 < 0` is False at once. The loop runs zero rounds and `copied` stays `[]`.
+
+    `numbers.copy()` gives the same result in one step, by doing the same work: it puts the value from every position into a new list. A later part of the course also shows a shorter way to write a loop over a list.
+
+prerequisites: [positions-read-values, loops-missing-step, append-receiver, append-add-shipping]
+related: [repeat-list, values-in-range]
+next: copy-list-backwards

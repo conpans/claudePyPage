@@ -1,0 +1,116 @@
+id: append-order
+title: Three appends in a row
+tier: exercise
+format: predict
+skill: append
+skills: [append, positions]
+difficulty: 1
+source:
+  type: original
+
+goal: Predict the list that three `append` lines build, and how long it is.
+statement: |
+  A program starts with an empty list and runs `append()` three times. Two of the three items are the same letter.
+
+  Read the program and work out what it prints. There are two printed lines: the list itself, and its length.
+
+  When you type the list, either kind of quotation mark is fine. `['x', 'y']` and `["x", "y"]` count as the same answer.
+rules:
+  - There is nothing to run here. Predict first, then check your prediction.
+  - '`print(letters)` prints the whole list the way Python writes lists: square brackets around the items, a comma and a space between items, and each text item in quotation marks.'
+toWrite: Nothing. You type what the program prints, and then one value.
+
+program: |
+  letters = []
+  letters.append("b")
+  letters.append("a")
+  letters.append("b")
+  print(letters)
+  print(len(letters))
+
+questions:
+  - ask: What does the program print? Put each printed line on its own line.
+    about: output
+    answer: |
+      ['b', 'a', 'b']
+      3
+    wrong:
+      - answer: |
+          ['a', 'b', 'b']
+          3
+        feedback: |
+          The length is right, but `append()` does not sort. Each `append` puts its item at the end, behind everything already in the list, so the items stay in the order of the three `append` lines. Read the three lines from top to bottom once more and write the items down in that order.
+      - answer: |
+          ['b', 'a']
+          2
+        feedback: |
+          A list keeps repeated values. The third `append` adds a second `"b"` even though the list already holds one, so after three `append` lines the list has three items, and `len()` counts all three.
+      - answer: |
+          ['b', 'a', 'b']
+          2
+        feedback: |
+          The list is right. `len(letters)` counts the items, and there are three. The number 2 is the last position (the course calls it the index). The last position is always one less than the length, because positions start at 0.
+      - answer: |
+          [b, a, b]
+          3
+        feedback: |
+          The order and the length are both right. One detail: when a whole list is printed, Python shows each text item inside quotation marks. It uses single ones, so `print(letters)` shows `'b'`, even though the program wrote `"b"`. Either kind of quotation mark is accepted here, but the marks themselves are part of the answer.
+      - answer: |
+          []
+          0
+        feedback: |
+          No line after `letters = []` stores anything with `=`, but the list still changes. `append()` is not a calculation that has to be stored: it changes the list itself, so an `append` line needs no `=`. After the first `append`, `letters` already holds one item, and after the third it holds three.
+  - ask: What is the value of `letters[2]` after the program has ended?
+    about: value
+    expression: letters[2]
+    answer: "'b'"
+    wrong:
+      - answer: "'a'"
+        feedback: |
+          Positions start at 0, so position 2 is the third item, not the second. `letters[0]` is `'b'`, `letters[1]` is `'a'`, and `letters[2]` is the `'b'` that the last `append` added.
+      - answer: '"a"'
+        feedback: |
+          Positions start at 0, so position 2 is the third item, not the second. `letters[0]` is `'b'`, `letters[1]` is `'a'`, and `letters[2]` is the `'b'` that the last `append` added.
+      - answer: a
+        feedback: |
+          Positions start at 0, so position 2 is the third item, not the second. `letters[0]` is `'b'`, `letters[1]` is `'a'`, and `letters[2]` is the `'b'` that the last `append` added.
+      - answer: '2'
+        feedback: |
+          2 is the position, the place in the list. `letters[2]` asks for the value stored at that place, which is one of the letters.
+
+hints:
+  - |
+    Each `append` line adds exactly one item. How many `append` lines are there, and does any of them remove or sort anything?
+  - |
+    Follow the list line by line. After `letters.append("b")` it is `['b']`. After the next line it is `['b', 'a']`. What does the third `append` add, and where does it land?
+  - |
+    The items sit in the order they were appended: position 0 holds the first item appended, position 1 the second, position 2 the third. `len()` counts the items, so it is one more than the last position.
+
+explanation: |
+  Follow `letters` one line at a time.
+
+  | line | `letters` after the line | `len(letters)` |
+  |---|---|---|
+  | `letters = []` | `[]` | 0 |
+  | `letters.append("b")` | `['b']` | 1 |
+  | `letters.append("a")` | `['b', 'a']` | 2 |
+  | `letters.append("b")` | `['b', 'a', 'b']` | 3 |
+
+  Each `append` adds its item at the end and leaves the earlier items where they are. The second `"b"` is a new item with the same value as the first, and the list keeps both. `print(letters)` shows the whole list, and `print(len(letters))` shows how many items it holds.
+
+  The positions are 0, 1 and 2. The length is 3, one more than the last position.
+
+solution:
+  walkthrough: |
+    The program prints `['b', 'a', 'b']` and then `3`.
+
+    - `letters = []` creates an empty list.
+    - The three `append` lines add `"b"`, then `"a"`, then `"b"`, each at the end. Nothing is sorted and nothing is dropped, so the order on the page is the order in the list.
+    - `len(letters)` counts the items: 3.
+    - `letters[2]` is the item at position 2, the last one, which is `'b'`.
+
+    Use the step-through to watch the list grow by one item on each `append` line.
+
+prerequisites: [positions-read-values]
+related: [append-receiver, assign-saved-length]
+next: append-receiver

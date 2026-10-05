@@ -1,0 +1,208 @@
+id: append-receiver
+title: Which one receives the item?
+tier: exercise
+format: fix
+skill: append
+skills: [append, positions, loops]
+difficulty: 1
+source:
+  type: original
+
+goal: Repair an `append` line that has the list and the item the wrong way round.
+statement: |
+  The list `numbers` is given. This program is meant to build a new list `doubled`, in which each item is the matching item of `numbers` times 2. With `numbers = [3, 1, 4]`, `doubled` should become `[6, 2, 8]`.
+
+  Instead, the program stops with an error:
+
+  ```
+  AttributeError: 'int' object has no attribute 'append'
+  ```
+
+  Read the message, find the line it is about, and repair it.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers
+    domain: { minLen: 1, maxLen: 8, min: -20, max: 20 }
+create:
+  - name: doubled
+    describe: a new list in which each item is the matching item of `numbers` times 2
+rules:
+  - '`numbers` has from 1 to 8 items. Each item is a whole number from -20 to 20, with both ends included. An item can be 0, and the same value can appear more than once.'
+  - '`doubled` has exactly as many items as `numbers`, in the same order: the item at position 0 of `doubled` is twice the item at position 0 of `numbers`, and so on.'
+  - Leave `numbers` unchanged.
+  - '`doubled` must be a new list, not a second name for `numbers`.'
+toWrite: A small change to one line. The rest of the program is already right.
+unchanged: [numbers]
+fresh: [doubled]
+
+starter: |
+  doubled = []
+  position = 0
+  while position < len(numbers):
+      value = numbers[position] * 2
+      value.append(doubled)
+      position = position + 1
+exampleGiven: { numbers: [3, 1, 4] }
+examples:
+  - given: { numbers: [3, 1, 4] }
+    result: { doubled: [6, 2, 8] }
+    why: 3 times 2 is 6, 1 times 2 is 2, and 4 times 2 is 8, appended in that order.
+
+tests:
+  - name: three items
+    given: { numbers: [3, 1, 4] }
+    expect: { doubled: [6, 2, 8] }
+    purpose: The example from the task.
+  - name: one item
+    given: { numbers: [7] }
+    expect: { doubled: [14] }
+    purpose: The shortest list allowed. The loop runs a single round.
+  - name: a negative item and a zero
+    given: { numbers: [-5, 0, 9] }
+    expect: { doubled: [-10, 0, 18] }
+    purpose: Doubling keeps the sign, and 0 times 2 is still 0.
+  - name: values far from their positions
+    given: { numbers: [10, 20, 15, 5] }
+    expect: { doubled: [20, 40, 30, 10] }
+    purpose: Catches a program that doubles the positions (0, 1, 2, 3) instead of the values stored there.
+  - name: the largest and smallest values allowed
+    given: { numbers: [20, -20] }
+    expect: { doubled: [40, -40] }
+    purpose: The values at the two ends of what the task allows.
+  - name: the longest list allowed, with repeats
+    given: { numbers: [4, -7, 4, 0, 19, 4, -7, 2] }
+    expect: { doubled: [8, -14, 8, 0, 38, 8, -14, 4] }
+    purpose: Eight items, the most the task allows, with 4 three times and -7 twice. Every item is doubled where it stands, and nothing is dropped.
+
+mistakes:
+  - id: wrong-receiver
+    label: Writes the item before .append and the list inside the parentheses
+    shows: error
+    errorType: AttributeError
+    errorContains: "'int' object"
+    code: |
+      doubled = []
+      position = 0
+      while position < len(numbers):
+          value = numbers[position] * 2
+          value.append(doubled)
+          position = position + 1
+    feedback: |
+      The program still stops with `'int' object has no attribute 'append'`. Read the message from the start: the thing written before `.append` is an `int`, a whole number, and a whole number cannot receive an item. Look at the `append` line and ask of each name on it: which one is the list, and which one is the number to add?
+  - id: stores-none
+    label: Stores what append() hands back
+    shows: error
+    errorType: AttributeError
+    errorContains: NoneType
+    code: |
+      doubled = []
+      position = 0
+      while position < len(numbers):
+          value = numbers[position] * 2
+          doubled = doubled.append(value)
+          position = position + 1
+    feedback: |
+      The message says `'NoneType' object has no attribute 'append'`: by the second round, the thing before `.append` is `None`, not a list. That happens when a line stores the result of `append()`, as in `doubled = doubled.append(value)`. `append()` changes the list and hands nothing back, so the `=` stores `None` and the list is lost. An `append` line needs no `=` at all.
+  - id: nothing-appended
+    label: Makes value a list, so nothing is appended to doubled
+    shows: wrong-result
+    code: |
+      doubled = []
+      position = 0
+      while position < len(numbers):
+          value = [numbers[position] * 2]
+          value.append(doubled)
+          position = position + 1
+    feedback: |
+      Your `doubled` is still the empty list it started as: nothing was ever appended to it. The error is gone, but the list before the dot is not `doubled`. For example, if `value` was turned into a list such as `[6]`, then `value.append(doubled)` runs without an error, and it is `value` that grows. The list that should grow has to stand before the dot.
+  - id: no-doubling
+    label: Appends the item without doubling it
+    shows: wrong-result
+    code: |
+      doubled = []
+      position = 0
+      while position < len(numbers):
+          doubled.append(numbers[position])
+          position = position + 1
+    feedback: |
+      Your `doubled` is a plain copy of `numbers`: every item is there as it is, without the times 2. The appending works now. Look at what goes inside the parentheses of `append()`, and compare it with what the loop is meant to work out on each round.
+  - id: replaces
+    label: Stores the doubled value in doubled instead of appending it
+    shows: wrong-result
+    code: |
+      doubled = []
+      position = 0
+      while position < len(numbers):
+          value = numbers[position] * 2
+          doubled = value
+          position = position + 1
+    feedback: |
+      At the end `doubled` is a single number, the last item times 2, not a list. A line such as `doubled = value` replaces the whole list with one number on every round. To add a value to a list and keep what is already there, the list needs `.append()`.
+  - id: adds-with-plus
+    label: Tries to add the number to the list with +
+    shows: error
+    errorType: TypeError
+    errorContains: concatenate
+    code: |
+      doubled = []
+      position = 0
+      while position < len(numbers):
+          value = numbers[position] * 2
+          doubled = doubled + value
+          position = position + 1
+    feedback: |
+      Python says it `can only concatenate list (not "int") to list`. In plain words, `+` cannot put a whole number onto the end of a list. Adding one item to a list is the job of `.append()`, with the list before the dot and the item inside the parentheses.
+
+hints:
+  - |
+    The message names the problem: something before `.append` is an `int`, a whole number. On the `append` line, which name holds a whole number, and which name holds the list?
+  - |
+    An `append` line has the shape "list, dot, append, and the item inside the parentheses". In this program, `doubled` is the list and `value` is the number worked out on this round. Check which of the two stands before the dot.
+  - |
+    Only the `append` line needs to change. The two names on it are in each other's places. Nothing else in the loop changes, and the line needs no `=`.
+
+explanation: |
+  The error message is the best clue. `'int' object has no attribute 'append'` means: the thing written before `.append` turned out to be a whole number, and whole numbers cannot receive items.
+
+  Follow the first round with `numbers = [3, 1, 4]`:
+
+  | line | what happens |
+  |---|---|
+  | `value = numbers[position] * 2` | `numbers[0]` is 3, so `value` becomes 6, a whole number |
+  | `value.append(doubled)` | asks the number 6 to receive the list, and Python stops here |
+
+  The two names are in each other's places. `doubled` is the list that should grow, so it belongs before the dot. `value` is the item that should be added, so it belongs inside the parentheses.
+
+  Once the line is the right way round, each round appends one doubled value:
+
+  | round | `position` | `value` | `doubled` after the append |
+  |---|---|---|---|
+  | 1 | 0 | 6 | `[6]` |
+  | 2 | 1 | 2 | `[6, 2]` |
+  | 3 | 2 | 8 | `[6, 2, 8]` |
+
+  `numbers` is only read, so it stays `[3, 1, 4]`.
+
+solution:
+  code: |
+    doubled = []
+    position = 0
+    while position < len(numbers):
+        value = numbers[position] * 2
+        doubled.append(value)
+        position = position + 1
+  walkthrough: |
+    Only the `append` line changes: `doubled.append(value)` in place of `value.append(doubled)`.
+
+    - `doubled` is the list that receives, so it stands before the dot.
+    - `value` is the number worked out on this round, so it goes inside the parentheses.
+    - There is no `=` on the line. `append()` changes `doubled` itself and hands nothing back.
+
+    With `numbers = [3, 1, 4]` the rounds append 6, then 2, then 8, so `doubled` ends as `[6, 2, 8]`. `numbers` is never written to, so it stays as it was, and `doubled` is a list of its own because it was created with `doubled = []`.
+
+    The first two lines inside the loop could also be one: `doubled.append(numbers[position] * 2)`. Python works out the multiplication first and appends the result.
+
+prerequisites: [append-order, positions-read-values]
+related: [append-add-shipping, copy-list]
+next: append-add-shipping

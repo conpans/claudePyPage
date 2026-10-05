@@ -1,0 +1,239 @@
+id: append-add-shipping
+title: Add the shipping to every price
+tier: exercise
+format: fill
+skill: append
+skills: [append, positions, loops]
+difficulty: 2
+source:
+  type: original
+
+goal: Write the one line that appends a worked-out value to a result list.
+statement: |
+  A shop charges the same shipping cost for every item. You have a list `prices` and a whole number `shipping`.
+
+  The program below visits every position of `prices`, but the line that builds the result is missing. Write that line, so that when the loop ends `totals` is a new list in which each item is the matching price plus `shipping`, in the same order as `prices`.
+
+  With `prices = [120, 35, 80]` and `shipping = 5`, `totals` must be `[125, 40, 85]`.
+given:
+  - name: prices
+    type: list[int]
+    describe: the prices, whole numbers
+    domain: { minLen: 1, maxLen: 8, min: 1, max: 500 }
+  - name: shipping
+    type: int
+    describe: the shipping cost that is added to every price
+    domain: { min: 0, max: 50 }
+create:
+  - name: totals
+    describe: a new list with each price plus `shipping`, in the same order as `prices`
+rules:
+  - '`prices` has from 1 to 8 items. Each price is a whole number from 1 to 500, with both ends included. The same price can appear more than once.'
+  - '`shipping` is a whole number from 0 to 50, with both ends included. When it is 0, each total equals its price.'
+  - '`totals` has exactly as many items as `prices`, in the same order.'
+  - Leave `prices` unchanged.
+  - '`totals` must be a new list, not a second name for `prices`.'
+toWrite: One line, in place of the comment inside the loop.
+unchanged: [prices]
+fresh: [totals]
+
+starter: |
+  totals = []
+  position = 0
+  while position < len(prices):
+      # your line goes here
+      position = position + 1
+exampleGiven: { prices: [120, 35, 80], shipping: 5 }
+examples:
+  - given: { prices: [120, 35, 80], shipping: 5 }
+    result: { totals: [125, 40, 85] }
+    why: 120 + 5 is 125, 35 + 5 is 40, and 80 + 5 is 85, appended in that order.
+  - given: { prices: [250], shipping: 20 }
+    result: { totals: [270] }
+    why: One price, one round, one total. 250 + 20 is 270.
+
+tests:
+  - name: three prices
+    given: { prices: [120, 35, 80], shipping: 5 }
+    expect: { totals: [125, 40, 85] }
+    purpose: The first example from the task.
+  - name: one price
+    given: { prices: [250], shipping: 20 }
+    expect: { totals: [270] }
+    purpose: The shortest list allowed. The loop runs a single round.
+  - name: no shipping
+    given: { prices: [60, 15, 45], shipping: 0 }
+    expect: { totals: [60, 15, 45] }
+    purpose: With `shipping` at 0, each total equals its price. This test cannot tell a program that forgot the shipping from a right one; the other tests do that. It checks that 0 is handled like any other shipping cost.
+  - name: the same price more than once
+    given: { prices: [40, 40, 90, 40], shipping: 10 }
+    expect: { totals: [50, 50, 100, 50] }
+    purpose: Equal prices give equal totals, and every one of them is kept.
+  - name: the largest and smallest prices allowed
+    given: { prices: [500, 500, 1], shipping: 50 }
+    expect: { totals: [550, 550, 51] }
+    purpose: The largest price and the smallest price, each with the largest shipping allowed.
+  - name: the longest list allowed
+    given: { prices: [2, 9, 1, 250, 499, 2, 64, 18], shipping: 12 }
+    expect: { totals: [14, 21, 13, 262, 511, 14, 76, 30] }
+    purpose: Eight prices, the most the task allows, small and large mixed. Every one of them gets the shipping, from the first to the last.
+
+mistakes:
+  - id: no-shipping
+    label: Appends the price without the shipping
+    shows: wrong-result
+    code: |
+      totals = []
+      position = 0
+      while position < len(prices):
+          totals.append(prices[position])
+          position = position + 1
+    feedback: |
+      Your `totals` is a copy of `prices`: every item is a price with nothing added. The appending is right. Look at what goes inside the parentheses of `append()`. It can be a whole calculation, not only a single value, and Python works it out before anything is appended.
+  - id: position-plus-shipping
+    label: Adds the shipping to the position instead of the price
+    shows: wrong-result
+    code: |
+      totals = []
+      position = 0
+      while position < len(prices):
+          totals.append(position + shipping)
+          position = position + 1
+    feedback: |
+      Your totals go up by exactly 1 from one item to the next, whatever the prices are. That happens when the shipping is added to `position`, the place in the list, instead of to the price stored at that place. `position` says where to look. The price itself is `prices[position]`.
+  - id: only-shipping
+    label: Appends the shipping on its own
+    shows: wrong-result
+    code: |
+      totals = []
+      position = 0
+      while position < len(prices):
+          totals.append(shipping)
+          position = position + 1
+    feedback: |
+      Every item of your `totals` is the same number, the shipping cost. The price at the current position has not been added. Each total needs two parts: the price at the current position, and the shipping.
+  - id: replaces
+    label: Stores the total in totals instead of appending it
+    shows: wrong-result
+    code: |
+      totals = []
+      position = 0
+      while position < len(prices):
+          totals = prices[position] + shipping
+          position = position + 1
+    feedback: |
+      At the end `totals` is a single number, the last price plus the shipping, not a list. A line such as `totals = ...` replaces the whole list with one number on every round. The empty list created before the loop has to grow, and a list grows with `.append()`.
+  - id: stores-none
+    label: Stores what append() hands back
+    shows: error
+    errorType: AttributeError
+    errorContains: NoneType
+    code: |
+      totals = []
+      position = 0
+      while position < len(prices):
+          totals = totals.append(prices[position] + shipping)
+          position = position + 1
+    feedback: |
+      The message says `'NoneType' object has no attribute 'append'`: by the second round, `totals` is `None`, not a list. That happens when the result of `append()` is stored with `=`. `append()` changes the list itself and hands nothing back, so the `=` stores `None` and the list is lost. The `append` line needs no `=`.
+  - id: wrong-receiver
+    label: Writes the number before .append and the list inside the parentheses
+    shows: error
+    errorType: AttributeError
+    errorContains: "'int' object"
+    code: |
+      totals = []
+      position = 0
+      while position < len(prices):
+          total = prices[position] + shipping
+          total.append(totals)
+          position = position + 1
+    feedback: |
+      Python says `'int' object has no attribute 'append'`: the thing written before `.append` is a whole number. A whole number cannot receive an item; only a list can. Look at your `append` line and check which name stands before the dot, and which value is inside the parentheses.
+  - id: whole-list-in-sum
+    label: Uses a whole list in a + where a single number belongs
+    shows: error
+    errorType: TypeError
+    errorContains: concatenate
+    code: |
+      totals = []
+      position = 0
+      while position < len(prices):
+          totals.append(prices + shipping)
+          position = position + 1
+    feedback: |
+      Python says it `can only concatenate list (not "int") to list`: a `+` on your line has a whole list on its left and a single number on its right. Two things cause this. `prices + shipping` tries to add the shipping to the whole list `prices`, when the price at the current position is `prices[position]`. And `totals = totals + ...` tries to put a number onto the end of a list with `+`, which is the job of `.append()`.
+  - id: square-brackets
+    label: Puts square brackets after .append
+    shows: error
+    errorType: TypeError
+    errorContains: builtin_function_or_method
+    code: |
+      totals = []
+      position = 0
+      while position < len(prices):
+          totals.append[prices[position] + shipping]
+          position = position + 1
+    feedback: |
+      Python says a `'builtin_function_or_method' object is not subscriptable`. The long name means something Python provides, here `append`, and "not subscriptable" means square brackets were written right after it. Square brackets after a list ask for the item at a position. `append()` is run with parentheses instead, and the item to add goes inside them.
+  - id: appends-to-prices
+    label: Appends to prices instead of totals
+    shows: never-stops
+    code: |
+      totals = []
+      position = 0
+      while position < len(prices):
+          prices.append(prices[position] + shipping)
+          position = position + 1
+    feedback: |
+      The program had to be stopped because the loop never ended. The loop stops once `position` reaches `len(prices)`. If your line appends to `prices`, that list grows by one item on every round, so its length moves away as fast as `position` moves on. The totals belong in `totals`, the list created before the loop, and `prices` has to stay as it was given. A missing `position = position + 1` would also keep the loop going.
+
+hints:
+  - |
+    Suppose `prices` is `[120, 35, 80]` and `shipping` is `5`. What should `totals` hold after the first round? Which two numbers were combined to get it?
+  - |
+    The line has two jobs: work out the price at the current position plus the shipping, and append the result to `totals`. The price at the current position is `prices[position]`.
+  - |
+    The line has this shape: `totals.append(a calculation)`. The list that receives stands before the dot. Inside the parentheses goes the current price plus `shipping`. Python works out the calculation first, then appends the number that came out.
+
+explanation: |
+  Every round of the loop does three things: read the price at the current position, add the shipping to it, and put the result at the end of `totals`.
+
+  With `prices = [120, 35, 80]` and `shipping = 5`:
+
+  | round | `position` | `prices[position]` | `prices[position] + shipping` | `totals` after the append |
+  |---|---|---|---|---|
+  | 1 | 0 | 120 | 125 | `[125]` |
+  | 2 | 1 | 35 | 40 | `[125, 40]` |
+  | 3 | 2 | 80 | 85 | `[125, 40, 85]` |
+
+  The calculation can sit inside the parentheses of `append()`. Python works out what is inside the parentheses first, so on round 1 it works out `120 + 5` and appends the number `125`. The calculation can also sit on a line of its own, stored in a variable, with the variable appended on the next line. Both ways put the same number in the list.
+
+  `totals` is created once, empty, before the loop. The `append` runs inside the loop, once per round, which is why the finished list has one total for each price. `prices` is only read, so it stays as it was.
+
+solution:
+  code: |
+    totals = []
+    position = 0
+    while position < len(prices):
+        totals.append(prices[position] + shipping)
+        position = position + 1
+  walkthrough: |
+    The missing line is `totals.append(prices[position] + shipping)`.
+
+    - `totals` stands before the dot because it is the list that receives.
+    - `prices[position] + shipping` is worked out first. On the first round that is `120 + 5`, so the number 125 is what gets appended.
+    - There is no `=` on the line. `append()` changes `totals` itself and hands nothing back.
+
+    Two lines do the same job, if you prefer to see the number before it is appended:
+
+    ```python
+    total = prices[position] + shipping
+    totals.append(total)
+    ```
+
+    Either way, `totals` grows by one item per round, so it ends with as many items as `prices`, in the same order.
+
+prerequisites: [append-receiver, loops-count-rounds]
+related: [running-totals, repeat-list]
+next: append-numbered-labels

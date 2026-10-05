@@ -1,0 +1,168 @@
+id: loops-two-counters
+title: Two counters, one job
+tier: exercise
+format: fix
+skill: loops
+skills: [loops, positions]
+difficulty: 2
+source:
+  type: original
+
+goal: Repair a loop in which the variable that counts the rounds and the variable that picks the item have come apart.
+statement: |
+  This program is meant to print every item of `numbers`, one item per line, in order. It uses two variables: `count` to count the rounds and `position` to say which item to print.
+
+  The program runs and stops on its own, but the output is wrong: every line shows the first item. Run it with `[3, 1, 4]` and compare the output with the list. Then find the cause and repair the program. A repair that uses only one of the two variables is welcome.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers
+    domain: { minLen: 1, maxLen: 6, min: -20, max: 20 }
+prints: 'Each item of `numbers` on its own line, in the order of the list, and nothing else. With `numbers = [3, 1, 4]`, three lines: `3`, `1` and `4`.'
+rules:
+  - '`numbers` has from 1 to 6 items, each a whole number from -20 to 20. It is never empty.'
+  - Print each item on its own line, in the order of the list. Print nothing else.
+  - An item can be negative, an item can be 0, and the same value can appear more than once. Each item is printed once.
+  - You do not have to keep both variables. One variable that does both jobs is a complete repair.
+  - Leave `numbers` unchanged.
+toWrite: A small change to the program you are given. The reference solution ends up with four lines.
+unchanged: [numbers]
+
+starter: |
+  position = 0
+  count = 0
+  while count < len(numbers):
+      print(numbers[position])
+      count = count + 1
+exampleGiven: { numbers: [3, 1, 4] }
+examples:
+  - given: { numbers: [3, 1, 4] }
+    output: |
+      3
+      1
+      4
+    why: Three rounds, one for each position. Round 1 prints the item at position 0, round 2 the item at position 1, round 3 the item at position 2.
+
+tests:
+  - name: three items
+    given: { numbers: [3, 1, 4] }
+    output: |
+      3
+      1
+      4
+    purpose: The example from the task. The program as given prints 3 three times.
+  - name: one item
+    given: { numbers: [7] }
+    output: |
+      7
+    purpose: The shortest list allowed. The bug does not show here, because the first item is also the only item. A repair still has to pass this test.
+  - name: negative and zero
+    given: { numbers: [-20, 0, 6] }
+    output: |
+      -20
+      0
+      6
+    purpose: Negative items and 0 are printed like any other item. -20 is the smallest value allowed.
+  - name: the first two items are equal
+    given: { numbers: [5, 5, 2] }
+    output: |
+      5
+      5
+      2
+    purpose: A program that repeats the first item is right for two lines and wrong on the third. Equal values can hide the bug for a while.
+  - name: six items far from their positions
+    given: { numbers: [10, 12, 14, 16, 18, 20] }
+    output: |
+      10
+      12
+      14
+      16
+      18
+      20
+    purpose: The longest list allowed, ending with the largest value allowed. The values differ from the positions 0 to 5, so printing a counter instead of the item cannot pass.
+
+mistakes:
+  - id: only-count-moves
+    label: Only the round counter moves; position stays at 0
+    shows: wrong-result
+    code: |
+      position = 0
+      count = 0
+      while count < len(numbers):
+          print(numbers[position])
+          count = count + 1
+    feedback: |
+      Every line of your output shows the first item, so on every round `numbers[position]` is `numbers[0]`. Look at the lines inside the loop: one of them changes `count`. Does any of them change `position`?
+  - id: condition-and-update-differ
+    label: The condition watches a variable that nothing inside the loop changes (for example position, while only count is updated)
+    shows: never-stops
+    code: |
+      position = 0
+      count = 0
+      while position < len(numbers):
+          print(numbers[position])
+          count = count + 1
+    feedback: |
+      The program had to be stopped, and it printed the first item over and over. So `position` never moved, and the condition never became False. Look at the `while` line: which variable does it watch, and which line inside the loop changes that variable on every round? Changing `count` does not move `position`.
+  - id: position-moves-count-does-not
+    label: Runs past the last item (the condition watches count, which never changes, or uses <=)
+    shows: error
+    errorType: IndexError
+    code: |
+      position = 0
+      count = 0
+      while count < len(numbers):
+          print(numbers[position])
+          position = position + 1
+    feedback: |
+      The items were printed in the right order, and then the program stopped with an IndexError: after the last item the condition was still True, so the loop asked for a position that has no item. Look at the `while` line. If it watches a variable that nothing inside the loop changes, it can never become False. If it uses `<=`, it lets one round too many run.
+
+hints:
+  - |
+    Run the program with `[3, 1, 4]`. The output is `3`, `3`, `3`. Which variable chooses the item that is printed, and does that variable ever change?
+  - |
+    `count` goes up on every round, but `position` stays at 0, so `numbers[position]` is `numbers[0]` every time. The variable that picks the item is the one that has to move.
+  - |
+    `position` can do both jobs. It picks the item, and after the loop it equals the number of rounds. Use it in the condition, in the `print` and in the update, and `count` is no longer needed.
+
+explanation: |
+  With `numbers = [3, 1, 4]`, `len(numbers)` is 3, and the program as given does this:
+
+  | check | `count` when checked | `count < 3` | `position` | printed | `count` after |
+  |---|---|---|---|---|---|
+  | 1 | 0 | True | 0 | 3 | 1 |
+  | 2 | 1 | True | 0 | 3 | 2 |
+  | 3 | 2 | True | 0 | 3 | 3 |
+  | 4 | 3 | False | 0 | the loop ends | 3 |
+
+  The loop runs the right number of rounds, because `count` moves. But `position`, the variable that picks the item, is 0 on every round, so `numbers[0]` is printed three times.
+
+  Keeping both variables and moving both works. They start at 0 together and go up by 1 together, so they hold the same value on every round. That is the clue: two variables that are always equal are doing one job, and keeping them in step is extra work that gains nothing. `position` already counts the rounds. On round 1 it is 0, on round 2 it is 1, and after the loop it equals the number of rounds that ran.
+
+  With one variable, nothing can drift apart:
+
+  | check | `position` when checked | `position < 3` | printed | `position` after |
+  |---|---|---|---|---|
+  | 1 | 0 | True | 3 | 1 |
+  | 2 | 1 | True | 1 | 2 |
+  | 3 | 2 | True | 4 | 3 |
+  | 4 | 3 | False | the loop ends | 3 |
+
+solution:
+  code: |
+    position = 0
+    while position < len(numbers):
+        print(numbers[position])
+        position = position + 1
+  walkthrough: |
+    `count` is gone, and `position` does both jobs.
+
+    - `position < len(numbers)` is the condition. It watches the same variable that picks the item.
+    - `print(numbers[position])` prints the item at the current position.
+    - `position = position + 1` is the update. It runs at the end of every round, so the condition can become False, and each round looks at the next item.
+
+    Keeping `count` and adding `position = position + 1` next to `count = count + 1` also passes. It costs an extra start value and an extra update, and the two have to be kept in step by hand, with nothing gained. One position variable says where to look, decides when to stop, and tells you afterward how many rounds ran.
+
+prerequisites: [loops-missing-step]
+related: [loops-count-rounds, loops-one-too-far]
+next: loops-countdown

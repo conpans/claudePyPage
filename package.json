@@ -1,0 +1,47 @@
+{
+  "name": "stepwise",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Stepwise: a local Python practice companion (real Python in the browser, no AI, no network)",
+  "engines": {
+    "node": ">=20"
+  },
+  "private": true,
+  "scripts": {
+    "setup": "npm install && npm run build",
+    "start": "node scripts/start.mjs",
+    "dev": "node scripts/copy-pyodide.mjs && vite",
+    "build": "node scripts/copy-pyodide.mjs && tsc -b && vite build",
+    "serve": "node server.mjs",
+    "typecheck": "tsc -b",
+    "lint": "oxlint src tests e2e scripts server.mjs",
+    "test": "vitest run",
+    "verify:native": "node scripts/verify-native.mjs",
+    "e2e": "PLAYWRIGHT_BROWSERS_PATH=0 playwright test",
+    "e2e:setup": "bash scripts/setup-e2e.sh",
+    "verify": "npm run typecheck && npm run lint && npm run test && npm run verify:native && npm run build && npm run e2e"
+  },
+  "dependencies": {
+    "@codemirror/autocomplete": "^6.20.3",
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-python": "^6.2.1",
+    "@codemirror/language": "^6.12.4",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.13",
+    "@fontsource-variable/atkinson-hyperlegible-mono": "^5.3.0",
+    "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
+    "@lezer/highlight": "^1.2.5",
+    "preact": "^10.29.8"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^24.19.1",
+    "oxlint": "^1.86.0",
+    "pyodide": "314.0.7",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.2",
+    "vitest": "^5.0.3",
+    "yaml": "^2.9.1"
+  }
+}

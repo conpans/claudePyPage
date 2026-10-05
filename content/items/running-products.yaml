@@ -1,0 +1,150 @@
+id: running-products
+title: Running products
+tier: variation
+variationOf: running-totals
+format: write
+order: 1
+skills: [positions, loops, accumulators, append]
+difficulty: 2
+newIdea: >-
+  The same shape as running totals, with multiplying in place of adding. That changes the start value.
+source:
+  type: original
+
+goal: Build a list of products so far, with one product for each item of the list.
+statement: |
+  Given a list `numbers`, build a new list `running_products` with the same number of items. The item at each position is all the items of `numbers` from position 0 up to and including that position, multiplied together.
+
+  With `numbers = [2, 3, 4]` the products so far are 2, then 2 times 3, then 2 times 3 times 4. So `running_products` must be `[2, 6, 24]`.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers
+    domain: { minLen: 1, maxLen: 8, min: -9, max: 9 }
+create:
+  - name: running_products
+    describe: a new list with one product for every item of `numbers`
+rules:
+  - '`numbers` has from 1 to 8 items, each a whole number from -9 to 9. The numbers are kept small so the products stay easy to read.'
+  - '`running_products` has exactly as many items as `numbers`.'
+  - The first product is the first item itself.
+  - If an item is 0, the product at that position is 0, and so is every product after it.
+  - Leave `numbers` unchanged, and make `running_products` a new list.
+toWrite: A short program of about seven lines, with the same shape as running totals.
+unchanged: [numbers]
+fresh: [running_products]
+
+starter: |
+  # numbers is given. Leave your answer in running_products.
+exampleGiven: { numbers: [2, 3, 4] }
+examples:
+  - given: { numbers: [2, 3, 4] }
+    result: { running_products: [2, 6, 24] }
+    why: 2, then 2 times 3 is 6, then 6 times 4 is 24.
+  - given: { numbers: [3, 0, 5] }
+    result: { running_products: [3, 0, 0] }
+    why: 3, then 3 times 0 is 0, then 0 times 5 is still 0.
+
+tests:
+  - name: three items
+    given: { numbers: [2, 3, 4] }
+    expect: { running_products: [2, 6, 24] }
+    purpose: The first example from the task.
+  - name: one item
+    given: { numbers: [7] }
+    expect: { running_products: [7] }
+    purpose: The shortest list allowed. A wrong start value shows at once.
+  - name: a zero in the middle
+    given: { numbers: [3, 0, 5] }
+    expect: { running_products: [3, 0, 0] }
+    purpose: After a 0 item, every later product is 0.
+  - name: negative items
+    given: { numbers: [-2, 3, -1] }
+    expect: { running_products: [-2, -6, 6] }
+    purpose: The sign flips each time a negative item is multiplied in.
+  - name: all ones
+    given: { numbers: [1, 1, 1] }
+    expect: { running_products: [1, 1, 1] }
+    purpose: Catches adding instead of multiplying, which would give 1, 2, 3.
+  - name: two items
+    given: { numbers: [5, 2] }
+    expect: { running_products: [5, 10] }
+    purpose: A second small case with different values, so a fixed answer cannot pass.
+
+mistakes:
+  - id: starts-at-zero
+    label: Starts the product at 0
+    shows: wrong-result
+    code: |
+      running_products = []
+      product = 0
+      position = 0
+      while position < len(numbers):
+          product = product * numbers[position]
+          running_products.append(product)
+          position = position + 1
+    feedback: |
+      Every product in your list is 0. The start value that works for adding does not work for multiplying: 0 times the first item is 0, and it stays 0 from then on. Which start value leaves the first item unchanged when you multiply?
+  - id: adds-instead
+    label: Adds the items instead of multiplying them
+    shows: wrong-result
+    code: |
+      running_products = []
+      product = 0
+      position = 0
+      while position < len(numbers):
+          product = product + numbers[position]
+          running_products.append(product)
+          position = position + 1
+    feedback: |
+      Your list holds the running totals: the items added, not multiplied. Two things change when you move from totals to products, the operation inside the loop and the start value before it.
+  - id: records-current-item
+    label: Records the current item instead of the product so far
+    shows: wrong-result
+    code: |
+      running_products = []
+      position = 0
+      while position < len(numbers):
+          running_products.append(numbers[position])
+          position = position + 1
+    feedback: |
+      Your list is a copy of `numbers`: each item is the current item, not the product so far. Either `append()` is given `numbers[position]` instead of the product, or the product is set back to its start value inside the loop.
+
+hints:
+  - |
+    Compare this with *Running totals*. Which parts of that program can stay exactly as they are, and which two parts must change?
+  - |
+    The operation changes from `+` to `*`. Then think about the start value. A start value must leave the first item unchanged, so which number times 2 is still 2?
+  - |
+    In words: start with a product of 1, an empty list, and position 0. On each round, first multiply the product by the current item, then append the product to the list, then move to the next position.
+
+explanation: |
+  The loop has the same shape as running totals. One variable holds the result so far, and after each update that variable is appended to the list.
+
+  With `numbers = [2, 3, 4]`:
+
+  | round | `numbers[position]` | `product` after multiplying | `running_products` after appending |
+  |---|---|---|---|
+  | 1 | 2 | 2 | `[2]` |
+  | 2 | 3 | 6 | `[2, 6]` |
+  | 3 | 4 | 24 | `[2, 6, 24]` |
+
+  The start value is where the two programs differ. For the first round to give 2, the product must start at a number that leaves 2 unchanged when multiplied by it. That number is 1, because 1 times 2 is 2. A product that started at 0 would stay 0.
+
+solution:
+  code: |
+    running_products = []
+    product = 1
+    position = 0
+    while position < len(numbers):
+        product = product * numbers[position]
+        running_products.append(product)
+        position = position + 1
+  walkthrough: |
+    - `product = 1` is the start value for multiplying. `1 * 2` is 2, so the first product is the first item itself.
+    - `product = product * numbers[position]` multiplies the product so far by the current item.
+    - `running_products.append(product)` records it. As in running totals, the update comes first and the append second.
+    - If an item is 0, `product` becomes 0 on that round and stays 0. That matches the rule in the task.
+
+prerequisites: [running-totals, accumulators-product-start]
+related: [accumulators-product-start]

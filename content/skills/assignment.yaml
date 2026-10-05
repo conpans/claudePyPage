@@ -1,0 +1,157 @@
+id: assignment
+order: 1
+title: Tracing assignments and updating variables
+shortTitle: Assignments
+summary: >-
+  Follow a program one line at a time, and know what each variable holds after every assignment.
+mixups:
+  - Reading `doubled = price * 2` as a rule that keeps `doubled` up to date. The line runs once and stores one number.
+  - Expecting a saved length, as in `original_length = len(numbers)`, to grow when the list grows.
+  - Storing a new value (`count = 1`) when you meant to build on the old one (`count = count + 1`).
+  - Expecting a name such as `total` or `original_length` to do something by itself. Names are chosen by the programmer. `=`, `len()` and `print()` belong to Python.
+
+sections:
+  - title: A variable holds one value at a time
+    body: |
+      A line such as `price = 10` is an assignment. Python carries it out in two steps, always in this order:
+
+      1. It works out the right side. The result is one value.
+      2. It stores that value under the name on the left.
+
+      For `price = 20 + 4`, the right side works out to `24`, and `24` is stored under the name `price`.
+
+      In math, `=` says that two things are equal. In Python, `=` is an instruction: store the value from the right side under the name on the left.
+
+      A variable holds one value at a time. If `price` already held a value, the new one replaces it, and `price` no longer holds the old one.
+
+      Lines run from top to bottom, one at a time. So the question "what does `price` hold?" needs a second part: after which line?
+
+      Step through the example below. The same `print` line appears three times and prints three different numbers, because `price` holds a different value each time.
+    demo:
+      title: One variable, three values in turn
+      code: |
+        price = 10
+        print(f"Price: {price}")
+        price = 25
+        print(f"Price: {price}")
+        price = 20 + 4
+        print(f"Price: {price}")
+      note: Watch the value of `price` in the table. Line 1 creates `price`. Lines 3 and 5 each replace the value it held before.
+
+  - title: An assignment is a snapshot, not a live formula
+    body: |
+      Look at this line:
+
+      ```python
+      doubled = price * 2
+      ```
+
+      It does not set up a rule that `doubled` is always twice `price`. It runs once. Python reads the value `price` holds at that moment, multiplies it by 2, and stores the number that comes out.
+
+      If `price` is `4`, the number `8` is stored under `doubled`. Only the `8` is stored. Nothing remembers that it came from `price`.
+
+      So when `price` changes later, `doubled` stays as it is. Think of a photo: it shows how things were when it was taken, and it does not change when the scene does. A formula in a spreadsheet is the opposite, because it updates itself. Python variables do not work that way.
+
+      To get a value that fits the new `price`, the program has to work it out again, with another assignment.
+    demo:
+      title: The price changes, the stored result stays
+      code: |
+        price = 4
+        doubled = price * 2
+        price = 7
+        print(f"Doubled: {doubled}")
+        doubled = price * 2
+        print(f"Doubled: {doubled}")
+      note: After line 3, `price` is 7 and `doubled` is still 8. Only line 5, a new assignment, changes `doubled`.
+
+  - title: Updating a variable with its own old value
+    body: |
+      The same name can stand on both sides of the `=`:
+
+      ```python
+      count = count + 1
+      ```
+
+      In math this could never be true. As an instruction it works, because the right side is worked out first. If `count` holds `2`, the right side `count + 1` works out to `3`. Then `3` is stored under `count`, replacing the `2`.
+
+      So the line reads the old value, and then stores the new one.
+
+      The same shape works with other calculations. `stock = stock - 3` takes 3 away from what `stock` held and stores the result under `stock` again.
+
+      Compare that with `count = 1`. There is no `count` on the right side, so the old value plays no part. Whatever `count` held is replaced by `1`.
+
+      A quick test for any assignment: does the name on the left of the `=` also appear on the right? If it does, the line builds on the old value. If it does not, the old value plays no part, and the variable no longer holds it after this line.
+    demo:
+      title: Adding 1, three times
+      code: |
+        count = 0
+        count = count + 1
+        count = count + 1
+        count = count + 1
+        print(f"Count: {count}")
+      note: Lines 2, 3 and 4 are the same text. Each one gives a different result, because `count` holds a different value when it runs.
+
+  - title: A saved length does not follow the list
+    body: |
+      `len(numbers)` gives the number of items in the list `numbers`. Like every right side, it is worked out at the moment its line runs.
+
+      ```python
+      original_length = len(numbers)
+      ```
+
+      With `numbers = [40, 50, 60]`, this line stores `3` under `original_length`. From then on `original_length` holds the plain number `3`. It is a snapshot again: nothing connects it to the list.
+
+      `numbers.append(70)` adds `70` to the end of the list, which then has 4 items. `original_length` still holds `3`, because no line has assigned to it since.
+
+      `len(numbers)` itself is not a variable. It is worked out again every time a line with `len(numbers)` runs, so it gives the number of items the list holds at that moment.
+
+      This difference is useful. A program that is about to add items to a list can first save how long the list was at the start.
+    demo:
+      title: Saving the length, then growing the list
+      code: |
+        numbers = [40, 50, 60]
+        original_length = len(numbers)
+        numbers.append(70)
+        numbers.append(80)
+        print(f"Saved length: {original_length}")
+        print(f"Length now: {len(numbers)}")
+      note: Watch `original_length` while the list grows on lines 3 and 4. It stays at 3.
+
+  - title: "Names are yours; =, len() and print() are Python's"
+    body: |
+      A program is made of two kinds of words.
+
+      Some belong to Python, and what they do is fixed. `=` stores a value under a name. `len()` counts the items of a list. `.append()` adds an item to the end of a list. `print()` shows a line of text.
+
+      The others are names, chosen by the person who wrote the program: `price`, `count`, `numbers`, `original_length`. Python attaches no meaning to them. `original_length` holds the original length for one reason only: a line of the program stored that number there. In the same way, a variable called `total` does not add anything up. It holds a total only if the lines of the program put one there.
+
+      So a variable can be renamed without changing what the program does, as long as the new name is used in every place where the old one stood. The new name also has to be free: not a name the program already uses for something else, and not one of Python's own names such as `len` or `print`.
+
+      The example below is the program from the previous section with both names changed. Step through it. Every step does what it did before, and the printed lines are the same.
+
+      Good names still matter. They tell a human reader what a value is for. Python does not look at what the words mean.
+    demo:
+      title: The same program with other names
+      code: |
+        parcel_weights = [40, 50, 60]
+        parcels_at_start = len(parcel_weights)
+        parcel_weights.append(70)
+        parcel_weights.append(80)
+        print(f"Saved length: {parcels_at_start}")
+        print(f"Length now: {len(parcel_weights)}")
+      note: Compare this with the example before it. Only the two names differ. `=`, `len()`, `.append()` and `print()` do what they did there.
+
+  - title: The shorthand +=
+    body: |
+      Part 1 of the course showed a shorthand for updating a variable: `count += 1` means exactly the same as `count = count + 1`. In the same way, `stock -= 3` means the same as `stock = stock - 3`.
+
+      Both forms do the same two steps: read the old value, then store the new one. The long form shows both steps on the page, and that is why the exercises here use it.
+
+      Write whichever you find clearer. The checker accepts both.
+
+exercises:
+  - assign-snapshot
+  - assign-saved-length
+  - assign-update-score
+  - assign-swap
+  - assign-two-purchases

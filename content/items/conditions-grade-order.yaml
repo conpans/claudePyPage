@@ -1,0 +1,188 @@
+id: conditions-grade-order
+title: A branch that never runs
+tier: exercise
+format: fix
+skill: conditions
+skills: [conditions]
+difficulty: 2
+source:
+  type: original
+
+goal: Repair a chain of conditions so that every score gets the right grade.
+statement: |
+  This program is meant to turn the test score in `score` into a grade and leave the grade, as text, in `grade`:
+
+  | `score` | `grade` |
+  |---|---|
+  | 80 or more | `"merit"` |
+  | from 50 to 79 | `"pass"` |
+  | below 50 | `"fail"` |
+
+  It runs without an error, but no score ever gets `"merit"`. A score of 85 comes out as `"pass"`. Find the cause and repair it.
+given:
+  - name: score
+    type: int
+    describe: a test score
+    domain: { min: 0, max: 100 }
+create:
+  - name: grade
+    describe: 'the grade for `score`, as text: `"merit"`, `"pass"` or `"fail"`'
+rules:
+  - '`score` is a whole number from 0 to 100.'
+  - 'A score of 80 or more gets `"merit"`. 80 itself is included.'
+  - 'A score from 50 to 79 gets `"pass"`. 50 and 79 are both included.'
+  - 'A score below 50 gets `"fail"`. 49 is the highest score that fails.'
+  - Write the three grades exactly as shown, in small letters.
+toWrite: A small change to the program you are given. Most of it is already right.
+
+starter: |
+  if score >= 50:
+      grade = "pass"
+  elif score >= 80:
+      grade = "merit"
+  else:
+      grade = "fail"
+exampleGiven: { score: 85 }
+examples:
+  - given: { score: 85 }
+    result: { grade: 'merit' }
+    why: 85 is 80 or more.
+  - given: { score: 60 }
+    result: { grade: 'pass' }
+    why: 60 is at least 50 and below 80.
+  - given: { score: 30 }
+    result: { grade: 'fail' }
+    why: 30 is below 50.
+
+tests:
+  - name: a score of 85
+    given: { score: 85 }
+    expect: { grade: 'merit' }
+    purpose: The first example from the task. The program as given stores "pass" for it.
+  - name: a score of 79
+    given: { score: 79 }
+    expect: { grade: 'pass' }
+    purpose: The highest score that is still a pass.
+  - name: a score of 50
+    given: { score: 50 }
+    expect: { grade: 'pass' }
+    purpose: Exactly on the pass limit. 50 itself has to pass.
+  - name: a score of 49
+    given: { score: 49 }
+    expect: { grade: 'fail' }
+    purpose: One below the pass limit. This is the highest score that fails.
+  - name: a score of 80
+    given: { score: 80 }
+    expect: { grade: 'merit' }
+    purpose: Exactly on the merit limit. 80 itself has to get merit.
+  - name: a score of 100
+    given: { score: 100 }
+    expect: { grade: 'merit' }
+    purpose: The highest score allowed.
+  - name: a score of 0
+    given: { score: 0 }
+    expect: { grade: 'fail' }
+    purpose: The lowest score allowed.
+
+mistakes:
+  - id: wider-condition-first
+    label: Asks the condition that is True for more scores first
+    shows: wrong-result
+    code: |
+      if score >= 50:
+          grade = "pass"
+      elif score >= 80:
+          grade = "merit"
+      else:
+          grade = "fail"
+    feedback: |
+      `grade` is `"pass"` for a score that should get `"merit"`. Step through this test and watch `grade`, working out each condition with this exact score. Which condition is the first one that is True for it, and what happens after that? If `grade` becomes `"merit"` and then changes to `"pass"`, the line that checks for a pass starts with `if`, so it is a separate question that Python asks as well. If the score sits exactly on the limit, 80, also check whether the comparison that should catch it is True when its two sides are equal.
+  - id: limit-left-out
+    label: Uses > where the limit itself should count
+    shows: wrong-result
+    code: |
+      if score > 80:
+          grade = "merit"
+      elif score > 50:
+          grade = "pass"
+      else:
+          grade = "fail"
+    feedback: |
+      `grade` is `"fail"` for a score of exactly 50, and 50 is the lowest score that passes. Put 50 into the condition that should catch it and work it out. A comparison written with `>` is False when its two sides are equal, so a score that sits exactly on a limit falls through to the next branch.
+  - id: else-on-second-if
+    label: Splits the chain into separate if statements
+    shows: wrong-result
+    code: |
+      if score >= 50:
+          grade = "pass"
+      if score >= 80:
+          grade = "merit"
+      else:
+          grade = "fail"
+    feedback: |
+      `grade` is `"fail"` for a score that should get `"pass"`. Step through this test and watch `grade`. If it is set to `"pass"` first and then replaced, the `else` is running as well: an `else` belongs only to the `if` directly above it, so after two separate `if` statements it runs whenever the second condition is False. If `grade` is never set to `"pass"`, no condition was True for this score, so check the limits in your conditions.
+  - id: grades-swapped-only
+    label: Swaps the two grades but leaves the conditions where they were
+    shows: wrong-result
+    code: |
+      if score >= 50:
+          grade = "merit"
+      elif score >= 80:
+          grade = "pass"
+      else:
+          grade = "fail"
+    feedback: |
+      `grade` is `"merit"` for a score that should get `"pass"`. Look at the condition directly above the line that stores `"merit"`, and work it out for this score. A branch is a condition together with the lines indented under it. When two branches change places, each condition keeps its own lines, so the two move together.
+
+hints:
+  - |
+    Take a score of 85 and go down the chain from the top. Which condition does Python check first, and is it True for 85?
+  - |
+    In an `if`/`elif`/`else` chain, Python takes the first branch whose condition is True and skips the rest. `85 >= 50` is True, so the first branch stores `"pass"`, and the `elif` is never checked. Every score that is 80 or more is also 50 or more.
+  - |
+    There are two ways to repair it. One way: change the order, so that the condition which is True for fewer scores gets its turn first. The other way: keep the order and add to the first condition, so that it is True only for the scores from 50 to 79.
+
+explanation: |
+  A chain is read from the top, and the first True condition wins. Here is the chain as given, with `score` at 85:
+
+  | part of the chain | condition | for 85 | what happens |
+  |---|---|---|---|
+  | `if` | `score >= 50` | True | stores `"pass"`, and the rest of the chain is skipped |
+  | `elif` | `score >= 80` | not checked | nothing |
+  | `else` | none | not reached | nothing |
+
+  The `elif` only gets a turn when the first condition is False, which means for a score below 50. No score below 50 is 80 or more. So the `"merit"` branch can never run.
+
+  The two conditions overlap. Every score that is 80 or more is also 50 or more:
+
+  | `score` | `score >= 50` | `score >= 80` |
+  |---|---|---|
+  | 30 | False | False |
+  | 60 | True | False |
+  | 85 | True | True |
+
+  For 85 both conditions are True, and in a chain only the first True condition counts. So the order decides which grade 85 gets.
+
+  While two conditions overlap like this, the one that is True for fewer scores has to be asked first. Then the wider condition below it only sees the scores that the first one did not take.
+
+solution:
+  code: |
+    if score >= 80:
+        grade = "merit"
+    elif score >= 50:
+        grade = "pass"
+    else:
+        grade = "fail"
+  walkthrough: |
+    The two conditions have changed places, and each one took its branch along. Nothing else is different.
+
+    - `if score >= 80:` is asked first. For 85 it is True, so `grade` becomes `"merit"` and the rest of the chain is skipped.
+    - `elif score >= 50:` is only checked when the first condition was False. So by this line the score is known to be below 80, and the condition needs no upper limit. It is True for the scores from 50 to 79.
+    - `else:` takes every score that neither condition took. Those are the scores below 50.
+    - Both comparisons use `>=`, because 80 itself is a merit and 50 itself is a pass.
+
+    Another correct repair keeps the original order and makes the first condition True only for the pass scores: `if score >= 50 and score < 80:`. Then no score makes two conditions True, and the order no longer matters.
+
+prerequisites: [conditions-separate-ifs]
+related: [conditions-status-category, count-three-groups]
+next: conditions-status-category

@@ -1,0 +1,220 @@
+id: assign-two-purchases
+title: Two purchases
+tier: exercise
+format: write
+skill: assignment
+skills: [assignment]
+difficulty: 2
+source:
+  type: original
+
+goal: Update one variable twice in a row, then print its final value.
+statement: |
+  You have a budget, and you buy the same item twice. Each purchase lowers the budget by the price of the item.
+
+  `budget` holds the money you start with, and `price` holds the price of one item. Write a program that carries out the two purchases one after the other, so that `budget` ends up holding the money that is left.
+
+  Then print one line: the text `Left: ` followed by the final value of `budget`.
+
+  With `budget = 50` and `price = 12`, the budget goes from 50 to 38, and then from 38 to 26. `budget` must end as `26`, and the program must print `Left: 26`.
+given:
+  - name: budget
+    type: int
+    describe: the money at the start, a whole number from 0 to 500
+    domain: { min: 0, max: 500 }
+  - name: price
+    type: int
+    describe: the price of one item, a whole number from 0 to 100
+    domain: { min: 0, max: 100 }
+where: budget >= 2 * price
+create:
+  - name: budget
+    describe: the money left after both purchases
+prints: 'One line: the text `Left: ` followed by the final value of `budget`, for example `Left: 26`.'
+rules:
+  - 'At the start, `budget` is a whole number from 0 to 500 and `price` is a whole number from 0 to 100. The numbers at both ends of each range are allowed.'
+  - 'There is always enough money for both purchases: `budget` is at least 2 times `price`. So the final amount is never below 0, and it can be exactly 0.'
+  - '`price` can be 0. Then `budget` ends with the value it started with.'
+  - The final amount goes in `budget` itself, and the printed line shows that final amount.
+  - 'Print exactly one line. It starts with `Left: ` (a capital L, a colon and one space), the number comes right after the space, and nothing comes after the number.'
+toWrite: 'A short program of about three lines: one update of `budget` for each purchase, then one `print` with an f-string.'
+
+starter: |
+  # budget and price are given. Leave the final amount in budget, then print it.
+exampleGiven: { budget: 50, price: 12 }
+examples:
+  - given: { budget: 50, price: 12 }
+    result: { budget: 26 }
+    output: 'Left: 26'
+    why: 50 - 12 is 38, then 38 - 12 is 26.
+  - given: { budget: 40, price: 20 }
+    result: { budget: 0 }
+    output: 'Left: 0'
+    why: 40 - 20 is 20, then 20 - 20 is 0. The money is used up exactly.
+
+tests:
+  - name: two purchases
+    given: { budget: 50, price: 12 }
+    expect: { budget: 26 }
+    output: 'Left: 26'
+    purpose: The first example from the task.
+  - name: the money is used up exactly
+    given: { budget: 40, price: 20 }
+    expect: { budget: 0 }
+    output: 'Left: 0'
+    purpose: The budget is exactly 2 times the price, so the final amount is 0.
+  - name: a price of 0
+    given: { budget: 75, price: 0 }
+    expect: { budget: 75 }
+    output: 'Left: 75'
+    purpose: Taking away 0 twice leaves the budget as it was. A program that stores the price in the budget would end with 0.
+  - name: small numbers
+    given: { budget: 9, price: 4 }
+    expect: { budget: 1 }
+    output: 'Left: 1'
+    purpose: The budget is 1 more than the two purchases cost, so exactly 1 is left. Another pair of values, so a fixed answer cannot pass.
+  - name: the largest values
+    given: { budget: 500, price: 100 }
+    expect: { budget: 300 }
+    output: 'Left: 300'
+    purpose: The largest budget and the largest price the task allows.
+  - name: no money and a price of 0
+    given: { budget: 0, price: 0 }
+    expect: { budget: 0 }
+    output: 'Left: 0'
+    purpose: The smallest values the task allows. Nothing is spent, and the line is still printed.
+
+mistakes:
+  - id: subtracts-once
+    label: Takes the price away only once
+    shows: wrong-result
+    code: |
+      budget = budget - price
+      print(f"Left: {budget}")
+    feedback: |
+      `budget` and the printed line both show the amount after one purchase: the price has been taken away once. The task has two purchases. Each one is its own update of `budget`, and the second one starts from what the first one left.
+  - id: prints-too-early
+    label: Prints before the purchases
+    shows: wrong-result
+    code: |
+      print(f"Left: {budget}")
+      budget = budget - price
+      budget = budget - price
+    feedback: |
+      `budget` ends with the right amount, but the printed line shows the amount from the start. The text was made before the purchases ran. An f-string reads the value `budget` holds at the moment its line runs, and the text does not change afterward. Look at where your `print` line, or the line that builds the text, stands compared with the two updates.
+  - id: prints-between
+    label: Prints between the two purchases
+    shows: wrong-result
+    code: |
+      budget = budget - price
+      print(f"Left: {budget}")
+      budget = budget - price
+    feedback: |
+      `budget` ends with the right amount, but the printed line shows the amount after one purchase. The text was made between the two updates, so it shows the value `budget` held at that moment. Lines run from top to bottom. Which line has to come after both updates?
+  - id: prints-after-each
+    label: Prints a line after each purchase
+    shows: wrong-result
+    code: |
+      budget = budget - price
+      print(f"Left: {budget}")
+      budget = budget - price
+      print(f"Left: {budget}")
+    feedback: |
+      `budget` ends with the right amount, but your program printed two lines, one after each purchase. The task asks for exactly one line, showing the final amount. Which of your `print` lines runs after both purchases?
+  - id: forgets-f
+    label: Writes the curly brackets in plain text instead of an f-string
+    shows: wrong-result
+    code: |
+      budget = budget - price
+      budget = budget - price
+      print("Left: {budget}")
+    feedback: |
+      `budget` ends with the right amount, but the printed line shows `{budget}` exactly as it is written, instead of the number. Curly brackets put a value into text only inside an f-string. Look at what stands right before the opening quotation mark in your `print` line.
+  - id: two-spaces
+    label: Prints two spaces after the colon
+    shows: wrong-result
+    code: |
+      budget = budget - price
+      budget = budget - price
+      print("Left: ", budget)
+    feedback: |
+      `budget` ends with the right amount, but the printed line has two spaces between the colon and the number, and the task asks for one. When `print()` gets several values separated by commas, it puts one space between them by itself. A space at the end of the text then becomes a second space.
+  - id: replaces-with-price
+    label: Stores the price in budget instead of taking it away
+    shows: wrong-result
+    code: |
+      budget = price
+      budget = price
+      print(f"Left: {budget}")
+    feedback: |
+      `budget` ends up equal to `price`, and the money you started with is gone. That happens when a line stores the price and drops what `budget` held, as in `budget = price`. A purchase lowers the old amount, so the old `budget` has to appear on the right side of the `=` as well.
+  - id: adds-instead
+    label: Adds the price instead of taking it away
+    shows: wrong-result
+    code: |
+      budget = budget + price
+      budget = budget + price
+      print(f"Left: {budget}")
+    feedback: |
+      `budget` ends higher than it started, by two times the price. Your update lines build on the old value, which is right, but each one adds the price. A purchase makes the budget smaller. Look at the sign between `budget` and `price` in your update lines.
+  - id: result-not-in-budget
+    label: Works out the final amount but does not store it in budget
+    shows: wrong-result
+    code: |
+      left = budget - price - price
+      print(f"Left: {left}")
+    feedback: |
+      The printed line is right, but `budget` still holds the amount from the start. The final amount was worked out and printed, or stored under another name, while `budget` itself was never updated. The task asks for the final amount in `budget`. Look at what stands on the left of your `=`.
+  - id: budget-never-changes
+    label: Works out the amounts without storing them
+    shows: wrong-result
+    code: |
+      budget - price
+      budget - price
+      print(f"Left: {budget}")
+    feedback: |
+      `budget` and the printed line both show the amount from the start. Usually that means no line stored a new value in `budget`. Lines such as `budget - price` work out a number and then let it go, because nothing stores it. Storing a result takes an assignment, with the name that receives it on the left of a single `=`.
+
+hints:
+  - |
+    Start with one purchase. With `budget = 50` and `price = 12`, what should `budget` hold after the first purchase? Which two values does Python have to read to work that out?
+  - |
+    One purchase is one update of `budget`: its new value is its old value minus `price`. The second purchase is the same update again. It starts from what the first one left, 38, and brings `budget` to 26.
+  - |
+    In words: update `budget` to its old value minus `price`. Do the same once more. Then print. An f-string puts a value into text with curly brackets, as in `f"Left: {budget}"`. The `print` line comes last, so that it shows the final amount.
+
+explanation: |
+  A purchase is one update: the new budget is the old budget minus the price. Two purchases are two updates, one after the other.
+
+  With `budget = 50` and `price = 12`:
+
+  | step | what happens | `budget` before | `budget` after |
+  |---|---|---|---|
+  | first purchase | 50 - 12 is worked out and stored in `budget` | 50 | 38 |
+  | second purchase | 38 - 12 is worked out and stored in `budget` | 38 | 26 |
+  | printing | the text is built from the value `budget` holds now | 26 | 26 |
+
+  Both purchases are the same instruction. They give different results because `budget` holds a different value each time: 50 the first time, 38 the second time.
+
+  The place of the `print` line matters. It shows the value `budget` holds at the moment it runs: 50 before the purchases, 38 between them, 26 after both. Only the last place shows the final amount.
+
+solution:
+  code: |
+    budget = budget - price
+    budget = budget - price
+    print(f"Left: {budget}")
+  walkthrough: |
+    The values below are for `budget = 50` and `price = 12`.
+
+    - The first `budget = budget - price` works out 50 - 12 and stores 38 in `budget`.
+    - The second line is the same text. It runs when `budget` holds 38, so it works out 38 - 12 and stores 26.
+    - `print(f"Left: {budget}")` comes last. The f-string reads the value `budget` holds at that moment, 26, and puts it after the text `Left: `.
+
+    When `price` is 0, both updates store the value `budget` already had, so the budget stays as it was. When `budget` is exactly 2 times `price`, the second update brings it to 0.
+
+    One update with `budget - 2 * price` on the right side gives the same result, and the checker accepts it. Two separate updates follow the story more closely: one line per purchase.
+
+    The shorthand `budget -= price` does exactly the same as `budget = budget - price`.
+
+prerequisites: [assign-update-score]
+related: [accumulators-add-up]

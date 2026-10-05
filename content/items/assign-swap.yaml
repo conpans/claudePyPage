@@ -1,0 +1,148 @@
+id: assign-swap
+title: A swap that loses a value
+tier: exercise
+format: fix
+skill: assignment
+skills: [assignment]
+difficulty: 2
+source:
+  type: original
+
+goal: Repair a program that should exchange the values of two variables.
+statement: |
+  `first` and `second` each hold the name of a drink. This program is meant to exchange the two values: afterward, `first` should hold the drink that `second` started with, and `second` should hold the drink that `first` started with.
+
+  The program runs without an error, but afterward both variables hold the same drink. Find the cause and repair it.
+given:
+  - name: first
+    type: str
+    describe: the name of a drink
+    domain: { oneOf: ['tea', 'coffee', 'juice', 'water', 'milk', 'cocoa'] }
+  - name: second
+    type: str
+    describe: the name of a drink, which can be the same one
+    domain: { oneOf: ['tea', 'coffee', 'juice', 'water', 'milk', 'cocoa'] }
+create:
+  - name: first
+    describe: the value that `second` held at the start
+  - name: second
+    describe: the value that `first` held at the start
+rules:
+  - 'Each of `first` and `second` holds one of these six texts, in small letters: `"tea"`, `"coffee"`, `"juice"`, `"water"`, `"milk"`, `"cocoa"`.'
+  - The two variables can hold the same text. Then each of them must still hold that text afterward.
+  - The checker tries several pairs of drinks. So the program has to work with whatever `first` and `second` hold, without typing a drink name into the program.
+  - The checker reads only `first` and `second`. Any other variable your program creates is ignored.
+toWrite: A small repair to the program you are given. One way to do it needs three lines.
+
+starter: |
+  first = second
+  second = first
+exampleGiven: { first: 'tea', second: 'coffee' }
+examples:
+  - given: { first: 'tea', second: 'coffee' }
+    result: { first: 'coffee', second: 'tea' }
+    why: The two values have changed places.
+  - given: { first: 'water', second: 'water' }
+    result: { first: 'water', second: 'water' }
+    why: Both variables hold the same text, so exchanging them changes nothing you can see.
+
+tests:
+  - name: tea and coffee
+    given: { first: 'tea', second: 'coffee' }
+    expect: { first: 'coffee', second: 'tea' }
+    purpose: The first example from the task.
+  - name: juice and milk
+    given: { first: 'juice', second: 'milk' }
+    expect: { first: 'milk', second: 'juice' }
+    purpose: A second pair of drinks, so a program with fixed drink names cannot pass.
+  - name: coffee and tea
+    given: { first: 'coffee', second: 'tea' }
+    expect: { first: 'tea', second: 'coffee' }
+    purpose: The drinks from the first test the other way around. The repair has to work whichever of the two drinks starts in `first`.
+  - name: the same drink twice
+    given: { first: 'water', second: 'water' }
+    expect: { first: 'water', second: 'water' }
+    purpose: Both variables hold the same text, so nothing visible changes. This test cannot tell a working exchange from a broken one. The other tests can.
+
+mistakes:
+  - id: loses-first
+    label: Replaces first before its value has been saved
+    shows: wrong-result
+    code: |
+      first = second
+      second = first
+    feedback: |
+      Both variables end up holding the drink that `second` started with. The drink that `first` started with is gone. Trace the program with `first = "tea"` and `second = "coffee"`, and write down both values after each line. After which line does no variable hold `"tea"` any more? If you already keep a copy in a third variable, check which value the copy holds and which line reads it.
+  - id: loses-second
+    label: Replaces second before its value has been saved
+    shows: wrong-result
+    code: |
+      second = first
+      first = second
+    feedback: |
+      Both variables end up holding the drink that `first` started with. The drink that `second` started with is gone. Changing the order of the two lines moves the problem to the other variable: whichever assignment runs first replaces a value that is still needed. That value has to be remembered somewhere before the line that replaces it. If you already keep a copy in a third variable, check which value the copy holds and which line reads it.
+  - id: puts-it-back
+    label: Saves a value, then stores it back where it came from
+    shows: wrong-result
+    code: |
+      kept = first
+      first = second
+      first = kept
+    feedback: |
+      Both variables hold what they held at the start, so nothing has been exchanged. Either no line stored a new value in them, or a value was saved and then stored back in the variable it came from. If your program uses a third variable, look at the line that reads it. Which of `first` and `second` is still waiting for its new value at that point?
+
+hints:
+  - |
+    Trace the two lines with `first = "tea"` and `second = "coffee"`. Write down both values after line 1, before you look at line 2. Where is `"tea"` now?
+  - |
+    After `first = second`, both variables hold `"coffee"`. A variable holds one value at a time, so `"tea"` was replaced, and no variable holds it any more. Line 2 can only copy `"coffee"` back. The value of `first` has to be saved somewhere before the line that replaces it.
+  - |
+    Think of two full cups whose contents you want to exchange. You need a third, empty cup. In the program: start by storing the value of `first` in a third variable. Then give `first` the value of `second`. Then give `second` the value from the third variable.
+
+explanation: |
+  Each assignment replaces the value of the variable on its left side. The broken program replaces a value that it still needs.
+
+  With `first = "tea"` and `second = "coffee"`:
+
+  | moment | `first` | `second` |
+  |---|---|---|
+  | at the start | `"tea"` | `"coffee"` |
+  | after line 1, `first = second` | `"coffee"` | `"coffee"` |
+  | after line 2, `second = first` | `"coffee"` | `"coffee"` |
+
+  After line 1, `"tea"` is not stored anywhere. Line 2 reads `first`, finds `"coffee"`, and stores it in `second`, which already held `"coffee"`.
+
+  Changing the order of the two lines does not help. Then `second` is replaced first, and `"coffee"` is the value that gets lost.
+
+  The repair is to save one value in a third variable before the line that replaces it:
+
+  | step | what happens | `first` | `second` | third variable |
+  |---|---|---|---|---|
+  | 1 | the value of `first` is saved in a third variable | `"tea"` | `"coffee"` | `"tea"` |
+  | 2 | `first` gets the value of `second` | `"coffee"` | `"coffee"` | `"tea"` |
+  | 3 | `second` gets the value of the third variable | `"coffee"` | `"tea"` | `"tea"` |
+
+  After step 2, `first` and `second` both hold `"coffee"`, exactly as in the broken program. The difference is that `"tea"` still exists, in the third variable, so step 3 can store it in `second`.
+
+solution:
+  code: |
+    kept = first
+    first = second
+    second = kept
+  walkthrough: |
+    One line is new, and the last line now reads from the new variable.
+
+    - `kept = first` saves the value of `first` before anything is replaced. With the example values, `kept` now holds `"tea"`.
+    - `first = second` replaces the value of `first` with `"coffee"`. This is the line that lost `"tea"` before. Now `"tea"` is still in `kept`.
+    - `second = kept` gives `second` the value that `first` started with.
+
+    This is the snapshot idea put to use. `kept` holds what `first` held on line 1, and it stays that way when `first` changes on line 2.
+
+    The name `kept` is your choice. Another name works equally well, as long as it is not `first` or `second`. A variable that holds a value only for a moment, like this one, is often called a helper variable.
+
+    When both variables hold the same text, the three lines run in the same way and nothing visible changes.
+
+    Python can also exchange two values in one line, `first, second = second, first`, and the checker accepts that too. The three-line version shows what has to happen: a value must be saved before it is replaced.
+
+prerequisites: [assign-snapshot]
+related: [assign-saved-length]

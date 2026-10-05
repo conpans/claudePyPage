@@ -1,0 +1,202 @@
+id: grow-list-in-place
+title: Grow a list in place
+tier: variation
+variationOf: repeat-list
+format: write
+order: 2
+skills: [assignment, positions, loops, append]
+difficulty: 3
+newIdea: >-
+  The list grows while the loop is reading it, so the loop needs the length the list had before it started growing.
+source:
+  type: original
+
+goal: Make a list twice as long by appending its own items to it, so that it stays the same list.
+statement: |
+  In *Repeat a list*, the answer went into a second list. Here the answer is `numbers` itself. Make that list twice as long: when your program ends, `numbers` holds its original items, and then the same items in the same order again.
+
+  With `numbers = [30, 10, 40]`, your program appends 30, then 10, then 40 to `numbers`. The list ends up as `[30, 10, 40, 30, 10, 40]`. Programmers call this changing a list *in place*: the list you were given is the one that changes, and when your program ends, `numbers` is still the name of that list.
+
+  One thing to know before you start. The loop you have written many times, with the condition `position < len(numbers)`, never ends in this task when it appends to `numbers` itself. If your first attempt does that, nothing is broken. The app stops a program that is still running after a few seconds, and your code stays in the editor. Seeing it happen once is a normal part of this exercise.
+
+  When it happens, look at the variables the app shows for the moment it stopped. They hold the clue to why the loop could not end, and to what it needs instead.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers
+    domain: { minLen: 1, maxLen: 10, min: 1, max: 1000 }
+create:
+  - name: numbers
+    describe: the same list, now twice as long, with its original items first and then the same items again
+rules:
+  - '`numbers` is never empty. When your program starts, it has from 1 to 10 items, each a whole number from 1 to 1000. Both 1 and 1000 can appear.'
+  - 'When your program ends, `numbers` is exactly twice as long as it was. The original items come first, in their original order, and the same items follow in the same order.'
+  - 'A value can appear more than once in the list. Every item is copied, whether or not its value appeared before.'
+  - 'Add the new items to the list you were given. When your program ends, `numbers` must still be the name of that very list. The checker tests this. If `numbers` is the name of a different list at the end, the program does not pass, even when that list holds the right items.'
+  - '`numbers = numbers + numbers` has the right items, but it does not pass. It builds a new list and moves the name `numbers` over to it. The same goes for building the doubled list under another name, such as `doubled`, and then writing `numbers = doubled`.'
+  - 'Using a second list as a helper is allowed. For example, a program may first copy the items into a list of its own, and then append them from that list to `numbers`. That passes, because the new items still go into the list you were given, and `numbers` is still its name. This task does not need a helper list, though. One loop that reads from `numbers` and appends to `numbers` is enough, and that loop is the practice here.'
+toWrite: 'A short program of about five lines: a loop that appends to `numbers`, and one line before the loop that lets the loop know where to end.'
+inPlace: [numbers]
+
+starter: |
+  # numbers is given. The answer is numbers itself, made twice as long.
+exampleGiven: { numbers: [30, 10, 40] }
+examples:
+  - given: { numbers: [30, 10, 40] }
+    result: { numbers: [30, 10, 40, 30, 10, 40] }
+    why: 30, 10 and 40 are appended to the list, in that order. The list had three items at the start, so three items are appended.
+  - given: { numbers: [7] }
+    result: { numbers: [7, 7] }
+    why: The list had one item at the start, so one item is appended.
+
+tests:
+  - name: three items
+    given: { numbers: [30, 10, 40] }
+    expect: { numbers: [30, 10, 40, 30, 10, 40] }
+    purpose: The first example from the task.
+  - name: one item
+    given: { numbers: [7] }
+    expect: { numbers: [7, 7] }
+    purpose: The shortest list allowed. Exactly one item is appended, and then the loop has to end.
+  - name: two equal items
+    given: { numbers: [5, 5] }
+    expect: { numbers: [5, 5, 5, 5] }
+    purpose: Equal items are still separate items, and each one is copied.
+  - name: the largest and smallest values allowed
+    given: { numbers: [1000, 1] }
+    expect: { numbers: [1000, 1, 1000, 1] }
+    purpose: The values at the edge of what the task allows.
+  - name: ten items
+    given: { numbers: [8, 3, 8, 1, 6, 6, 2, 9, 4, 7] }
+    expect: { numbers: [8, 3, 8, 1, 6, 6, 2, 9, 4, 7, 8, 3, 8, 1, 6, 6, 2, 9, 4, 7] }
+    purpose: The longest list allowed. It has ten items at the start, so ten more are appended.
+
+mistakes:
+  - id: length-keeps-growing
+    label: Compares the position with a length that grows on every round
+    shows: never-stops
+    code: |
+      position = 0
+      while position < len(numbers):
+          numbers.append(numbers[position])
+          position = position + 1
+    feedback: |
+      The program had to be stopped because the loop never ended, and `numbers` has grown far beyond the few items it started with. Look at the variables at the moment it stopped. If `position` is still 0, the step that moves it on is missing from the loop. Otherwise the loop did move on, but its end moved too: each round appends one item, so `len(numbers)` goes up by 1 whenever `position` does, and `position < len(numbers)` stays True. Python works out `len(numbers)` again every time the condition is tested. A number stored in a variable before the loop does not change when the list grows, as long as no line inside the loop assigns to that variable again.
+  - id: stops-one-early
+    label: Stops before the last of the original items
+    shows: wrong-result
+    code: |
+      original_length = len(numbers)
+      position = 0
+      while position < original_length - 1:
+          numbers.append(numbers[position])
+          position = position + 1
+    feedback: |
+      Your list is one item short: the last of the original items was not copied. A list that starts with 3 items has the length 3 and the last position 2, and the loop has to run for the positions 0, 1 and 2. Check which number your `while` line compares `position` with, and whether the comparison fits that number.
+  - id: appends-position
+    label: Appends the position instead of the value
+    shows: wrong-result
+    code: |
+      original_length = len(numbers)
+      position = 0
+      while position < original_length:
+          numbers.append(position)
+          position = position + 1
+    feedback: |
+      The second half of your list holds the positions 0, 1, 2 and so on, and not copies of the items. `position` says where the loop is. `numbers[position]` is the value stored there.
+  - id: one-round-too-many
+    label: Runs one round more than the list had items
+    shows: wrong-result
+    code: |
+      original_length = len(numbers)
+      position = 0
+      while position <= original_length:
+          numbers.append(numbers[position])
+          position = position + 1
+    feedback: |
+      Your list is one item too long: after all the copies, the first item was appended once more. The loop ran one round more than the list had items at the start. In other exercises the same comparison asks for a position that has no item, and Python reports an error. Here the list had already grown, so that position did hold an item and no error came. Look at the comparison in your `while` line.
+  - id: assigns-new-position
+    label: Stores into a position past the end instead of appending
+    shows: error
+    errorType: IndexError
+    errorContains: assignment
+    code: |
+      original_length = len(numbers)
+      position = 0
+      while position < original_length:
+          numbers[original_length + position] = numbers[position]
+          position = position + 1
+    feedback: |
+      The message says `list assignment index out of range`. It comes from a line that stores into a position of `numbers`, such as `numbers[3] = ...`. Square brackets can replace the item at a position that already exists, but they cannot create a new one: a list with 3 items has the positions 0, 1 and 2, and no position 3 yet. A list gets a new position at its end only when something is appended to it.
+  - id: builds-new-list
+    label: Builds a new list and gives it the name of the given list
+    shows: wrong-result
+    code: |
+      doubled = []
+      position = 0
+      while position < len(numbers):
+          doubled.append(numbers[position])
+          position = position + 1
+      position = 0
+      while position < len(numbers):
+          doubled.append(numbers[position])
+          position = position + 1
+      numbers = doubled
+    feedback: |
+      The items are right, but `numbers` is not the list you were given anymore. A line that starts with `numbers =` gives that name to whatever is on its right side, and here that is a newly built list. The list the checker handed over was left as it was. In this task the new items have to go into that list itself.
+
+hints:
+  - |
+    For `[30, 10, 40]`, how many rounds should the loop run? Now look at the condition `position < len(numbers)`. After the first append, what does `len(numbers)` give?
+  - |
+    Python works out `len(numbers)` again every time the condition is tested. For `[30, 10, 40]` it gives 3 at first, then 4 after one append, then 5. A variable behaves differently. A number stored in a variable stays the same until you assign to that variable again, whatever happens to the list. That is the idea from the warm-up *A saved length*.
+  - |
+    In words: before the loop, store the length of `numbers` in a variable of its own. The name is your choice, for example `original_length`. Start the position at 0. While the position is less than that stored number, append the item at the position to `numbers` and move to the next position. For `[30, 10, 40]` the stored number is 3 during the whole loop, so the loop runs exactly 3 rounds.
+
+explanation: |
+  The loop has one question to answer before every round: have all the original items been copied yet? The condition you usually write, `position < len(numbers)`, cannot answer it here, because the length changes while the loop runs.
+
+  With `numbers = [30, 10, 40]`, this is what happens when the condition uses `len(numbers)` directly. The third column shows what `len(numbers)` gives at the moment the condition is tested.
+
+  | round | `position` | `len(numbers)` | condition | `numbers` after the append |
+  |---|---|---|---|---|
+  | 1 | 0 | 3 | `0 < 3` is True | `[30, 10, 40, 30]` |
+  | 2 | 1 | 4 | `1 < 4` is True | `[30, 10, 40, 30, 10]` |
+  | 3 | 2 | 5 | `2 < 5` is True | `[30, 10, 40, 30, 10, 40]` |
+  | 4 | 3 | 6 | `3 < 6` is True | `[30, 10, 40, 30, 10, 40, 30]` |
+  | 5 | 4 | 7 | `4 < 7` is True | `[30, 10, 40, 30, 10, 40, 30, 10]` |
+
+  After round 3 the list is exactly right, but the loop has no way to notice. Every round adds 1 to `position` and 1 to the length, so the length always stays 3 ahead and the condition is never False. From round 4 on, the loop is copying its own copies.
+
+  What the loop needs is the number 3: the length the list had before the first append. Assignment can keep that number. When Python runs an assignment, it works out the right side once, at that moment, and stores the result. If the right side is `len(numbers)` and the list has 3 items, the variable receives the number 3. It is not a live formula that follows the list. Later appends make the list longer, and the variable still holds 3.
+
+  With that saved length in the condition:
+
+  | round | `position` | saved length | condition | `numbers` after the append |
+  |---|---|---|---|---|
+  | 1 | 0 | 3 | `0 < 3` is True | `[30, 10, 40, 30]` |
+  | 2 | 1 | 3 | `1 < 3` is True | `[30, 10, 40, 30, 10]` |
+  | 3 | 2 | 3 | `2 < 3` is True | `[30, 10, 40, 30, 10, 40]` |
+  | after round 3 | 3 | 3 | `3 < 3` is False | the loop ends |
+
+  The loop reads the positions 0, 1 and 2. Those hold the original items, and they have not moved, because `append()` only adds at the end.
+
+solution:
+  code: |
+    original_length = len(numbers)
+    position = 0
+    while position < original_length:
+        numbers.append(numbers[position])
+        position = position + 1
+  walkthrough: |
+    - `original_length = len(numbers)` runs once, before the loop. Python works out the length at that moment, which is 3 for `[30, 10, 40]`, and stores that number. The variable does not follow the list: it still holds 3 when `numbers` has 4, 5 and then 6 items. The name `original_length` is a choice. Any name works, as long as the `while` line uses the same one.
+    - `while position < original_length:` compares `position` with the stored number. The loop runs for the positions 0, 1 and 2 and then ends, because `3 < 3` is False.
+    - `numbers.append(numbers[position])` uses `numbers` twice. Inside the parentheses after `.append`, `numbers[position]` reads the item at the current position. Before `.append`, `numbers` is the list that receives the item. Both are the same list, and that is what this task asks for.
+    - `position = position + 1` moves to the next of the original items.
+
+    No line assigns a new value to `numbers`, so it is still the list the checker handed over. Only its contents have changed.
+
+    `numbers += numbers` also passes, although `numbers = numbers + numbers` does not. For a list, `+=` adds the items to the list itself instead of building a new list, so here it is not only a shorter way to write the full form.
+
+prerequisites: [assign-saved-length, repeat-list]
+related: [assign-saved-length]

@@ -1,0 +1,121 @@
+id: assign-saved-length
+title: A saved length
+tier: exercise
+format: predict
+skill: assignment
+skills: [assignment, positions, append]
+difficulty: 1
+source:
+  type: original
+
+goal: Tell a length that was saved earlier from the length a list has now.
+statement: |
+  The program below saves the length of a list in a variable. Then it adds two items to the list.
+
+  Three reminders about lists:
+
+  - `len(numbers)` gives the number of items in `numbers`.
+  - `numbers.append(13)` adds `13` to the end of `numbers`.
+  - `numbers[0]` is the first item. A position in a list (the course calls it the index) counts from 0.
+
+  Read the program and answer both questions. Tracing on paper helps: after each line, write down the whole list and the value of `original_length`.
+rules:
+  - There is nothing to run here. Predict first, then check your prediction.
+toWrite: Nothing. You type what the program prints, and then one value.
+
+program: |
+  numbers = [5, 8]
+  original_length = len(numbers)
+  numbers.append(13)
+  numbers.append(21)
+  print(original_length)
+  print(len(numbers))
+
+questions:
+  - ask: What does the program print? Put each printed line on its own line.
+    about: output
+    answer: |
+      2
+      4
+    wrong:
+      - answer: |
+          4
+          4
+        feedback: |
+          Your second line is right. For the first, look at line 2: `len(numbers)` was worked out there, while the list had two items, and the number that came out was stored in `original_length`. Lines 3 and 4 change the list. Does either of them assign to `original_length`?
+      - answer: |
+          2
+          2
+        feedback: |
+          Your first line is right. For the second: each `append` adds one item to the end of `numbers`, so the list is longer by the time line 6 runs. `len(numbers)` on line 6 counts the items the list has at that moment. Only the saved number stays as it was.
+      - answer: |
+          2
+          3
+        feedback: |
+          Your first line is right. For the second: `append` never replaces an item. Each `append` adds one more item to the end of the list, so two `append` lines make the list two items longer.
+      - answer: |
+          1
+          3
+        feedback: |
+          1 and 3 are the last positions of the list, before and after the two `append` lines. `len()` gives something else: the number of items. Positions start at 0, so the number of items is always one more than the last position. How many items does `[5, 8]` hold?
+  - ask: After the program has ended, what is the value of `numbers[original_length]`?
+    about: value
+    expression: numbers[original_length]
+    answer: '13'
+    wrong:
+      - answer: '8'
+        feedback: |
+          8 is the second item, and the second item is at position 1, because positions count from 0. `original_length` holds 2. Count again, starting from position 0.
+      - answer: '21'
+        feedback: |
+          21 is the last item of the list, at position 3. But `original_length` did not grow with the list: it still holds the number that line 2 stored, because no later line assigns to it. Use that number as the position, and count from position 0.
+      - answer: '2'
+        feedback: |
+          2 is the value of `original_length`, which is used here as the position. The question asks for the item stored at that position. A position says where to look in the list. The value is what is stored there.
+      - answer: IndexError
+        feedback: |
+          No error happens here. The question is about the end of the program, when both `append` lines have run and the list has 4 items, at positions 0 to 3. And `original_length` did not grow with the list: it still holds the number that line 2 stored. Which item is at that position?
+
+hints:
+  - |
+    Sort the lines into two groups: lines that change the list, and lines that change `original_length`. Then go through the program from the top and note both after each line.
+  - |
+    Line 2 works out `len(numbers)` while the list is `[5, 8]`, so it stores 2 in `original_length`. From then on `original_length` holds a plain number. Nothing connects it to the list.
+  - |
+    After line 4 the list is `[5, 8, 13, 21]` and `original_length` is still 2. Line 6 works out `len(numbers)` again, with the list as it is at that moment. For the second question, use 2 as the position and count from position 0.
+
+explanation: |
+  `len(numbers)` is worked out at the moment its line runs. Line 2 stores the result, and the stored number does not change when the list does.
+
+  | line | what runs | `numbers` after | `original_length` after |
+  |---|---|---|---|
+  | 1 | `numbers = [5, 8]` | `[5, 8]` | not created yet |
+  | 2 | `original_length = len(numbers)` | `[5, 8]` | 2 |
+  | 3 | `numbers.append(13)` | `[5, 8, 13]` | 2 |
+  | 4 | `numbers.append(21)` | `[5, 8, 13, 21]` | 2 |
+
+  Line 5 prints the saved number, 2. Line 6 has its own `len(numbers)`. Python works it out again, with the list as it is at that moment, and gets 4.
+
+  For the second question, the saved 2 is used as a position. Positions count from 0:
+
+  | position | 0 | 1 | 2 | 3 |
+  |---|---|---|---|---|
+  | item | 5 | 8 | 13 | 21 |
+
+  Position 2 holds 13. That is no coincidence. The two original items fill positions 0 and 1, so the saved length, 2, is the position where the first appended item landed.
+
+solution:
+  walkthrough: |
+    The program prints `2` and then `4`. After the program has ended, `numbers[original_length]` is `13`.
+
+    - Line 2 runs while the list holds two items, so `original_length` gets the value 2.
+    - Lines 3 and 4 each add one item to the end of the list. Neither line assigns to `original_length`, so it stays at 2.
+    - Line 5 prints the saved 2. Line 6 works out `len(numbers)` again and prints 4, the length at that moment.
+    - `numbers[original_length]` is `numbers[2]`. Counting from position 0, that is the third item, 13.
+
+    This is what a saved length is good for: it still says how long the list was before the program started adding to it.
+
+    Use the step-through to see every line with the real values.
+
+prerequisites: [assign-snapshot]
+related: [grow-list-in-place, positions-length-and-last]

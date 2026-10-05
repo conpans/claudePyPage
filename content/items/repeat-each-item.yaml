@@ -1,0 +1,206 @@
+id: repeat-each-item
+title: Repeat each item
+tier: variation
+variationOf: repeat-list
+format: write
+order: 1
+skills: [positions, loops, append]
+difficulty: 2
+newIdea: >-
+  Two appends in one round, instead of two walks over the whole list.
+source:
+  type: original
+
+goal: Build a new list in which every item of a list appears twice in a row.
+statement: |
+  Given a list `numbers`, build a new list `each_twice`. Every item of `numbers` goes into it twice in a row: the item, then the same item again, and only then the next item.
+
+  With `numbers = [3, 1, 4]`, `each_twice` must be `[3, 3, 1, 1, 4, 4]`.
+
+  Compare that with *Repeat a list*, the challenge this follows. There the answer for the same list was `[3, 1, 4, 3, 1, 4]`: the whole list, then the whole list again. Both answers hold the same items and have the same length. Only the order differs, and that changes the shape of the program. Here one walk over the list is enough.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers
+    domain: { minLen: 1, maxLen: 10, min: -100, max: 100 }
+create:
+  - name: each_twice
+    describe: a new list in which every item of `numbers` appears twice in a row
+rules:
+  - '`numbers` is never empty. It has from 1 to 10 items, each a whole number from -100 to 100. Both -100 and 100 can appear, and so can 0.'
+  - '`each_twice` has exactly twice as many items as `numbers`.'
+  - 'The order matters: the item at position 0 twice, then the item at position 1 twice, and so on up to the last position.'
+  - 'A value can appear more than once in `numbers`. Each of those items is still copied twice, so `[5, 5]` gives `[5, 5, 5, 5]`.'
+  - 'The values do not change on the way. A 3 goes in as 3 and 3, never as 6.'
+  - 'Leave `numbers` unchanged, and make `each_twice` a new list.'
+toWrite: A short program of about six lines. It needs an empty list and one loop with two appends in it.
+unchanged: [numbers]
+fresh: [each_twice]
+
+starter: |
+  # numbers is given. Leave your answer in each_twice.
+exampleGiven: { numbers: [3, 1, 4] }
+examples:
+  - given: { numbers: [3, 1, 4] }
+    result: { each_twice: [3, 3, 1, 1, 4, 4] }
+    why: 3 is appended twice, then 1 twice, then 4 twice.
+  - given: { numbers: [-2, 0] }
+    result: { each_twice: [-2, -2, 0, 0] }
+    why: A negative number and 0 are copied like any other item.
+
+tests:
+  - name: three items
+    given: { numbers: [3, 1, 4] }
+    expect: { each_twice: [3, 3, 1, 1, 4, 4] }
+    purpose: The first example from the task.
+  - name: one item
+    given: { numbers: [7] }
+    expect: { each_twice: [7, 7] }
+    purpose: The shortest list allowed. The loop runs a single round, and that round adds two items.
+  - name: negative items and zero
+    given: { numbers: [-2, 0, 5] }
+    expect: { each_twice: [-2, -2, 0, 0, 5, 5] }
+    purpose: A negative number and 0 are ordinary items and are copied as they are.
+  - name: equal items
+    given: { numbers: [5, 5, 2] }
+    expect: { each_twice: [5, 5, 5, 5, 2, 2] }
+    purpose: Equal items are still separate items. Each one is copied twice.
+  - name: the largest and smallest values allowed
+    given: { numbers: [100, -100] }
+    expect: { each_twice: [100, 100, -100, -100] }
+    purpose: The values at the edge of what the task allows.
+  - name: ten items
+    given: { numbers: [4, 9, 2, 7, 7, 0, -3, 6, 1, 8] }
+    expect: { each_twice: [4, 4, 9, 9, 2, 2, 7, 7, 7, 7, 0, 0, -3, -3, 6, 6, 1, 1, 8, 8] }
+    purpose: The longest list allowed. Ten rounds give twenty items.
+
+mistakes:
+  - id: whole-list-twice
+    label: Appends the whole list, then the whole list again
+    shows: wrong-result
+    code: |
+      each_twice = []
+      position = 0
+      while position < len(numbers):
+          each_twice.append(numbers[position])
+          position = position + 1
+      position = 0
+      while position < len(numbers):
+          each_twice.append(numbers[position])
+          position = position + 1
+    feedback: |
+      Your list has the right items and the right length, but the copies sit in the wrong places: the whole list comes first, and then the whole list again. That is what two walks over `numbers` give, and it was the answer to *Repeat a list*. Here the copy of an item has to be appended while the loop is still at that item, before `position` moves on.
+  - id: each-item-once
+    label: Appends each item only once
+    shows: wrong-result
+    code: |
+      each_twice = []
+      position = 0
+      while position < len(numbers):
+          each_twice.append(numbers[position])
+          position = position + 1
+    feedback: |
+      Your list is a copy of `numbers`: every item is there once, so the list is half as long as it should be. Each round of your loop adds one item to `each_twice`. How many items does one round have to add?
+  - id: doubles-value
+    label: Appends twice the value instead of the value twice
+    shows: wrong-result
+    code: |
+      each_twice = []
+      position = 0
+      while position < len(numbers):
+          each_twice.append(numbers[position] * 2)
+          position = position + 1
+    feedback: |
+      Your list has one item for each item of `numbers`, and each of them is twice as large. A 3, for example, has become 6. Twice the value is not the value twice. Doubling a number, with `* 2` or by adding it to itself, changes which number is appended. It does not change how many items are appended.
+  - id: appends-position
+    label: Appends the position instead of the value
+    shows: wrong-result
+    code: |
+      each_twice = []
+      position = 0
+      while position < len(numbers):
+          each_twice.append(position)
+          each_twice.append(position)
+          position = position + 1
+    feedback: |
+      Your list holds the positions 0, 0, 1, 1 and so on, and not the items of `numbers`. `position` says where the loop is. `numbers[position]` is the value stored there.
+  - id: appends-pair-as-one-item
+    label: Appends the two copies as one small list
+    shows: wrong-result
+    code: |
+      each_twice = []
+      position = 0
+      while position < len(numbers):
+          each_twice.append([numbers[position], numbers[position]])
+          position = position + 1
+    feedback: |
+      Your list has one item for each item of `numbers`, and each of those items is itself a small list, as in `[[3, 3], [1, 1], [4, 4]]`: look at the double square brackets. That happens when the two copies are wrapped in square brackets and appended in one go. `.append()` adds exactly one item each time it runs, whatever is inside the parentheses. Two separate items in `each_twice` take two separate appends.
+  - id: past-the-end
+    label: Asks for a position that has no item
+    shows: error
+    errorType: IndexError
+    code: |
+      each_twice = []
+      position = 0
+      while position < len(numbers):
+          each_twice.append(numbers[position])
+          position = position + 1
+          each_twice.append(numbers[position])
+    feedback: |
+      The program asked for a position that has no item. In this task that has three usual causes. The comparison in the `while` line may let `position` reach `len(numbers)`, which is one past the last position. Or `position` moves on between the two appends, so the second append reads the next item, and in the last round there is no next item. Or the two lists have swapped places on an `append` line, so the program reads from `each_twice` while it is still empty. Check the comparison first, then the order of the lines inside the loop, then which list stands before each `.append`.
+  - id: never-moves-on
+    label: Never moves to the next position
+    shows: never-stops
+    code: |
+      each_twice = []
+      position = 0
+      while position < len(numbers):
+          each_twice.append(numbers[position])
+          each_twice.append(numbers[position])
+    feedback: |
+      The program had to be stopped because the loop never ended. Look at the variables at the moment it stopped. If `position` is still 0, the step that moves it on never ran. The round has more lines now, so check that the step is still there and is indented like the appends. If `position` is large and `numbers` itself has grown, the appends are going into `numbers`, and the loop cannot reach its end. In that case look at the line that creates `each_twice`, and at the name written before each `.append`.
+
+hints:
+  - |
+    In *Repeat a list*, the copy of an item was appended much later, during a second walk. Here the copy has to sit right behind the item. At which moment does the loop have that item at hand?
+  - |
+    `append()` adds one item at the end each time it runs. If one round runs it twice with the same item, that item lands in the list twice, side by side. With `[3, 1, 4]`, the first round turns `[]` into `[3]` and then into `[3, 3]`.
+  - |
+    In words: start with an empty list and position 0. While the position is less than the length of `numbers`: append the item at that position, append the item at that position once more, and then move to the next position. One position variable is enough, because both appends read the same position.
+
+explanation: |
+  The walk over the list is the one you know: one loop, one position variable, every position from 0 to the last. What changes is the work done in a round. A round now appends the current item twice before it moves on.
+
+  With `numbers = [3, 1, 4]`:
+
+  | round | `position` | `numbers[position]` | `each_twice` after the first append | `each_twice` after the second append |
+  |---|---|---|---|---|
+  | 1 | 0 | 3 | `[3]` | `[3, 3]` |
+  | 2 | 1 | 1 | `[3, 3, 1]` | `[3, 3, 1, 1]` |
+  | 3 | 2 | 4 | `[3, 3, 1, 1, 4]` | `[3, 3, 1, 1, 4, 4]` |
+
+  Both appends in a round read the same position, so they append the same value. `position` moves on only after both have run. That is why one position variable is enough. Nothing has to count the copies, because the two copies are two lines.
+
+  The list grows by two items per round, so three rounds give six items.
+
+  The order of the result comes from the order in which the appends run. In *Repeat a list*, the whole first walk ran before the second walk started, so the result was `[3, 1, 4, 3, 1, 4]`. Here the two appends for one item run one right after the other, so the result is `[3, 3, 1, 1, 4, 4]`.
+
+  Appending twice is not the same as appending twice the value. `3 * 2` is the single number 6. Two appends of 3 are two items.
+
+solution:
+  code: |
+    each_twice = []
+    position = 0
+    while position < len(numbers):
+        each_twice.append(numbers[position])
+        each_twice.append(numbers[position])
+        position = position + 1
+  walkthrough: |
+    - `each_twice = []` creates a new, empty list before the loop.
+    - The loop is one walk over `numbers`: `position` goes from 0 to the last position.
+    - The two `each_twice.append(numbers[position])` lines are the same on purpose. Each one adds the item at the current position to the end of the list, so the item and its copy end up side by side.
+    - `position = position + 1` comes after both appends. If it sat between them, the second append would read the next item instead of the same one.
+
+    `numbers` is only read, never changed, and `each_twice` is a new list.
+
+prerequisites: [repeat-list]

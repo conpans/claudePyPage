@@ -1,0 +1,376 @@
+id: count-three-groups
+title: Below, within, above
+tier: variation
+variationOf: count-matching
+format: write
+order: 1
+skills: [positions, loops, conditions, accumulators]
+difficulty: 3
+newIdea: >-
+  Every item goes into exactly one of three groups, and a chain of if, elif and else is the tool for that.
+source:
+  type: original
+
+goal: Count how many readings are below a range, within it, and above it.
+statement: |
+  A sensor has recorded the temperature in a room several times, in whole degrees. The readings are given in the list `readings`. Two more whole numbers are given, `low` and `high`: the room is fine while the temperature is anywhere from `low` to `high`.
+
+  Put every reading into one of three groups, and leave the number of readings in each group in its own variable:
+
+  - `below_count`: how many readings are less than `low`
+  - `within_count`: how many readings are from `low` to `high`, with both ends included
+  - `above_count`: how many readings are greater than `high`
+
+  With `low = 18` and `high = 24`, the readings 18 and 24 are both within. A reading of 17 is below, and a reading of 25 is above.
+given:
+  - name: readings
+    type: list[int]
+    describe: a list of temperature readings, each a whole number of degrees
+    domain: { minLen: 1, maxLen: 20, min: -50, max: 150 }
+  - name: low
+    type: int
+    describe: the lowest temperature that still counts as within the range
+    domain: { min: -50, max: 150 }
+  - name: high
+    type: int
+    describe: the highest temperature that still counts as within the range
+    domain: { min: -50, max: 150 }
+where: low <= high
+create:
+  - name: below_count
+    describe: how many readings are less than `low`
+  - name: within_count
+    describe: how many readings are from `low` to `high`, both ends included
+  - name: above_count
+    describe: how many readings are greater than `high`
+rules:
+  - '`readings` has from 1 to 20 items. Each item is a whole number from -50 to 150.'
+  - '`low` and `high` are whole numbers from -50 to 150. `low` is never greater than `high`, but the two can be equal.'
+  - Below means less than `low`. Above means greater than `high`.
+  - Within means from `low` to `high` with both ends included. A reading equal to `low` is within, and so is a reading equal to `high`.
+  - All three variables must exist at the end. A group that no reading falls into has the count `0`.
+  - Every reading is counted in exactly one group, so the three counts always add up to `len(readings)`. You can use that to check your own result.
+  - The readings are in no particular order, and the same reading can appear more than once. Each one is counted.
+  - Leave `readings` unchanged.
+toWrite: A program of about twelve lines. It needs three start values, one loop, and one chain of `if`, `elif` and `else` inside the loop.
+unchanged: [readings]
+
+starter: |
+  # readings, low and high are given. Leave your answers in below_count, within_count and above_count.
+exampleGiven: { readings: [21, 17, 24, 30, 22, 12], low: 18, high: 24 }
+examples:
+  - given: { readings: [21, 17, 24, 30, 22, 12], low: 18, high: 24 }
+    result: { below_count: 2, within_count: 3, above_count: 1 }
+    why: 17 and 12 are less than 18, and 30 is greater than 24. That leaves 21, 24 and 22. The 24 is equal to `high`, so it is within. The counts add up to 6, the number of readings.
+  - given: { readings: [18, 17, 20, 18], low: 18, high: 24 }
+    result: { below_count: 1, within_count: 3, above_count: 0 }
+    why: 17 is less than 18. Both readings of 18 are equal to `low`, so they are within, like 20. Nothing is greater than 24, so `above_count` is 0.
+
+tests:
+  - name: all three groups
+    given: { readings: [21, 17, 24, 30, 22, 12], low: 18, high: 24 }
+    expect: { below_count: 2, within_count: 3, above_count: 1 }
+    purpose: The first example from the task. All three groups appear, and one reading is exactly equal to high.
+  - name: readings equal to low
+    given: { readings: [18, 17, 20, 18], low: 18, high: 24 }
+    expect: { below_count: 1, within_count: 3, above_count: 0 }
+    purpose: A reading exactly equal to low is within, and 17 is 1 below low. Nothing is above, so that count has to exist and be 0.
+  - name: low and high are equal
+    given: { readings: [20, 19, 20, 21, 20], low: 20, high: 20 }
+    expect: { below_count: 1, within_count: 3, above_count: 1 }
+    purpose: The range is a single value, 20. Only a reading of exactly 20 is within.
+  - name: one reading
+    given: { readings: [30], low: 18, high: 24 }
+    expect: { below_count: 0, within_count: 0, above_count: 1 }
+    purpose: The shortest list allowed. One count is 1, and the other two stay at 0.
+  - name: negative readings and zero
+    given: { readings: [-25, -15, -10, 0, -20, 3], low: -20, high: -10 }
+    expect: { below_count: 1, within_count: 3, above_count: 2 }
+    purpose: Negative numbers work the same way. -25 is less than -20, so it is below. -20 and -10 are the two ends, so they are within, like -15. 0 and 3 are greater than -10, so they are above.
+  - name: the widest range allowed
+    given: { readings: [-50, 150, 0, 73], low: -50, high: 150 }
+    expect: { below_count: 0, within_count: 4, above_count: 0 }
+    purpose: The smallest and largest values allowed. Every reading is within, even the two at the ends, so the other two counts stay at 0.
+
+mistakes:
+  - id: never-moves-on
+    label: Only moves to the next position inside one branch
+    shows: never-stops
+    code: |
+      below_count = 0
+      within_count = 0
+      above_count = 0
+      position = 0
+      while position < len(readings):
+          if readings[position] < low:
+              below_count = below_count + 1
+          elif readings[position] > high:
+              above_count = above_count + 1
+          else:
+              within_count = within_count + 1
+              position = position + 1
+    feedback: |
+      The program had to be stopped because the loop never ended. Look for the line that moves `position` on. If it is missing, or if it is indented inside one of the branches, the loop gets stuck: inside a branch it only runs for readings of that one group, and on any other reading the loop stays at the same position forever. Moving to the next position has to happen on every round, whichever group the reading is in.
+  - id: one-too-far
+    label: Asks for a position one past the end
+    shows: error
+    errorType: IndexError
+    code: |
+      below_count = 0
+      within_count = 0
+      above_count = 0
+      position = 0
+      while position <= len(readings):
+          if readings[position] < low:
+              below_count = below_count + 1
+          elif readings[position] > high:
+              above_count = above_count + 1
+          else:
+              within_count = within_count + 1
+          position = position + 1
+    feedback: |
+      The loop asked for a position that has no item. With 6 readings the positions are 0 to 5. `len(readings)` is 6, which is one past the last position. The usual cause is a loop that runs one round too far. The comparisons in the chain put each reading into its group; the comparison in the `while` line decides when the loop ends, and that is the one to look at.
+  - id: below-also-within
+    label: Separate ifs, so a reading below the range is also counted as within
+    shows: wrong-result
+    code: |
+      below_count = 0
+      within_count = 0
+      above_count = 0
+      position = 0
+      while position < len(readings):
+          if readings[position] < low:
+              below_count = below_count + 1
+          if readings[position] > high:
+              above_count = above_count + 1
+          else:
+              within_count = within_count + 1
+          position = position + 1
+    feedback: |
+      Your three counts add up to more than the number of readings, so some readings were counted twice. Every reading below `low` was counted as below and then as within too. That happens with separate `if` statements: each `if` is checked on its own, and an `else` belongs only to the `if` directly above it. A reading below `low` is not greater than `high` either, so it lands in that `else`. In a chain of `if`, `elif` and `else`, only one branch runs for each reading.
+  - id: below-also-above
+    label: Separate ifs, so a reading below the range is also counted as above
+    shows: wrong-result
+    code: |
+      below_count = 0
+      within_count = 0
+      above_count = 0
+      position = 0
+      while position < len(readings):
+          if readings[position] < low:
+              below_count = below_count + 1
+          if readings[position] >= low and readings[position] <= high:
+              within_count = within_count + 1
+          else:
+              above_count = above_count + 1
+          position = position + 1
+    feedback: |
+      Your three counts add up to more than the number of readings, so some readings were counted twice. Every reading below `low` was counted as below and then as above too. That happens with separate `if` statements: each `if` is checked on its own, and an `else` belongs only to the `if` directly above it. A reading below `low` fails the test for within, so it lands in that `else`. In a chain of `if`, `elif` and `else`, only one branch runs for each reading.
+  - id: above-also-within
+    label: Separate ifs, so a reading above the range is also counted as within
+    shows: wrong-result
+    code: |
+      below_count = 0
+      within_count = 0
+      above_count = 0
+      position = 0
+      while position < len(readings):
+          if readings[position] > high:
+              above_count = above_count + 1
+          if readings[position] < low:
+              below_count = below_count + 1
+          else:
+              within_count = within_count + 1
+          position = position + 1
+    feedback: |
+      Your three counts add up to more than the number of readings, so some readings were counted twice. Every reading above `high` was counted as above and then as within too. That happens with separate `if` statements: each `if` is checked on its own, and an `else` belongs only to the `if` directly above it. A reading above `high` is not less than `low` either, so it lands in that `else`. In a chain of `if`, `elif` and `else`, only one branch runs for each reading.
+  - id: ends-not-counted
+    label: Readings equal to low or high are not counted in any group
+    shows: wrong-result
+    code: |
+      below_count = 0
+      within_count = 0
+      above_count = 0
+      position = 0
+      while position < len(readings):
+          if readings[position] < low:
+              below_count = below_count + 1
+          elif readings[position] > low and readings[position] < high:
+              within_count = within_count + 1
+          elif readings[position] > high:
+              above_count = above_count + 1
+          position = position + 1
+    feedback: |
+      Your three counts add up to less than the number of readings, so some readings were not counted at all. The missing ones are the readings exactly equal to `low` or to `high`. The task counts both ends as within. Try your test for within by hand with a reading equal to `high`, and then with one equal to `low`: is it True both times?
+  - id: ends-counted-outside
+    label: Readings equal to low or high are counted as below or above
+    shows: wrong-result
+    code: |
+      below_count = 0
+      within_count = 0
+      above_count = 0
+      position = 0
+      while position < len(readings):
+          if readings[position] <= low:
+              below_count = below_count + 1
+          elif readings[position] >= high:
+              above_count = above_count + 1
+          else:
+              within_count = within_count + 1
+          position = position + 1
+    feedback: |
+      Your `within_count` is too small, and the readings missing from it have turned up in `below_count` or `above_count` instead. The readings that went to the wrong group are the ones exactly equal to `low` or to `high`. The task counts both ends as within: a reading equal to `low` is not below, and a reading equal to `high` is not above. Try each of your comparisons by hand with a reading equal to `high`, and then with one equal to `low`.
+  - id: swapped-groups
+    label: Swaps the below count and the above count
+    shows: wrong-result
+    code: |
+      below_count = 0
+      within_count = 0
+      above_count = 0
+      position = 0
+      while position < len(readings):
+          if readings[position] < low:
+              above_count = above_count + 1
+          elif readings[position] > high:
+              below_count = below_count + 1
+          else:
+              within_count = within_count + 1
+          position = position + 1
+    feedback: |
+      Your `within_count` is right, but `below_count` and `above_count` have traded places: each holds the number that belongs in the other. Below means less than `low`, and above means greater than `high`. Check which count each branch adds to, and which way each comparison points.
+  - id: within-asked-first
+    label: Asks a test for within that only checks high before the test for below
+    shows: wrong-result
+    code: |
+      below_count = 0
+      within_count = 0
+      above_count = 0
+      position = 0
+      while position < len(readings):
+          if readings[position] <= high:
+              within_count = within_count + 1
+          elif readings[position] < low:
+              below_count = below_count + 1
+          else:
+              above_count = above_count + 1
+          position = position + 1
+    feedback: |
+      Your `below_count` is 0, although some readings are less than `low`, and `within_count` is too large: the readings below the range were counted as within. In a chain, Python runs the first branch whose condition is True and skips the rest. A reading below `low` is also not above `high`, so a test for within that only compares the reading with `high` is True for it. If that test comes first, the question about `low` never gets its turn. Take a reading below `low` and follow it through your chain from the top.
+  - id: within-too-wide
+    label: The test for within also lets in readings above high
+    shows: wrong-result
+    code: |
+      below_count = 0
+      within_count = 0
+      above_count = 0
+      position = 0
+      while position < len(readings):
+          if readings[position] < low:
+              below_count = below_count + 1
+          elif readings[position] >= low or readings[position] <= high:
+              within_count = within_count + 1
+          else:
+              above_count = above_count + 1
+          position = position + 1
+    feedback: |
+      Your `above_count` is 0, although some readings are greater than `high`, and `within_count` is too large: the readings above the range were counted as within. So the branch for within also takes readings above `high`. Usually its test joins two comparisons with `or`, which is True as soon as one of them is True, or it compares the reading with `low` but never with `high`. A reading is within only when it is at least `low` and at most `high`, both at once.
+  - id: compares-position
+    label: Compares the position with low and high instead of the reading
+    shows: wrong-result
+    code: |
+      below_count = 0
+      within_count = 0
+      above_count = 0
+      position = 0
+      while position < len(readings):
+          if position < low:
+              below_count = below_count + 1
+          elif position > high:
+              above_count = above_count + 1
+          else:
+              within_count = within_count + 1
+          position = position + 1
+    feedback: |
+      Every reading went into the below group, and the other two counts are 0, although the readings in this test belong to all three groups. That usually means the chain compares `position` with `low` and `high`, instead of the reading. `position` only says where the loop is: with 6 readings it goes from 0 to 5, and each of those numbers is less than 18. The value to compare is the reading stored at that position.
+  - id: starts-inside-loop
+    label: Sets the three counts to 0 inside the loop
+    shows: wrong-result
+    code: |
+      position = 0
+      while position < len(readings):
+          below_count = 0
+          within_count = 0
+          above_count = 0
+          if readings[position] < low:
+              below_count = below_count + 1
+          elif readings[position] > high:
+              above_count = above_count + 1
+          else:
+              within_count = within_count + 1
+          position = position + 1
+    feedback: |
+      Your three counts add up to 1, although there are more readings than that: only the last reading was counted. That happens when the counts get their start value of 0 inside the loop. Then every round sets them back to 0 and throws away what the rounds before it counted. Look at where the three counts are set to 0.
+
+hints:
+  - |
+    Every reading belongs to exactly one of the three groups. How many counts does the program need, and how many of them change on one round of the loop?
+  - |
+    Take `low = 18` and `high = 24`, and put these four readings into their groups by hand: 17, 18, 24, 25. Which comparison tells you that 17 is below? Which one tells you that 25 is above? And what is left for 18 and 24?
+  - |
+    In words: start three counts at 0, and the position at 0. On each round, look at the reading at the current position. If it is less than `low`, add 1 to the below count. Otherwise, if it is greater than `high`, add 1 to the above count. Otherwise, add 1 to the within count. Then move to the next position, and do that on every round. The two "otherwise" steps are what `elif` and `else` are for.
+
+explanation: |
+  In *Count the slow responses* every item got one question, and one count either went up or stayed the same. Here there are three groups, and every reading belongs to exactly one of them. So the loop keeps three counts, and on every round exactly one of the three goes up by 1.
+
+  Two questions are enough to find the group a reading belongs to:
+
+  1. Is it less than `low`? Then it is below, and nothing more needs to be asked.
+  2. If not: is it greater than `high`? Then it is above.
+  3. If neither is True, the reading is within.
+
+  With `readings = [21, 17, 24, 30, 22, 12]`, `low = 18` and `high = 24`:
+
+  | round | reading | less than 18? | greater than 24? | group | below, within, above after |
+  |---|---|---|---|---|---|
+  | 1 | 21 | False | False | within | 0, 1, 0 |
+  | 2 | 17 | True | not asked | below | 1, 1, 0 |
+  | 3 | 24 | False | False | within | 1, 2, 0 |
+  | 4 | 30 | False | True | above | 1, 2, 1 |
+  | 5 | 22 | False | False | within | 1, 3, 1 |
+  | 6 | 12 | True | not asked | below | 2, 3, 1 |
+
+  Round 3 is the boundary. 24 is equal to `high`, and `24 > 24` is False, so 24 is not above. It ends up within. The same happens at the other end: `18 < 18` is False, so a reading of 18 is not below. Because `<` and `>` both leave out the equal value, the group that is left over includes both ends.
+
+  "Not asked" in rounds 2 and 6 is how a chain of `if`, `elif` and `else` works. Python goes down the chain, runs the first branch whose condition is True, and skips the rest. One reading, one branch, one count.
+
+  Separate `if` statements do not work like that. Each one is checked on its own, whatever happened in the one before it, and an `else` belongs only to the `if` directly above it. Suppose the two questions were two separate `if` statements, with the `else` after the second one. The reading 17 would be counted as below by the first `if`. Then the second `if` would ask whether 17 is greater than 24. It is not, so 17 would land in the `else` and be counted as within too.
+
+  A check you can do yourself: every reading is counted exactly once, so the three counts add up to the number of readings. Here 2 + 3 + 1 is 6, and the list has 6 items. If your counts add up to more, something was counted twice. If they add up to less, something was not counted at all.
+
+solution:
+  code: |
+    below_count = 0
+    within_count = 0
+    above_count = 0
+    position = 0
+    while position < len(readings):
+        if readings[position] < low:
+            below_count = below_count + 1
+        elif readings[position] > high:
+            above_count = above_count + 1
+        else:
+            within_count = within_count + 1
+        position = position + 1
+  walkthrough: |
+    - The three counts start at 0 before the loop. A group that no reading falls into keeps this start value, so all three variables exist at the end.
+    - `if readings[position] < low:` asks the first question. If it is True, the below count goes up and Python skips the rest of the chain.
+    - `elif readings[position] > high:` is only reached when the first condition was False. If it is True, the above count goes up.
+    - `else:` catches every reading that is left: not less than `low`, and not greater than `high`. That is the range from `low` to `high` with both ends included, because `<` and `>` are both False for a reading equal to the value they compare with.
+    - `position = position + 1` is lined up with the `if`, outside all three branches. It runs on every round, whichever group the reading went to.
+
+    Exactly one of the three branches runs on each round. That is why the three counts add up to `len(readings)`.
+
+    The chain can also be written in the order of the groups: test for within directly, with `elif low <= readings[position] <= high:`, and let the `else` catch the readings above. Both chains put every reading into exactly one group.
+
+prerequisites: [count-matching, conditions-grade-order, conditions-inside-range]
+related: [conditions-separate-ifs, values-in-range]

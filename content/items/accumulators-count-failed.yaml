@@ -1,0 +1,159 @@
+id: accumulators-count-failed
+title: Count the failed checks
+tier: exercise
+format: write
+skill: accumulators
+skills: [accumulators, conditions, positions, loops]
+difficulty: 2
+source:
+  type: original
+
+goal: Count how many items of a list match a condition.
+statement: |
+  A monitoring script has recorded the result of several health checks. Each result is the text `"pass"` or the text `"fail"`.
+
+  Write a program that counts how many of the results are `"fail"` and leaves that number in `failed_count`.
+given:
+  - name: checks
+    type: list[str]
+    describe: a list of check results
+    domain: { minLen: 1, maxLen: 20, oneOf: ['pass', 'fail'] }
+create:
+  - name: failed_count
+    describe: how many items of `checks` are equal to `"fail"`
+rules:
+  - '`checks` has from 1 to 20 items. Every item is exactly `"pass"` or `"fail"`, in small letters.'
+  - If nothing failed, `failed_count` must be `0`.
+  - Do not use `.count()`. The point of this exercise is to write the loop yourself.
+  - Leave `checks` unchanged.
+toWrite: A short program of about six lines. It needs a start value, a loop over the positions, and an `if` inside the loop.
+unchanged: [checks]
+forbid: ['.count()']
+
+starter: |
+  # checks is given. Leave your answer in failed_count.
+exampleGiven: { checks: ['fail', 'pass', 'fail', 'fail', 'pass'] }
+examples:
+  - given: { checks: ['fail', 'pass', 'fail', 'fail', 'pass'] }
+    result: { failed_count: 3 }
+    why: The items at positions 0, 2 and 3 are "fail".
+  - given: { checks: ['pass', 'pass'] }
+    result: { failed_count: 0 }
+    why: Nothing failed, so the count stays at its start value.
+
+tests:
+  - name: three of five failed
+    given: { checks: ['fail', 'pass', 'fail', 'fail', 'pass'] }
+    expect: { failed_count: 3 }
+    purpose: The first example from the task. Matches and non-matches are mixed.
+  - name: nothing failed
+    given: { checks: ['pass', 'pass', 'pass'] }
+    expect: { failed_count: 0 }
+    purpose: The count has to exist and be 0 even when the condition is never True.
+  - name: everything failed
+    given: { checks: ['fail', 'fail', 'fail', 'fail'] }
+    expect: { failed_count: 4 }
+    purpose: The condition is True on every round.
+  - name: one failed item
+    given: { checks: ['fail'] }
+    expect: { failed_count: 1 }
+    purpose: The shortest list allowed, with a match.
+  - name: one passed item
+    given: { checks: ['pass'] }
+    expect: { failed_count: 0 }
+    purpose: The shortest list allowed, without a match.
+  - name: the only failure is last
+    given: { checks: ['pass', 'pass', 'fail'] }
+    expect: { failed_count: 1 }
+    purpose: Catches a loop that stops one item early.
+
+mistakes:
+  - id: never-moves-on
+    label: Only moves to the next position when the item matches
+    shows: never-stops
+    code: |
+      failed_count = 0
+      position = 0
+      while position < len(checks):
+          if checks[position] == "fail":
+              failed_count = failed_count + 1
+              position = position + 1
+    feedback: |
+      The program had to be stopped because the loop never ended. Check where `position = position + 1` sits. If it is indented under the `if`, it only runs for a `"fail"` item, and on a `"pass"` item the loop looks at the same position forever. The step to the next position has to run on every round, whatever the item is.
+  - id: counts-every-item
+    label: Adds 1 for every item
+    shows: wrong-result
+    code: |
+      failed_count = 0
+      position = 0
+      while position < len(checks):
+          failed_count = failed_count + 1
+          position = position + 1
+    feedback: |
+      Your count is the number of items in the list, so it goes up on every round. The line that adds 1 should only run when the current item is `"fail"`.
+  - id: counts-passes
+    label: Counts the items that passed
+    shows: wrong-result
+    code: |
+      failed_count = 0
+      position = 0
+      while position < len(checks):
+          if checks[position] == "pass":
+              failed_count = failed_count + 1
+          position = position + 1
+    feedback: |
+      Your number is the count of `"pass"` items. Read the condition under your `if` once more: which text should the current item be compared with?
+  - id: stops-one-early
+    label: Stops before the last item
+    shows: wrong-result
+    code: |
+      failed_count = 0
+      position = 0
+      while position < len(checks) - 1:
+          if checks[position] == "fail":
+              failed_count = failed_count + 1
+          position = position + 1
+    feedback: |
+      Your count misses the last item of the list. With 3 items the positions are 0, 1 and 2, and the loop has to run for all three. Look at the comparison in your `while` line.
+
+hints:
+  - |
+    You already know how to add up a list. What would you add on each round here, and on which rounds?
+  - |
+    Counting is adding 1. Start `failed_count` at 0 before the loop. Inside the loop, an `if` decides whether this round adds 1. The current item is `checks[position]`.
+  - |
+    In words: start the count at 0 and the position at 0. While the position is less than the length of `checks`: if the item at that position equals `"fail"`, add 1 to the count. Then move to the next position, and do that on every round.
+
+explanation: |
+  This is the adding-up loop with two changes: what is added is always 1, and it is only added when a condition is True.
+
+  With `checks = ["fail", "pass", "fail", "fail", "pass"]`:
+
+  | round | `position` | `checks[position]` | equal to `"fail"`? | `failed_count` after |
+  |---|---|---|---|---|
+  | 1 | 0 | `"fail"` | True | 1 |
+  | 2 | 1 | `"pass"` | False | 1 |
+  | 3 | 2 | `"fail"` | True | 2 |
+  | 4 | 3 | `"fail"` | True | 3 |
+  | 5 | 4 | `"pass"` | False | 3 |
+
+  The loop visits every item. The `if` only decides whether the count changes on that round.
+
+  Two things have to happen on every round, match or no match: the item is looked at, and `position` moves on. Only the adding belongs under the `if`.
+
+solution:
+  code: |
+    failed_count = 0
+    position = 0
+    while position < len(checks):
+        if checks[position] == "fail":
+            failed_count = failed_count + 1
+        position = position + 1
+  walkthrough: |
+    - `failed_count = 0` sits before the loop. If nothing fails, the answer is this start value.
+    - `checks[position] == "fail"` compares the current item with the text `"fail"`. The result is True or False.
+    - `failed_count = failed_count + 1` is indented under the `if`, so it runs only on rounds where the comparison is True.
+    - `position = position + 1` is lined up with the `if`, not inside it. It runs on every round, so the loop always moves on and ends after the last item.
+
+prerequisites: [accumulators-add-up, conditions-separate-ifs, loops-missing-step]
+related: [count-matching, accumulators-replace-or-add]

@@ -1,0 +1,224 @@
+id: conditions-status-category
+title: Categorize a status code
+tier: exercise
+format: write
+skill: conditions
+skills: [conditions]
+difficulty: 2
+source:
+  type: original
+
+goal: Sort a number into one of four categories, where each named category is a range with both ends included.
+statement: |
+  When a monitoring script asks a web server for a page, the server answers with a status code: a whole number such as 200 or 404 that says how the request went.
+
+  Write a program that sorts `status_code` into one of four categories and leaves the category, as text, in `category`:
+
+  | `status_code` | `category` |
+  |---|---|
+  | 200 to 299 | `"ok"` |
+  | 400 to 499 | `"client error"` |
+  | 500 to 599 | `"server error"` |
+  | any other code | `"other"` |
+
+  Both ends of each range belong to it. You do not need to know anything else about status codes.
+given:
+  - name: status_code
+    type: int
+    describe: the status code of one answer from a web server
+    domain: { min: 100, max: 599 }
+create:
+  - name: category
+    describe: 'the category of `status_code`, as text: `"ok"`, `"client error"`, `"server error"` or `"other"`'
+rules:
+  - '`status_code` is a whole number from 100 to 599.'
+  - '200 to 299 gives `"ok"`. 200 and 299 are both included.'
+  - '400 to 499 gives `"client error"`. 400 and 499 are both included.'
+  - '500 to 599 gives `"server error"`. 500 and 599 are both included.'
+  - 'Every other code gives `"other"`. Those are the codes from 100 to 199 and from 300 to 399, ends included.'
+  - 'Write each category exactly as shown: small letters, and one space between the two words.'
+  - '`category` must have a value for every code.'
+toWrite: 'A program of about eight lines: one `if`/`elif`/`else` chain with a branch for each category.'
+
+starter: |
+  # status_code is given. Leave your answer in category.
+exampleGiven: { status_code: 204 }
+examples:
+  - given: { status_code: 204 }
+    result: { category: 'ok' }
+    why: 204 is from 200 to 299.
+  - given: { status_code: 404 }
+    result: { category: 'client error' }
+    why: 404 is from 400 to 499.
+  - given: { status_code: 503 }
+    result: { category: 'server error' }
+    why: 503 is from 500 to 599.
+  - given: { status_code: 302 }
+    result: { category: 'other' }
+    why: 302 is in none of the three named ranges.
+
+tests:
+  - name: an ordinary ok code
+    given: { status_code: 204 }
+    expect: { category: 'ok' }
+    purpose: The first example from the task.
+  - name: the lowest code allowed
+    given: { status_code: 100 }
+    expect: { category: 'other' }
+    purpose: 100 is below all three named ranges, so it is "other".
+  - name: one below the ok range
+    given: { status_code: 199 }
+    expect: { category: 'other' }
+    purpose: 199 is the last code before the ok range starts.
+  - name: the first ok code
+    given: { status_code: 200 }
+    expect: { category: 'ok' }
+    purpose: The lower end of the ok range belongs to it.
+  - name: the last ok code
+    given: { status_code: 299 }
+    expect: { category: 'ok' }
+    purpose: The upper end of the ok range belongs to it.
+  - name: one above the ok range
+    given: { status_code: 300 }
+    expect: { category: 'other' }
+    purpose: 300 is the first code after the ok range. It is in no named range.
+  - name: one below the client error range
+    given: { status_code: 399 }
+    expect: { category: 'other' }
+    purpose: 399 is the last code before the client error range starts.
+  - name: the first client error code
+    given: { status_code: 400 }
+    expect: { category: 'client error' }
+    purpose: The lower end of the client error range belongs to it.
+  - name: the last client error code
+    given: { status_code: 499 }
+    expect: { category: 'client error' }
+    purpose: The upper end of the client error range belongs to it.
+  - name: the first server error code
+    given: { status_code: 500 }
+    expect: { category: 'server error' }
+    purpose: The lower end of the server error range belongs to it.
+  - name: the highest code allowed
+    given: { status_code: 599 }
+    expect: { category: 'server error' }
+    purpose: The upper end of the server error range, and the largest code the task allows.
+
+mistakes:
+  - id: range-end-left-out
+    label: Leaves out an end of a range
+    shows: wrong-result
+    code: |
+      if 200 < status_code and status_code < 299:
+          category = "ok"
+      elif 400 < status_code and status_code < 499:
+          category = "client error"
+      elif 500 < status_code and status_code < 599:
+          category = "server error"
+      else:
+          category = "other"
+    feedback: |
+      `category` is `"other"` for a code that sits exactly on the end of one of the three named ranges, and both ends of each range belong to it. Put this code into the condition that should catch it and work out each comparison. One written with `<` or `>` is False when its two sides are equal.
+  - id: no-upper-limit
+    label: Checks only the lower end of each range
+    shows: wrong-result
+    code: |
+      if status_code >= 200:
+          category = "ok"
+      elif status_code >= 400:
+          category = "client error"
+      elif status_code >= 500:
+          category = "server error"
+      else:
+          category = "other"
+    feedback: |
+      `category` is `"ok"` for a code above 299, so the condition of your `"ok"` branch is True for this code as well. There are two usual causes. The condition may check only the lower end of the range, and then it is True for every code from 200 up. Or its upper limit may be one too far, as in `<= 300`. Work out each comparison in that condition with this code.
+  - id: or-instead-of-and
+    label: Joins the two comparisons with or
+    shows: wrong-result
+    code: |
+      if 200 <= status_code or status_code <= 299:
+          category = "ok"
+      elif 400 <= status_code or status_code <= 499:
+          category = "client error"
+      elif 500 <= status_code or status_code <= 599:
+          category = "server error"
+      else:
+          category = "other"
+    feedback: |
+      `category` is `"ok"` for a code below 200. So the condition of your `"ok"` branch is True for this code. There are two usual causes. Its two comparisons may be joined with `or`, which is True as soon as one side is True, and a code below 200 is also below 299. Or nothing in the condition compares the code with the lower end, 200. Work out each comparison by hand for this code.
+  - id: else-after-separate-ifs
+    label: Uses separate if statements with one else at the end
+    shows: wrong-result
+    code: |
+      if 200 <= status_code and status_code <= 299:
+          category = "ok"
+      if 400 <= status_code and status_code <= 499:
+          category = "client error"
+      if 500 <= status_code and status_code <= 599:
+          category = "server error"
+      else:
+          category = "other"
+    feedback: |
+      `category` ends as `"other"` for a code from 200 to 299. Step through this test and watch `category`. If it is set to `"ok"` first and then replaced, the `else` at the end is running as well: an `else` belongs only to the `if` directly above it, so separate `if` statements do not protect an earlier answer. If `category` is never set to `"ok"`, work out your first condition by hand for this code.
+  - id: no-other-branch
+    label: Has no branch for the remaining codes
+    shows: wrong-result
+    code: |
+      if 200 <= status_code and status_code <= 299:
+          category = "ok"
+      elif 400 <= status_code and status_code <= 499:
+          category = "client error"
+      elif 500 <= status_code and status_code <= 599:
+          category = "server error"
+    feedback: |
+      For this code the checker found no `category` at all. None of your conditions is True for it, so no branch ran and nothing was stored. The rules ask for `"other"` for every code outside the three named ranges, so the chain needs a branch that takes all the remaining cases.
+
+hints:
+  - |
+    `category` can end up with four different texts. For each one, say in words which codes lead to it. For example: a code is "ok" when it is at least 200 and at most 299.
+  - |
+    Each of the three named ranges needs two comparisons joined with `and`, the same shape as in *Inside the range*. With 404: `400 <= 404` is True and `404 <= 499` is True, so 404 is a client error.
+  - |
+    In words: if the code is from 200 to 299, store `"ok"`. Otherwise, if it is from 400 to 499, store `"client error"`. Otherwise, if it is from 500 to 599, store `"server error"`. In every other case, store `"other"`. That is one `if`, two `elif` branches and an `else`, so exactly one branch runs for every code.
+
+explanation: |
+  There are four possible answers, and every code gets exactly one of them. That is the job of one `if`/`elif`/`else` chain: Python goes down the chain, runs the first branch whose condition is True, and skips the rest.
+
+  Each named range has two ends, and both ends belong to it. So each condition is made of two comparisons that must both be True, joined with `and`. For 404 and the client error range: 404 is at least 400, and 404 is at most 499.
+
+  Here is what such a chain does for five codes:
+
+  | `status_code` | 200 to 299? | 400 to 499? | 500 to 599? | `category` |
+  |---|---|---|---|---|
+  | 204 | True | not checked | not checked | `"ok"` |
+  | 404 | False | True | not checked | `"client error"` |
+  | 503 | False | False | True | `"server error"` |
+  | 302 | False | False | False | `"other"` |
+  | 100 | False | False | False | `"other"` |
+
+  The last two rows show how `"other"` works. The codes from 100 to 199 and from 300 to 399 need no conditions of their own. They are the codes for which all three conditions are False, and the `else` branch at the end of the chain takes all of them.
+
+  The `else` has to be part of the same chain as the three conditions. After three separate `if` statements, an `else` would belong only to the last one, and it would also run for a code such as 204.
+
+solution:
+  code: |
+    if 200 <= status_code and status_code <= 299:
+        category = "ok"
+    elif 400 <= status_code and status_code <= 499:
+        category = "client error"
+    elif 500 <= status_code and status_code <= 599:
+        category = "server error"
+    else:
+        category = "other"
+  walkthrough: |
+    - `200 <= status_code and status_code <= 299` is True for the codes from 200 to 299. Both comparisons use `<=`, so 200 and 299 themselves are included, and `and` makes sure that both ends are checked.
+    - The two `elif` lines do the same for 400 to 499 and for 500 to 599. Each one is only checked when every condition above it was False.
+    - `else` takes every code that is left. That covers 100 to 199 and 300 to 399 without naming them.
+    - Because this is one chain, exactly one branch runs. So `category` gets a value for every code, and no later branch can replace an earlier answer.
+
+    In *A branch that never runs* the order of the conditions mattered, because one score could make two conditions True. Here no code is in two ranges, so the three named ranges could come in any order.
+
+    The course's chained form works here too: `if 200 <= status_code <= 299:` means the same as the first line.
+
+prerequisites: [conditions-inside-range, conditions-grade-order]
+related: [count-three-groups, values-in-range]

@@ -1,0 +1,103 @@
+id: loops-count-rounds
+title: How many rounds?
+tier: exercise
+format: predict
+skill: loops
+skills: [loops, assignment]
+difficulty: 1
+source:
+  type: original
+
+goal: Count the rounds of a loop and work out what the loop variable holds after the loop has ended.
+statement: |
+  Two counters go up inside the same loop. The condition looks at only one of them.
+
+  Read the program and work out what it prints. Tracing on paper helps: write one row per round, with the value of `position` when the condition is checked, and the values of `rounds` and `position` at the end of the round.
+rules:
+  - There is nothing to run here. Predict first, then check your prediction.
+toWrite: Nothing. You type what the program prints.
+
+program: |
+  position = 0
+  rounds = 0
+  while position < 3:
+      rounds = rounds + 1
+      position = position + 1
+  print(rounds)
+  print(position)
+
+questions:
+  - ask: What does the program print? Put each printed line on its own line.
+    about: output
+    answer: |
+      3
+      3
+    wrong:
+      - answer: |
+          3
+          2
+        feedback: |
+          `rounds` is right. For `position`, look at the last round: it starts with `position` at 2, and `position = position + 1` still runs at the end of it, making `position` 3. The condition is then checked again, `3 < 3` is False, and the loop ends. The value that stays in `position` is the one that stopped the loop, not the last one that passed the condition.
+      - answer: |
+          2
+          2
+        feedback: |
+          Count the rounds by the values `position` has when the condition is checked and found True: 0, 1 and 2. That is three rounds, and the round with `position` at 0 counts like the others. Both lines inside the loop run on each of those rounds, so both counters reach 3.
+      - answer: |
+          4
+          4
+        feedback: |
+          The condition is checked before every round. When `position` reaches 3, the check `3 < 3` is False, so there is no round with `position` at 3. The rounds run with `position` at 0, 1 and 2: three rounds, not four.
+      - answer: |
+          2
+          3
+        feedback: |
+          Both lines inside the loop run on every round, so `rounds` and `position` go up together: after round 1 both are 1, after round 2 both are 2, after round 3 both are 3. If `position` ends at 3, the loop ran 3 rounds, and `rounds` says so.
+  - ask: After the loop has ended, what is the value of the condition `position < 3`? Write `True` or `False`.
+    about: value
+    expression: position < 3
+    answer: 'False'
+    wrong:
+      - answer: 'True'
+        feedback: |
+          A `while` loop ends only when its condition is False. After the last round `position` is 3, and `3 < 3` is False. If the condition were still True, another round would run.
+
+hints:
+  - |
+    The condition `position < 3` is checked before every round. Which values of `position` make it True, and which value is the first to make it False?
+  - |
+    Write one row per round. Round 1 is checked with `position` at 0 and ends with `rounds` at 1 and `position` at 1. Round 2 is checked with `position` at 1. Carry on until a check fails.
+  - |
+    After round 2, `rounds` and `position` are both 2, and the next check is `2 < 3`. Follow that round to its end, then make the next check. Does it let another round run?
+
+explanation: |
+  The condition is checked before every round, and it is checked once more after the last round, the time it fails.
+
+  | check | `position` when checked | `position < 3` | round runs? | `rounds` after | `position` after |
+  |---|---|---|---|---|---|
+  | 1 | 0 | True | yes | 1 | 1 |
+  | 2 | 1 | True | yes | 2 | 2 |
+  | 3 | 2 | True | yes | 3 | 3 |
+  | 4 | 3 | False | no, the loop ends | 3 | 3 |
+
+  The condition is checked four times. The body runs three times.
+
+  `position` ends at 3, not at 2. The round that started with `position` at 2 still ran its update, and it is the value 3 that made the condition False. The value that stops a loop is the value the variable keeps.
+
+  `rounds` goes up on the same rounds as `position`, starting from the same value, so the two can never differ here. `position` alone would have been enough to count the rounds.
+
+solution:
+  walkthrough: |
+    The program prints `3` and then `3`.
+
+    - The loop runs three rounds, with `position` at 0, 1 and 2 when the condition is checked.
+    - `rounds = rounds + 1` runs on each of those rounds, so `rounds` goes 1, 2, 3.
+    - `position = position + 1` runs on each round too, so `position` goes 1, 2, 3. After the third round the check `3 < 3` is False, and the loop ends with `position` at 3.
+
+    After the loop, `position < 3` is False. That is what ended it.
+
+    Use the step-through to watch the `while` line: it runs four times, and the body runs three times.
+
+prerequisites: [assign-update-score]
+related: [loops-missing-step, accumulators-replace-or-add]
+next: loops-missing-step

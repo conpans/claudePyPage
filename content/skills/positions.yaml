@@ -1,0 +1,166 @@
+id: positions
+order: 2
+title: List positions, values, and length
+shortTitle: Positions and values
+summary: >-
+  Tell a position in a list from the value stored there, and work out the last position from the length.
+mixups:
+  - Reading `position` as if it were the item. `position` says where to look; `numbers[position]` is the value stored there.
+  - Expecting a name such as `position`, `spot` or `where` to mean something to Python. The names are yours. The brackets and `len()` are Python's, and they behave the same whatever the names are.
+  - Treating `len(numbers)` as the last position. With 4 items the positions are 0, 1, 2 and 3, so the last position is `len(numbers) - 1`.
+  - Adding 1 to the value, as in `numbers[position] + 1`, when you meant the item at the next position, `numbers[position + 1]`.
+
+sections:
+  - title: Items sit at numbered positions, starting from 0
+    body: |
+      A list keeps its items in order. Every item sits at a numbered position, and the numbering starts at 0, not at 1. The course calls a position an index.
+
+      With `numbers = [12, 25, 7]`:
+
+      | position | item |
+      |---|---|
+      | 0 | 12 |
+      | 1 | 25 |
+      | 2 | 7 |
+
+      The first item, 12, sits at position 0. The third item, 7, sits at position 2. A list of three items has the positions 0, 1 and 2, and no position 3.
+
+      To read the item at a position, write the position inside square brackets after the list name. `numbers[0]` is 12, and `numbers[2]` is 7.
+
+      The example below walks along the list with a loop. On each round (one pass through the indented lines; the course calls a round an iteration), `position` holds one position and `numbers[position]` reads the item sitting there. Loops get a unit of their own; here, watch the two numbers in each printed line.
+    demo:
+      title: Each position and the item sitting there
+      given: { numbers: [12, 25, 7] }
+      code: |
+        position = 0
+        while position < len(numbers):
+            print(f"position {position} holds {numbers[position]}")
+            position = position + 1
+      note: The first printed line says position 0, not position 1. The last one says position 2, although the list has 3 items.
+
+  - title: A position is not the value stored there
+    body: |
+      `position` and `numbers[position]` are two different numbers, and the exercises in this collection keep coming back to the difference.
+
+      - `position` is a place in the list. It answers the question "where?".
+      - `numbers[position]` is the item at that place. It answers the question "what is stored there?".
+
+      The brackets mean "the item at". Read `numbers[position]` as "the item of `numbers` at position `position`".
+
+      The list below is chosen so that no item equals its own position, which keeps the two numbers apart. With `numbers = [40, 10, 30, 20]`:
+
+      | `position` | `numbers[position]` |
+      |---|---|
+      | 0 | 40 |
+      | 1 | 10 |
+      | 2 | 30 |
+      | 3 | 20 |
+
+      If `position` holds 1, then `print(position)` prints `1`, and `print(numbers[position])` prints `10`. Position 1 is the second place in the list, and 10 is what sits there.
+    demo:
+      title: Where to look, and what is there
+      given: { numbers: [40, 10, 30, 20] }
+      code: |
+        position = 1
+        print(f"position: {position}")
+        print(f"item there: {numbers[position]}")
+        position = 3
+        print(f"position: {position}")
+        print(f"item there: {numbers[position]}")
+      note: Line 4 gives `position` a new value. The list does not change. The line only changes where line 6 looks.
+
+  - title: The length and the last position
+    body: |
+      `len(numbers)` counts the items in the list. With `numbers = [31, 27, 45, 12, 60]`, `len(numbers)` is 5.
+
+      Because the positions start at 0, five items sit at the positions 0, 1, 2, 3 and 4. The last position is 4, which is `len(numbers) - 1`. That holds for every list with at least one item: the last position is always the length minus 1.
+
+      Asking for `numbers[5]` on this list stops the program with an error:
+
+      ```
+      IndexError: list index out of range
+      ```
+
+      Read it in two parts. `IndexError` says the problem is a position (the course's word is index). `list index out of range` says the position asked for is not one that the list has. The app also shows the line it happened on. On that line, work out the number inside the brackets at that moment, and compare it with `len(numbers) - 1`. Most often the number is one too big, because `len(numbers)` was used where `len(numbers) - 1` was meant.
+    demo:
+      title: Five items, last position 4
+      given: { numbers: [31, 27, 45, 12, 60] }
+      code: |
+        length = len(numbers)
+        last_position = length - 1
+        print(f"{length} items")
+        print(f"last position: {last_position}")
+        print(f"last item: {numbers[last_position]}")
+      note: '`length` and `last_position` are one apart. The item at the last position is read on line 5, with the brackets.'
+
+  - title: "Your names, Python's rules"
+    body: |
+      A program mixes two kinds of words.
+
+      `position`, `last_position`, `numbers`, `spot` and `where` are names. The person writing the program chooses them, and Python attaches no meaning to them. A variable called `position` holds a position only because a line of the program stored one there. Call it `spot` or `where` instead, and nothing changes, as long as the new name is used in every place where the old one stood.
+
+      The square brackets and `len()` belong to Python, and what they do is fixed. `weights[where]` reads the item of `weights` at the position that `where` holds, in exactly the way `numbers[position]` does. `len(weights)` counts the items of `weights`.
+
+      The example below is the previous example with every name changed and a different list. Step through it: each line does what the matching line did before.
+
+      Good names still help the human reader, because they say what a value is for. That is why the exercises here say `position` for a position and `numbers` for a list of numbers. When an exercise uses another name, such as `spot`, it does so on purpose, to show that Python treats every name the same way.
+    demo:
+      title: The same program with other names
+      given: { weights: [55, 70, 62] }
+      code: |
+        how_many = len(weights)
+        where = how_many - 1
+        print(f"{how_many} items")
+        print(f"last position: {where}")
+        print(f"last item: {weights[where]}")
+      note: Compare this with the example before it. Only the names and the list differ. The brackets and `len()` do what they did there.
+
+  - title: Negative positions are a separate feature
+    body: |
+      Python also accepts a negative number inside the brackets. For a negative number it counts from the end of the list: `numbers[-1]` is the last item, and `numbers[-2]` is the item before it. With `numbers = [40, 10, 30, 20]`, `numbers[-1]` is 20, and so is `numbers[len(numbers) - 1]`.
+
+      This is a separate feature, not part of the numbering you have seen so far. Counting from the front starts at 0 at the first item. Counting from the end starts at -1 at the last item. A negative position that goes past the front, such as `numbers[-5]` on a four-item list, raises the same `IndexError`.
+
+      The forward loops in this app use the positions 0 to `len(numbers) - 1`, so the exercises here reach the last item with `len(numbers) - 1`. If you write `numbers[-1]`, the checker accepts it. The course explains negative positions when it works with strings, in Part 3.
+    demo:
+      title: Two ways to the last item
+      given: { numbers: [40, 10, 30, 20] }
+      code: |
+        print(f"counted from the end: {numbers[-1]}")
+        print(f"counted from the front: {numbers[len(numbers) - 1]}")
+        print(f"one before the last: {numbers[-2]}")
+      note: Lines 1 and 2 print the same item. Line 2 is the form the exercises practice.
+
+  - title: A position can be worked out
+    body: |
+      Whatever stands inside the brackets is worked out first, and the number that comes out is used as a position.
+
+      `numbers[position + 1]` is the item at the position after `position`. If `position` is 1, then `position + 1` is 2, and `numbers[position + 1]` is the item at position 2.
+
+      Where the `+ 1` stands changes everything. With `numbers = [40, 10, 30, 20]` and `position` at 1:
+
+      | expression | what the `+ 1` changes | value |
+      |---|---|---|
+      | `numbers[position + 1]` | the position: this is the item at position 2 | 30 |
+      | `numbers[position] + 1` | the value: this is the item at position 1, plus 1 | 11 |
+
+      Inside the brackets, `+ 1` moves one place along the list. Outside the brackets, `+ 1` adds 1 to an item and does not look at the list again.
+
+      The position that comes out still has to exist. If `position` is the last position, `position + 1` equals `len(numbers)`, and asking for it raises `IndexError`.
+    demo:
+      title: The next item, and the item plus 1
+      given: { numbers: [40, 10, 30, 20] }
+      code: |
+        position = 1
+        print(f"item at position {position}: {numbers[position]}")
+        print(f"next position: {position + 1}")
+        print(f"item at the next position: {numbers[position + 1]}")
+        print(f"item at position {position}, plus 1: {numbers[position] + 1}")
+      note: On line 4, `position + 1` is worked out first, and then the item at that position is read. Line 5 reads the item at position 1 and adds 1 to it. `position` itself holds 1 the whole time, because no line stores a new value in it.
+
+exercises:
+  - positions-read-values
+  - positions-length-and-last
+  - positions-last-item
+  - positions-first-and-last
+  - positions-neighbors

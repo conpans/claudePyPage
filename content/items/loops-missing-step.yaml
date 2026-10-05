@@ -1,0 +1,154 @@
+id: loops-missing-step
+title: A loop that never ends
+tier: exercise
+format: fix
+skill: loops
+skills: [loops, positions]
+difficulty: 1
+source:
+  type: original
+
+goal: Repair a loop that prints the same item forever because nothing moves the position on to the next item.
+statement: |
+  This program is meant to print every item of `numbers`, one item per line, from the first to the last.
+
+  As it is, it never ends. Running it is safe: the app stops a program that keeps going, after a few seconds or as soon as it has printed more than 20,000 characters, and then shows the output so far and the variables at the moment it stopped. Run it, look at what was printed and at the value of `position`, and repair the program.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers
+    domain: { minLen: 1, maxLen: 6, min: -20, max: 20 }
+prints: 'Each item of `numbers` on its own line, in the order of the list, and nothing else. With `numbers = [3, 1, 4]`, three lines: `3`, `1` and `4`.'
+rules:
+  - '`numbers` has from 1 to 6 items, each a whole number from -20 to 20. It is never empty.'
+  - Print each item on its own line, in the order of the list. Print nothing else.
+  - An item can be negative, an item can be 0, and the same value can appear more than once. Each item is printed once.
+  - Leave `numbers` unchanged.
+toWrite: One line added to the program you are given. The rest is already right.
+unchanged: [numbers]
+
+starter: |
+  position = 0
+  while position < len(numbers):
+      print(numbers[position])
+exampleGiven: { numbers: [3, 1, 4] }
+examples:
+  - given: { numbers: [3, 1, 4] }
+    output: |
+      3
+      1
+      4
+    why: Position 0 holds 3, position 1 holds 1 and position 2 holds 4. Each gets one round and one line.
+
+tests:
+  - name: three items
+    given: { numbers: [3, 1, 4] }
+    output: |
+      3
+      1
+      4
+    purpose: The example from the task.
+  - name: one item
+    given: { numbers: [7] }
+    output: |
+      7
+    purpose: The shortest list allowed. The loop runs a single round and then has to stop.
+  - name: negative and zero
+    given: { numbers: [-20, 0, 12] }
+    output: |
+      -20
+      0
+      12
+    purpose: Negative items and 0 are printed like any other item. -20 is the smallest value allowed.
+  - name: repeated values
+    given: { numbers: [2, 2, 9, 2] }
+    output: |
+      2
+      2
+      9
+      2
+    purpose: Equal items each get their own line. The loop moves by position, not by value.
+  - name: six items far from their positions
+    given: { numbers: [10, 12, 14, 16, 18, 20] }
+    output: |
+      10
+      12
+      14
+      16
+      18
+      20
+    purpose: The longest list allowed, ending with the largest value allowed. The values differ from the positions 0 to 5, so printing the position instead of the item cannot pass.
+
+mistakes:
+  - id: never-moves-on
+    label: Nothing moves position to the next item
+    shows: never-stops
+    code: |
+      position = 0
+      while position < len(numbers):
+          print(numbers[position])
+    feedback: |
+      The program had to be stopped, and the output shows the same item printed over and over: the item at position 0. Look at `position` among the variables at that moment. It still holds 0: no line inside the loop stores a new value in it, or the line that should do that is not indented and so is not part of the loop. The condition can only become False if `position` moves on every round.
+  - id: moves-on-too-early
+    label: Asks for a position past the end (moves on before printing, or runs one round too many)
+    shows: error
+    errorType: IndexError
+    code: |
+      position = 0
+      while position < len(numbers):
+          position = position + 1
+          print(numbers[position])
+    feedback: |
+      The program stopped with an IndexError: on its last round it asked for a position that has no item. Compare the printed lines with the list. If the first item is missing, the line that moves `position` runs before the `print`, so every round prints the item one position further on: use the current position first, then move on. If every item was printed before the error, the comparison in the `while` line lets one round too many run.
+
+hints:
+  - |
+    Run the program and let the app stop it. Which item was printed, and how many times? What does `position` hold at the moment it stopped?
+  - |
+    A loop has three parts: a start, a condition and an update. `position = 0` is the start and `position < len(numbers)` is the condition. Which part is missing?
+  - |
+    The missing line makes `position` one larger. It belongs inside the loop, after the `print`, with the same indentation, so that it runs at the end of every round.
+
+explanation: |
+  With `numbers = [3, 1, 4]`, `len(numbers)` is 3, and the program as given does this:
+
+  | check | `position` when checked | `position < 3` | printed | `position` after |
+  |---|---|---|---|---|
+  | 1 | 0 | True | 3 | 0 |
+  | 2 | 0 | True | 3 | 0 |
+  | 3 | 0 | True | 3 | 0 |
+  | ... | 0 | True | 3 | 0 |
+
+  Every round is the same as the one before. `position` is 0 when the condition is checked, so the condition is True, and `numbers[0]` is printed again. Nothing ever changes, so there is no last round.
+
+  With the update in place, each round ends with `position` one larger:
+
+  | check | `position` when checked | `position < 3` | printed | `position` after |
+  |---|---|---|---|---|
+  | 1 | 0 | True | 3 | 1 |
+  | 2 | 1 | True | 1 | 2 |
+  | 3 | 2 | True | 4 | 3 |
+  | 4 | 3 | False | the loop ends | 3 |
+
+  The update has to be inside the body, so that it runs on every round, and after the `print`, so that each round prints the item at the current position before moving on.
+
+solution:
+  code: |
+    position = 0
+    while position < len(numbers):
+        print(numbers[position])
+        position = position + 1
+  walkthrough: |
+    The added line is `position = position + 1`, the update.
+
+    - It is indented like the `print`, so it is part of the body and runs on every round.
+    - It comes after the `print`, so each round prints the item at the current position and then moves on.
+    - With `numbers = [3, 1, 4]`, `position` is 0, 1 and 2 on the three rounds, then 3. `3 < 3` is False, and the loop ends.
+
+    After the loop, `position` equals `len(numbers)`. It is the value that stopped the loop.
+
+    The shorthand `position += 1` does exactly the same as `position = position + 1`.
+
+prerequisites: [loops-count-rounds, positions-read-values]
+related: [loops-two-counters, accumulators-count-failed]
+next: loops-one-too-far

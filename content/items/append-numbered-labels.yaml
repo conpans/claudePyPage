@@ -1,0 +1,221 @@
+id: append-numbered-labels
+title: Numbered labels
+tier: exercise
+format: write
+skill: append
+skills: [append, positions, loops]
+difficulty: 2
+source:
+  type: original
+
+goal: Build a list of text labels that use both the position and the value stored at it.
+statement: |
+  The list `names` is given, and it holds first names. Write a program that builds a new list `labels` with one text item for each name, numbered from 1. Each label is made of three parts:
+
+  - the number, which is the name's position plus 1,
+  - then a period and one space,
+  - then the name itself.
+
+  With `names = ["Ada", "Grace"]`, `labels` must be `["1. Ada", "2. Grace"]`.
+
+  Each label is a single piece of text. An f-string is a good way to put the number and the name together.
+given:
+  - name: names
+    type: list[str]
+    describe: a list of first names
+    domain: { minLen: 1, maxLen: 6, oneOf: ['Ada', 'Grace', 'Linus', 'Guido', 'Margaret', 'Alan', 'Barbara', 'Dennis'] }
+create:
+  - name: labels
+    describe: a new list of text items such as `"1. Ada"`, one for each name, in the same order
+rules:
+  - '`names` has from 1 to 6 items. Each item is one of the names Ada, Grace, Linus, Guido, Margaret, Alan, Barbara and Dennis, spelled with a capital first letter. The same name can appear more than once.'
+  - '`labels` has exactly as many items as `names`, in the same order. The first label starts with `1.`, not `0.`'
+  - 'Each label is exactly the number, a period, one space, and the name, with nothing else, as in `"3. Linus"`. Every item of `labels` is text, including its number part.'
+  - Leave `names` unchanged.
+  - '`labels` must be a new list, not a second name for `names`.'
+toWrite: A short program of about five lines. It needs an empty list, a start position, and a loop with two lines inside it.
+unchanged: [names]
+fresh: [labels]
+
+starter: |
+  # names is given. Leave your answer in labels.
+exampleGiven: { names: ['Ada', 'Grace'] }
+examples:
+  - given: { names: ['Ada', 'Grace'] }
+    result: { labels: ['1. Ada', '2. Grace'] }
+    why: Position 0 holds "Ada", and 0 + 1 is 1, so the first label is "1. Ada". Position 1 holds "Grace", and 1 + 1 is 2.
+  - given: { names: ['Guido', 'Guido'] }
+    result: { labels: ['1. Guido', '2. Guido'] }
+    why: The names are the same, and the numbers still differ, because they come from the positions.
+
+tests:
+  - name: two names
+    given: { names: ['Ada', 'Grace'] }
+    expect: { labels: ['1. Ada', '2. Grace'] }
+    purpose: The first example from the task.
+  - name: one name
+    given: { names: ['Linus'] }
+    expect: { labels: ['1. Linus'] }
+    purpose: The shortest list allowed. The only label is numbered 1.
+  - name: the same name twice
+    given: { names: ['Guido', 'Guido'] }
+    expect: { labels: ['1. Guido', '2. Guido'] }
+    purpose: The two labels differ only in their numbers, which come from the positions, not from the names.
+  - name: three names
+    given: { names: ['Dennis', 'Ada', 'Margaret'] }
+    expect: { labels: ['1. Dennis', '2. Ada', '3. Margaret'] }
+    purpose: A list whose order is not alphabetical. The labels keep the order of `names`.
+  - name: six names
+    given: { names: ['Margaret', 'Alan', 'Barbara', 'Dennis', 'Ada', 'Grace'] }
+    expect: { labels: ['1. Margaret', '2. Alan', '3. Barbara', '4. Dennis', '5. Ada', '6. Grace'] }
+    purpose: The longest list allowed. The last label is numbered 6, the length of the list, while its position is 5.
+
+mistakes:
+  - id: numbers-from-zero
+    label: Numbers the labels from 0
+    shows: wrong-result
+    code: |
+      labels = []
+      position = 0
+      while position < len(names):
+          labels.append(f"{position}. {names[position]}")
+          position = position + 1
+    feedback: |
+      Your first label starts with `0.` and every number is one too small. The names are right. The number on a label is not the position itself: positions start at 0, and the task counts from 1. Look at the part of your code that puts the number into each label.
+  - id: only-names
+    label: Appends the names without numbers
+    shows: wrong-result
+    code: |
+      labels = []
+      position = 0
+      while position < len(names):
+          labels.append(names[position])
+          position = position + 1
+    feedback: |
+      Your `labels` is a copy of `names`. Each item needs to be a new piece of text that starts with a number. An f-string can put the number and the name together into one text item.
+  - id: only-numbers
+    label: Appends the numbers without names
+    shows: wrong-result
+    code: |
+      labels = []
+      position = 0
+      while position < len(names):
+          labels.append(position + 1)
+          position = position + 1
+    feedback: |
+      Your `labels` holds whole numbers, 1, 2, 3 and so on, and no names. Each item has to be text: the number, a period, a space, and the name stored at the current position, all in one piece of text. An f-string is one way to build it.
+  - id: forgot-braces
+    label: Writes names[position] outside the curly braces
+    shows: wrong-result
+    code: |
+      labels = []
+      position = 0
+      while position < len(names):
+          labels.append(f"{position + 1}. names[position]")
+          position = position + 1
+    feedback: |
+      Every label ends with the text `names[position]` itself instead of a name. Inside an f-string, only what stands between curly braces `{ }` is worked out. Text outside the braces is kept exactly as written. Check that the name lookup is inside its own pair of braces.
+  - id: one-past-the-end
+    label: Asks for a position one past the end
+    shows: error
+    errorType: IndexError
+    code: |
+      labels = []
+      position = 0
+      while position < len(names):
+          labels.append(f"{position + 1}. {names[position + 1]}")
+          position = position + 1
+    feedback: |
+      The program asked for a position that has no item. With 2 names the positions are 0 and 1. Two things cause this. One is a lookup such as `names[position + 1]`, which asks for the next name; on the last round there is no next name. The other is a `while` comparison that lets `position` reach `len(names)`. The `+ 1` belongs in the number shown on the label, not in the lookup, and the loop has to stop when `position` reaches the length.
+  - id: wrong-receiver
+    label: Writes the label before .append and the list inside the parentheses
+    shows: error
+    errorType: AttributeError
+    errorContains: "'str' object"
+    code: |
+      labels = []
+      position = 0
+      while position < len(names):
+          label = f"{position + 1}. {names[position]}"
+          label.append(labels)
+          position = position + 1
+    feedback: |
+      Python says `'str' object has no attribute 'append'`: the thing written before `.append` is text (a `str`), such as a label or a name. Text cannot receive an item; only a list can. Look at your `append` line and check which name stands before the dot, and which value is inside the parentheses.
+  - id: adds-one-to-name
+    label: Adds 1 to the name instead of to the position
+    shows: error
+    errorType: TypeError
+    errorContains: can only concatenate str
+    code: |
+      labels = []
+      position = 0
+      while position < len(names):
+          labels.append(f"{names[position] + 1}. {names[position]}")
+          position = position + 1
+    feedback: |
+      Python says it `can only concatenate str (not "int") to str`: a `+` has text on its left and a whole number on its right. Here that usually means `names[position] + 1`. `names[position]` is the value stored at the position, a name such as `"Ada"`, and 1 cannot be added to a name. The number on a label comes from the position itself, the place in the list.
+  - id: empty-list-inside-loop
+    label: Creates the empty list inside the loop
+    shows: wrong-result
+    code: |
+      position = 0
+      while position < len(names):
+          labels = []
+          labels.append(f"{position + 1}. {names[position]}")
+          position = position + 1
+    feedback: |
+      Your `labels` holds only the last label. That happens when `labels = []` sits inside the loop: it runs again at the start of every round and throws away the labels appended before. The empty list has to be created once, before the loop.
+  - id: never-moves-on
+    label: Never moves the position on
+    shows: never-stops
+    code: |
+      labels = []
+      position = 0
+      while position < len(names):
+          labels.append(f"{position + 1}. {names[position]}")
+    feedback: |
+      The program had to be stopped because the loop never ended. The loop stops once `position` reaches `len(names)`, so `position` has to grow by 1 on every round. Check that a line such as `position = position + 1` is inside the loop, indented like the `append` line. The loop also never ends if the `append` adds to `names` instead of `labels`, because then `names` grows by one item on every round.
+
+hints:
+  - |
+    On each round of the loop, two things are known: the position, and the name stored at that position. Which of the two gives the number on the label, and which gives the name?
+  - |
+    With `names = ["Ada", "Grace"]`, the first round has `position` at 0 and `names[position]` equal to `"Ada"`. The label is `"1. Ada"`: the number is `position + 1`, and the name is `names[position]`.
+  - |
+    In words: start with an empty list and position 0. While the position is less than the length of `names`, build one label with an f-string that has two pairs of curly braces, one for `position + 1` and one for `names[position]`, append it to `labels`, and move to the next position.
+
+explanation: |
+  The position and the value stored at it are both used on every round, for two different parts of the label.
+
+  With `names = ["Ada", "Grace"]`:
+
+  | round | `position` | `position + 1` | `names[position]` | label | `labels` after the append |
+  |---|---|---|---|---|---|
+  | 1 | 0 | 1 | `"Ada"` | `"1. Ada"` | `['1. Ada']` |
+  | 2 | 1 | 2 | `"Grace"` | `"2. Grace"` | `['1. Ada', '2. Grace']` |
+
+  `position` is the place in the list. It starts at 0, so the number on the label is `position + 1`. `names[position]` is the value stored at that place, the name itself.
+
+  The f-string has two pairs of curly braces. The first holds the number, worked out from the position. The second holds the name, looked up at that position. Between them, outside any braces, sit the period and the space, which are kept exactly as written. The whole thing is one text item, and that is what gets appended.
+
+  The `+ 1` changes the number that is shown. It does not change `position`, so the lookup `names[position]` still reads the current name, and the step `position = position + 1` still moves the loop on by one.
+
+solution:
+  code: |
+    labels = []
+    position = 0
+    while position < len(names):
+        labels.append(f"{position + 1}. {names[position]}")
+        position = position + 1
+  walkthrough: |
+    - `labels = []` creates the result list, empty, before the loop.
+    - `position` walks through the positions 0, 1, 2 and so on, while it is less than `len(names)`.
+    - `f"{position + 1}. {names[position]}"` builds one label. The first pair of braces works out `position + 1`, so position 0 gives the number 1. The second pair looks up the name stored at the current position. The period and the space between them are plain text and are kept as written.
+    - `labels.append(...)` adds that text to the end of `labels`. The list stands before the dot, the new label goes inside the parentheses.
+    - `position = position + 1` moves on to the next name. The `+ 1` in the f-string only changes what is shown; this line is what moves the loop on.
+
+    `names` is only read, so it stays as it was, and `labels` is a new list because it was created with `labels = []`.
+
+prerequisites: [append-add-shipping, positions-read-values]
+related: [copy-list, positions-in-range]
+next: copy-list

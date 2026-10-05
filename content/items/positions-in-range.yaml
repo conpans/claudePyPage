@@ -1,0 +1,275 @@
+id: positions-in-range
+title: Where are they?
+tier: variation
+variationOf: values-in-range
+format: write
+order: 1
+skills: [positions, loops, conditions, append]
+difficulty: 3
+newIdea: >-
+  This time the position is what you keep, and the value is only what you test.
+source:
+  type: original
+
+goal: Build a new list of the positions at which the items of a given list lie inside a range.
+statement: |
+  The list `numbers` and the two limits `low` and `high` are given, as in *Keep the values in range*. An item is in range when it is from `low` to `high`, both ends included.
+
+  This time, build a new list `positions_in_range` that holds the **positions** of the items that are in range, not the items themselves. Positions are counted from 0: the first item of `numbers` is at position 0, and the last is at `len(numbers) - 1`. The course calls a position the index.
+
+  With `numbers = [12, 3, 25, 8, 40, 15]`, `low = 5` and `high = 20`, the items in range are 12, 8 and 15. They are found at positions 0, 3 and 5. So `positions_in_range` must be `[0, 3, 5]`.
+
+  The positions go into the list in increasing order, which is the order in which a loop from position 0 meets them. If no item is in range, `positions_in_range` is an empty list.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers
+    domain: { minLen: 1, maxLen: 20, min: -100, max: 100 }
+  - name: low
+    type: int
+    describe: the lower end of the range, which counts as inside
+    domain: { min: -100, max: 100 }
+  - name: high
+    type: int
+    describe: the upper end of the range, which counts as inside
+    domain: { min: -100, max: 100 }
+where: low <= high
+create:
+  - name: positions_in_range
+    describe: a new list with the positions, counted from 0, of the items of `numbers` that are from `low` to `high`, both ends included, in increasing order
+rules:
+  - '`numbers` has from 1 to 20 items. Each item is a whole number from -100 to 100.'
+  - '`low` and `high` are whole numbers from -100 to 100, and `low` is never greater than `high`. The two can be equal, and then only items equal to that one number are in range.'
+  - 'An item is in range when it is at least `low` and at most `high`. Both ends count as inside.'
+  - '`positions_in_range` holds the position of every item that is in range, counted from 0, in increasing order. A value that is in range and appears more than once in `numbers` gives one position for each place where it appears.'
+  - 'If no item is in range, `positions_in_range` must be an empty list, `[]`.'
+  - 'Each number in `positions_in_range` is a position counted from 0, so it is from 0 to `len(numbers) - 1`. It says where an item is, not what the item is. Some tests use items that could pass for positions, so a list of the items cannot pass for the answer.'
+  - Leave `numbers` unchanged, and make `positions_in_range` a new list.
+toWrite: A short program of about six lines, with the same shape as *Keep the values in range*. The `if` stays the same. Think about what the append should receive.
+unchanged: [numbers]
+fresh: [positions_in_range]
+
+starter: |
+  # numbers, low and high are given. Leave your answer in positions_in_range.
+exampleGiven: { numbers: [12, 3, 25, 8, 40, 15], low: 5, high: 20 }
+examples:
+  - given: { numbers: [12, 3, 25, 8, 40, 15], low: 5, high: 20 }
+    result: { positions_in_range: [0, 3, 5] }
+    why: 12 is at position 0, 8 is at position 3 and 15 is at position 5. The `if` finds the three items; the answer records where they were found.
+  - given: { numbers: [9, 2, 4, 30, 1], low: 0, high: 5 }
+    result: { positions_in_range: [1, 2, 4] }
+    why: The items in range are 2, 4 and 1, found at positions 1, 2 and 4. Both lists are made of small numbers, so look closely at which one the task asks for.
+  - given: { numbers: [50, 60, -70], low: 5, high: 20 }
+    result: { positions_in_range: [] }
+    why: No item is in range, so no position is recorded.
+
+tests:
+  - name: mixed values
+    given: { numbers: [12, 3, 25, 8, 40, 15], low: 5, high: 20 }
+    expect: { positions_in_range: [0, 3, 5] }
+    purpose: The first example from the task, with the same input as *Keep the values in range*. The values 12, 8 and 15 are far from the positions 0, 3 and 5.
+  - name: values that could be positions
+    given: { numbers: [9, 2, 4, 30, 1], low: 0, high: 5 }
+    expect: { positions_in_range: [1, 2, 4] }
+    purpose: The items in range are 2, 4 and 1, and those numbers are all valid positions in a list of 5 items. Appending the values gives `[2, 4, 1]`, which is not the answer `[1, 2, 4]`.
+  - name: nothing in range
+    given: { numbers: [50, 60, -70], low: 5, high: 20 }
+    expect: { positions_in_range: [] }
+    purpose: No item is in range. The list has to exist and be empty.
+  - name: equal to the ends
+    given: { numbers: [1, 20, 10, 21, 5, 4], low: 5, high: 20 }
+    expect: { positions_in_range: [1, 2, 4] }
+    purpose: 20 is equal to `high` and 5 is equal to `low`, so their positions, 1 and 4, are recorded, along with position 2 for the 10. 21 and 4 are one step outside the range.
+  - name: low equals high
+    given: { numbers: [7, 12, 7, -7], low: 7, high: 7 }
+    expect: { positions_in_range: [0, 2] }
+    purpose: The range holds one number, 7, and it appears at positions 0 and 2. Each comparison has to be True when its two sides are equal. 12 is above the range and -7 is below it.
+  - name: repeated values, all in range
+    given: { numbers: [-3, 9, -3, 9], low: -5, high: 10 }
+    expect: { positions_in_range: [0, 1, 2, 3] }
+    purpose: Every item is in range, and -3 and 9 each appear twice. The answer is every position from 0 to 3, each one once.
+  - name: one item
+    given: { numbers: [100], low: -100, high: 100 }
+    expect: { positions_in_range: [0] }
+    purpose: The shortest list allowed. Its only item is equal to `high` and sits at position 0, so the answer is `[0]`.
+
+mistakes:
+  - id: never-moves-on
+    label: Only moves to the next position when the item is in range
+    shows: never-stops
+    code: |
+      positions_in_range = []
+      position = 0
+      while position < len(numbers):
+          if low <= numbers[position] and numbers[position] <= high:
+              positions_in_range.append(position)
+              position = position + 1
+    feedback: |
+      The program had to be stopped because the loop never ended. Look at the value of `position` at that moment, and at the line that moves it on. If that line is missing, `position` stays at 0. If it is indented under the `if`, it runs only on the rounds where the item is in range, so at the first item outside the range the loop stays at the same position forever. The step to the next position has to run on every round, whether or not a position was appended.
+  - id: one-too-far
+    label: Asks for a position one past the end
+    shows: error
+    errorType: IndexError
+    errorContains: list index
+    code: |
+      positions_in_range = []
+      position = 0
+      while position <= len(numbers):
+          if low <= numbers[position] and numbers[position] <= high:
+              positions_in_range.append(position)
+          position = position + 1
+    feedback: |
+      The program asked for a position that has no item. A list's last position is one less than its length: with 6 items the positions are 0 to 5, and position 6 is one past the end. Look first at the comparison in your `while` line: what is the largest value of `position` it lets through, for a list of any length? If that is right, check that `position` moves on at the end of the round, after the item at the current position has been tested. The `while` line decides when the loop ends; the condition in the `if` line only decides which positions are recorded.
+  - id: append-backwards
+    label: Writes the position before .append and the list inside the parentheses
+    shows: error
+    errorType: AttributeError
+    errorContains: "'int' object"
+    code: |
+      positions_in_range = []
+      position = 0
+      while position < len(numbers):
+          if low <= numbers[position] and numbers[position] <= high:
+              position.append(positions_in_range)
+          position = position + 1
+    feedback: |
+      The message says `'int' object has no attribute 'append'`. Python looked at what stands before the dot in your `append` line and found a whole number, not a list. A whole number has no `append`; only a list can receive an item. That usually means the two parts of the line have swapped places. The list that receives stands before the dot, and the number to add goes inside the parentheses. Look at the name written before `.append`: is it the list?
+  - id: appends-values
+    label: Appends the item instead of its position
+    shows: wrong-result
+    code: |
+      positions_in_range = []
+      position = 0
+      while position < len(numbers):
+          if low <= numbers[position] and numbers[position] <= high:
+              positions_in_range.append(numbers[position])
+          position = position + 1
+    feedback: |
+      Your list holds the items that are in range, not the positions where they were found. That is the answer to *Keep the values in range*, and this task turns it around. The `if` is right to test the value. Look at what is inside the parentheses of your `.append()`: is it the value, or the place where the value was found?
+  - id: positions-from-one
+    label: Counts the positions from 1
+    shows: wrong-result
+    code: |
+      positions_in_range = []
+      position = 0
+      while position < len(numbers):
+          if low <= numbers[position] and numbers[position] <= high:
+              positions_in_range.append(position + 1)
+          position = position + 1
+    feedback: |
+      Every number in your list is 1 larger than it should be. Python counts positions from 0, so the first item is at position 0 and the last is at `len(numbers) - 1`. On each round, `position` already holds the position of the current item, as long as it started at 0. Check its start value, and check whether anything is added to it before it goes into the list.
+  - id: starts-at-one
+    label: Starts at position 1 and never looks at the first item
+    shows: wrong-result
+    code: |
+      positions_in_range = []
+      position = 1
+      while position < len(numbers):
+          if low <= numbers[position] and numbers[position] <= high:
+              positions_in_range.append(position)
+          position = position + 1
+    feedback: |
+      Your list is missing position 0, although the first item of `numbers` is in range. The first item is at position 0, so a loop that begins at position 1 never looks at it. Look at the value `position` has before the loop starts.
+  - id: counts-matches
+    label: Appends a second counter that counts the matches
+    shows: wrong-result
+    code: |
+      positions_in_range = []
+      position = 0
+      count = 0
+      while position < len(numbers):
+          if low <= numbers[position] and numbers[position] <= high:
+              positions_in_range.append(count)
+              count = count + 1
+          position = position + 1
+    feedback: |
+      Your list counts 0, 1, 2 and so on, one number for each item in range, but those numbers are not the places where the items were found: in the first test the items in range are at positions 0, 3 and 5. That happens when a second counter goes up only on the rounds that match, and that counter is what gets appended. It counts the matches; it does not say where they were. The loop already has a variable that holds the place it is looking at on every round, so a second counter is not needed.
+  - id: tests-position
+    label: Tests the position instead of the item (emptying the list inside the loop gives the same result)
+    shows: wrong-result
+    code: |
+      positions_in_range = []
+      position = 0
+      while position < len(numbers):
+          if low <= position and position <= high:
+              positions_in_range.append(position)
+          position = position + 1
+    feedback: |
+      Your list holds only 5, the last position. Two different causes give this result. The `if` line may compare `position` itself with `low` and `high`: of the positions 0 to 5, only 5 is from 5 to 20. The range is about the items, so the `if` line tests the item stored at the position; only the append uses the position itself. Or a line inside the loop may make `positions_in_range` a new list again, such as `positions_in_range = []`, so each round throws away what earlier rounds added and only the last position is left. Look at what your `if` line compares, and at where `positions_in_range = []` sits.
+  - id: replaces
+    label: Stores the position in positions_in_range instead of appending it
+    shows: wrong-result
+    code: |
+      positions_in_range = []
+      position = 0
+      while position < len(numbers):
+          if low <= numbers[position] and numbers[position] <= high:
+              positions_in_range = position
+          position = position + 1
+    feedback: |
+      `positions_in_range` ends up as a single number, 5, not a list. A line such as `positions_in_range = position` replaces whatever the name held, so on each round where the item is in range the new position pushes out the one before it, and only the last one is left. The empty list made before the loop has to grow by one item on each of those rounds, and a list grows with `.append()`.
+  - id: ends-excluded
+    label: Leaves out the items that are equal to low or to high
+    shows: wrong-result
+    code: |
+      positions_in_range = []
+      position = 0
+      while position < len(numbers):
+          if low < numbers[position] and numbers[position] < high:
+              positions_in_range.append(position)
+          position = position + 1
+    feedback: |
+      Your list is missing the positions of the items that are exactly equal to `low` or to `high`, and the rules count both ends as inside. A comparison written with `<` is False when its two sides are equal. Look at each comparison sign in your `if` line and try it by hand with an item equal to `low`, then with an item equal to `high`.
+
+hints:
+  - |
+    Your program for *Keep the values in range* already visits every position and tests the item stored there. On the rounds where the test is True, what do you want to remember this time: the item, or where you found it?
+  - |
+    Two numbers are in play on every round. With `numbers = [12, 3, 25, 8, 40, 15]`, round 4 has `position` equal to 3 and `numbers[position]` equal to 8. The `if` tests the 8. The answer wants the 3.
+  - |
+    In words: start with an empty list and the position at 0. While the position is less than the length of `numbers`: if the item at that position is in range, append the position itself to `positions_in_range`. Then move to the next position, on every round.
+
+explanation: |
+  The loop is the one from *Keep the values in range*. On every round it holds two numbers, and this task asks for the other one.
+
+  With `numbers = [12, 3, 25, 8, 40, 15]`, `low = 5` and `high = 20`:
+
+  | round | `position` | `numbers[position]` | in range? | `positions_in_range` after the round |
+  |---|---|---|---|---|
+  | 1 | 0 | 12 | True | `[0]` |
+  | 2 | 1 | 3 | False | `[0]` |
+  | 3 | 2 | 25 | False | `[0]` |
+  | 4 | 3 | 8 | True | `[0, 3]` |
+  | 5 | 4 | 40 | False | `[0, 3]` |
+  | 6 | 5 | 15 | True | `[0, 3, 5]` |
+
+  Compare the second and third columns. `position` says where the loop is looking: 0, 1, 2, 3, 4, 5. `numbers[position]` is what is stored there: 12, 3, 25, 8, 40, 15. The `if` has to look at the third column, because the range is about values. The answer is made from the second column, because the task asks where. In *Keep the values in range* the same three rounds appended 12, 8 and 15. Here they append 0, 3 and 5.
+
+  A position is a number too, and that is why the two get mixed up. With `numbers = [9, 2, 4, 30, 1]`, `low = 0` and `high = 5`, the items in range are 2, 4 and 1, found at positions 1, 2 and 4. Both `[2, 4, 1]` and `[1, 2, 4]` are short lists of small numbers, and only the second one answers the question. The checker uses such a case on purpose.
+
+  The name `position` was chosen for this program, and Python attaches no meaning to it. What makes it a position is how it is used: it starts at 0, it goes up by 1 on every round, and it is written inside the square brackets of `numbers[...]`. The square brackets, `len()` and `.append()` are Python's own.
+
+solution:
+  code: |
+    positions_in_range = []
+    position = 0
+    while position < len(numbers):
+        if low <= numbers[position] and numbers[position] <= high:
+            positions_in_range.append(position)
+        position = position + 1
+  walkthrough: |
+    - `positions_in_range = []` makes a new, empty list before the loop. If no item is in range, it stays empty, and that is the answer.
+    - `position = 0` starts at the first position. Positions are counted from 0, so the loop's own counter is already the number the task asks for.
+    - `while position < len(numbers):` visits the positions 0 to `len(numbers) - 1`, one round each.
+    - `low <= numbers[position] and numbers[position] <= high` tests the value stored at the current position. This line is the same as in *Keep the values in range*. The range is about values, so the value is what gets compared.
+    - `positions_in_range.append(position)` is indented under the `if`. This is the line that changed. The list receives `position`, the place where the value was found, instead of `numbers[position]`, the value itself.
+    - `position = position + 1` is lined up with the `if` and runs on every round.
+
+    Because the loop visits the positions in increasing order, the recorded positions come out in increasing order on their own.
+
+    `numbers` is only read, never changed, and `positions_in_range` is a new list.
+
+    A later part of the course shows `for` loops, a shorter way to visit every position, and the checker accepts them too.
+
+prerequisites: [values-in-range, positions-read-values]
+related: [first-greatest-position, count-matching]

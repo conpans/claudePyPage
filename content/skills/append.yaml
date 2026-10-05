@@ -1,0 +1,195 @@
+id: append
+order: 6
+title: Building result lists with append()
+shortTitle: Building lists
+summary: >-
+  Start with an empty list, then add one item to its end on every round of a loop with `.append()`.
+mixups:
+  - Writing the item before `.append` and the list inside the parentheses, as in `value.append(result)`, when the list that receives has to stand before the dot.
+  - Appending the position (`result.append(position)`) when you meant the value stored there (`result.append(numbers[position])`).
+  - Writing `result = result.append(value)`, which stores `None` in `result`, because `append()` changes the list and hands nothing back.
+  - Expecting a name such as `result` or `totals` to collect anything by itself. Names are chosen by the programmer. `.append()`, `[ ]` and `len()` belong to Python and do fixed things.
+
+sections:
+  - title: append() adds one item at the end
+    body: |
+      `.append()` is how a list grows. The line
+
+      ```python
+      scores.append(7)
+      ```
+
+      adds the item `7` to the end of the list `scores`. Afterwards the list is one item longer than before. Nothing that was already in it moves or changes.
+
+      Three things are always true of `append()`:
+
+      - It adds exactly one item each time it runs. To add three items, a program runs it three times.
+      - It adds at the end. The items stay in the order in which they were appended. Nothing is sorted.
+      - A repeated value is kept. Appending `7` to a list that already holds a `7` gives a list with two 7s.
+
+      Step through the example below and watch `scores` after each line. The list starts empty, written `[]`, and `len(scores)` goes up by one with every `append`.
+    demo:
+      title: Three appends, one list
+      code: |
+        scores = []
+        scores.append(7)
+        print(scores)
+        scores.append(2)
+        print(scores)
+        scores.append(7)
+        print(scores)
+        print(len(scores))
+      note: The list grows by one item on each `append` line. The second `7` lands at the end, after the `2`, and the first `7` stays at position 0.
+
+  - title: Which list, which item
+    body: |
+      An `append` line has two parts, and each has its own place:
+
+      ```python
+      basket.append(price)
+      ```
+
+      - Before the dot: the list that receives the item. Here that is `basket`.
+      - Inside the parentheses: the item to add. Here that is the value of `price`.
+
+      Read it as "`basket` receives `price`". The list that receives always comes first.
+
+      Written the other way round, as `price.append(basket)`, Python stops the program with this message:
+
+      ```
+      AttributeError: 'int' object has no attribute 'append'
+      ```
+
+      The message is worth reading slowly, because it says where to look. `'int' object` describes what Python found before the dot: it looked at `price` and found a whole number (an `int`). A whole number has no `append`. Lists have `append`; numbers do not. So when you see this message, look at the name written before `.append`. It holds a whole number, not a list. Most often the list and the item have swapped places.
+
+      The names themselves carry no meaning for Python. `basket` receives the item because it is the list and it stands before the dot, not because of what the word means. The same line with the names `b` and `p` would do the same thing.
+    demo:
+      title: The list before the dot, the item inside the parentheses
+      code: |
+        basket = []
+        price = 12
+        basket.append(price)
+        price = 7
+        basket.append(price)
+        print(basket)
+        print(price)
+      note: On each `append` line, `basket` is the list that receives and `price` is a plain number that gets added. `price` is never a list, which is why `price.append(basket)` would fail.
+
+  - title: append() changes the list and hands nothing back
+    body: |
+      Compare these two lines:
+
+      ```python
+      total = total + 5
+      names.append("Ada")
+      ```
+
+      The first line works out a new value, and the `=` is needed to store it. The second line has no `=`, and it needs none. `append()` changes the list `names` itself. After the line has run, `names` is already one item longer.
+
+      Because `append()` has nothing to hand back, Python hands back `None`, the value that means "nothing here". That matters if you write
+
+      ```python
+      names = names.append("Ada")
+      ```
+
+      The right side runs first: `"Ada"` goes into the list, and the call hands back `None`. Then the `=` stores that `None` under the name `names`. The list is lost. The next `names.append(...)` fails with `AttributeError: 'NoneType' object has no attribute 'append'`, because `names` is now `None`, not a list.
+
+      So an `append` line stands on its own, with no `=`. Step through the example and watch what `answer` receives.
+    demo:
+      title: What append() hands back
+      code: |
+        names = []
+        answer = names.append("Ada")
+        print(names)
+        print(answer)
+      note: Line 2 does two things. The list grows, so `names` is `['Ada']`. And `answer` receives `None`, because `append()` hands nothing back.
+
+  - title: Start empty before the loop, append inside it
+    body: |
+      Most result lists are built by a loop. The pattern has two parts in two places:
+
+      - Before the loop, once: `result = []`. This creates the list, empty.
+      - Inside the loop, on every round: `result.append(...)`. Each round adds one item, so after the loop the list has one item per round. (The course calls a round an iteration.)
+
+      The line `result = []` has to stay before the loop. If it moves inside the loop, above the `append`, it runs again at the start of every round and throws away everything appended so far. With `numbers = [3, 1, 4]`, the list would end as `[4]`: only the last round's item survives.
+
+      The empty list is the start value of a list that is being built, in the same way that `0` is the start value of a total. Step through the example and watch `result` grow by one on each round while `numbers` stays as it was.
+    demo:
+      title: One item per round
+      given: { numbers: [3, 1, 4] }
+      code: |
+        result = []
+        position = 0
+        while position < len(numbers):
+            result.append(numbers[position])
+            print(f"Length {len(result)}: {result}")
+            position = position + 1
+      note: '`result = []` runs once, before the loop. The `append` runs three times, once per round, and the printed length goes 1, 2, 3.'
+
+  - title: Append the value, not the position
+    body: |
+      Inside the loop, two different things are available on every round:
+
+      - `position`, the place in the list the loop is looking at: 0, then 1, then 2. (The course calls a position the index.)
+      - `numbers[position]`, the value stored at that place.
+
+      These two lines look alike and do different things:
+
+      ```python
+      result.append(position)
+      result.append(numbers[position])
+      ```
+
+      The first appends the places themselves. With three items the result is `[0, 1, 2]`, whatever values `numbers` holds. The second appends what is stored at each place. With `numbers = [10, 20, 30]` it gives `[10, 20, 30]`.
+
+      A quick check for your own programs: if the result list is `[0, 1, 2, ...]` no matter which values the given list holds, the `append` is being given the position. The step-through below builds both lists in the same loop, so you can see them side by side.
+    demo:
+      title: Positions in one list, values in the other
+      given: { numbers: [10, 20, 30] }
+      code: |
+        positions = []
+        values = []
+        position = 0
+        while position < len(numbers):
+            positions.append(position)
+            values.append(numbers[position])
+            position = position + 1
+        print(positions)
+        print(values)
+      note: Watch both lists on each round. `positions` collects 0, 1, 2. `values` collects what `numbers` holds at those places.
+
+  - title: Appending something worked out
+    body: |
+      The parentheses of `append()` can hold more than a plain name. Any calculation works:
+
+      ```python
+      totals.append(price + shipping)
+      ```
+
+      Python always works out what is inside the parentheses first, and only then appends the result. If `price` is `120` and `shipping` is `5`, the sum `125` is worked out, and `125` is what lands in the list. The list never holds the `+`; it holds the number that came out.
+
+      Writing it in two lines does exactly the same thing, and some people find it clearer to read:
+
+      ```python
+      total = price + shipping
+      totals.append(total)
+      ```
+
+      Either way, the value that is appended is the one worked out on that round. Later rounds work out new values and append those. Items already in the list stay as they are.
+    demo:
+      title: Each price with a discount taken off
+      given: { prices: [120, 35, 80], discount: 15 }
+      code: |
+        reduced = []
+        position = 0
+        while position < len(prices):
+            reduced.append(prices[position] - discount)
+            position = position + 1
+        print(reduced)
+      note: On each round the subtraction inside the parentheses is worked out first. The number that comes out is what gets appended.
+
+exercises:
+  - append-order
+  - append-receiver
+  - append-add-shipping
+  - append-numbered-labels

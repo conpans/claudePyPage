@@ -1,0 +1,241 @@
+id: copy-list-backwards
+title: Copy a list backwards
+tier: variation
+variationOf: copy-list
+format: write
+order: 1
+skills: [positions, loops, append]
+difficulty: 2
+newIdea: >-
+  The loop runs from the last position down to 0, so the start, the condition and the update all change.
+source:
+  type: original
+
+goal: Build a new list that holds the items of a given list in the opposite order.
+statement: |
+  Given a list `numbers`, build a new list `reversed_copy` that holds the same items in the opposite order: the last item of `numbers` comes first, and the first item of `numbers` comes last.
+
+  With `numbers = [8, 3, 5]`, `reversed_copy` must be `[5, 3, 8]`.
+
+  The practice here is a `while` loop like the one in *Copy a list*: it visits the positions of `numbers` one at a time and appends the value stored at each one to `reversed_copy`. `.append()` always adds at the end of a list, so the order in which the loop visits the positions decides the order of the items in `reversed_copy`. The checker accepts any program that meets the rules below, with or without a loop.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers, which may be empty
+    domain: { minLen: 0, maxLen: 10, min: -100, max: 100 }
+create:
+  - name: reversed_copy
+    describe: a new list with the items of `numbers` in the opposite order
+rules:
+  - '`numbers` has from 0 to 10 items. Each item is a whole number from -100 to 100, with both ends included.'
+  - '`numbers` can be empty. The answer is then an empty list, `[]`. An empty list has no positions, so a loop over its positions runs zero rounds.'
+  - With one item there is nothing to turn around, so the answer holds that one item.
+  - '`reversed_copy` has exactly as many items as `numbers`, in the opposite order. A value that appears more than once in `numbers` appears that many times in `reversed_copy`.'
+  - 'Leave `numbers` unchanged. When your program ends, `numbers` must hold exactly the items it held at the start, in the same order. The checker tests this.'
+  - '`reversed_copy` must be a new list, not a second name for `numbers`. This holds for every list, also for `[]`, `[7]` and `[6, 2, 6]`, where a second name for `numbers` would hold the right values. The checker tests this and tells you if it finds one list with two names.'
+  - 'Python can also reverse a list in one step. Such a program passes only when it meets all the rules above: `reversed_copy` holds the right items, `numbers` is as it was given, and `reversed_copy` is a new list. Take care with `numbers.reverse()`: it turns the list `numbers` itself around and makes no new list. With `numbers = [8, 3, 5]`, that line turns `numbers` into `[5, 3, 8]`, so `numbers` is no longer as it was given. The practice here is the loop that counts down.'
+toWrite: A short program of about five lines, with the same shape as *Copy a list*. The start, the condition and the update are different.
+unchanged: [numbers]
+fresh: [reversed_copy]
+
+starter: |
+  # numbers is given. Leave your answer in reversed_copy.
+exampleGiven: { numbers: [8, 3, 5] }
+examples:
+  - given: { numbers: [8, 3, 5] }
+    result: { reversed_copy: [5, 3, 8] }
+    why: The last item, 5, comes first. Then comes 3. The first item, 8, comes last.
+  - given: { numbers: [] }
+    result: { reversed_copy: [] }
+    why: An empty list has no positions, so a loop over its positions runs zero rounds and appends nothing. Turned around, an empty list is still an empty list.
+
+tests:
+  - name: three items
+    given: { numbers: [8, 3, 5] }
+    expect: { reversed_copy: [5, 3, 8] }
+    purpose: The first example from the task.
+  - name: an empty list
+    given: { numbers: [] }
+    expect: { reversed_copy: [] }
+    purpose: The shortest list allowed. There is no last position to start from, so the loop has to run zero rounds.
+  - name: one item
+    given: { numbers: [7] }
+    expect: { reversed_copy: [7] }
+    purpose: The only item is stored at position 0. Catches a loop that stops before it reads position 0.
+  - name: two items
+    given: { numbers: [4, 9] }
+    expect: { reversed_copy: [9, 4] }
+    purpose: The shortest list in which the order changes.
+  - name: the same in both directions
+    given: { numbers: [6, 2, 6] }
+    expect: { reversed_copy: [6, 2, 6] }
+    purpose: The list reads the same from either end, and 6 appears twice. A plain copy in the original order passes this test, as it passes the empty and the one-item test. The other tests catch it, because their first and last items differ.
+  - name: negative values and zero
+    given: { numbers: [-100, 0, 45, -6] }
+    expect: { reversed_copy: [-6, 45, 0, -100] }
+    purpose: Zero and negative numbers are ordinary items. -100 is the smallest value allowed.
+  - name: ten items
+    given: { numbers: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100] }
+    expect: { reversed_copy: [100, 90, 80, 70, 60, 50, 40, 30, 20, 10] }
+    purpose: The longest list allowed, with the largest value allowed. No value equals its position, so appending the positions cannot pass.
+
+mistakes:
+  - id: assigns-into-empty
+    label: Stores into a position of the new list before that position exists
+    shows: error
+    errorType: IndexError
+    errorContains: assignment
+    code: |
+      reversed_copy = []
+      position = 0
+      while position < len(numbers):
+          reversed_copy[len(numbers) - 1 - position] = numbers[position]
+          position = position + 1
+    feedback: |
+      The error message says `list assignment index out of range`. It comes from a line that stores into a list position, such as `reversed_copy[position] = ...`. Square brackets can replace the item at a position that already exists, but a new empty list has no positions yet, not even position 0. A list gets a new position when an item is appended to it: the first append makes position 0, the next one position 1, and so on.
+  - id: starts-one-past-end
+    label: Starts at the length of the list, one past the last position
+    shows: error
+    errorType: IndexError
+    code: |
+      reversed_copy = []
+      position = len(numbers)
+      while position >= 0:
+          reversed_copy.append(numbers[position])
+          position = position - 1
+    feedback: |
+      The program asked for a position that has no item. With 3 items the positions are 0, 1 and 2, so position 3, which equals `len(numbers)`, is one past the end, and an empty list has no positions at all. If `reversed_copy` was still empty when the error came, the very first read failed: look at the start value of `position`. If it already held items, look at the update and the condition: `position` has to get smaller on every round, and the loop has to end after position 0.
+  - id: starts-at-zero
+    label: Counts down, but starts at position 0
+    shows: wrong-result
+    code: |
+      reversed_copy = []
+      position = 0
+      while position >= 0:
+          reversed_copy.append(numbers[position])
+          position = position - 1
+    feedback: |
+      Your list holds a single item, the first item of `numbers`. Two different causes lead there. If the loop counts down but begins at position 0, it reads position 0, then `position` drops below 0 and the loop ends: look at the start value of `position`, and ask at which position a walk from the last item to the first begins. If the line that makes the empty list stands inside the loop, it runs again on every round and throws away what was appended before, so only the item from the last round, at position 0, is left: look at where that line stands.
+  - id: stops-before-zero
+    label: Stops before it reads position 0
+    shows: wrong-result
+    code: |
+      reversed_copy = []
+      position = len(numbers) - 1
+      while position > 0:
+          reversed_copy.append(numbers[position])
+          position = position - 1
+    feedback: |
+      Your list is missing its last item, which should be the first item of `numbers`. The loop ended before it read position 0. Position 0 holds an item like any other position, and in a loop that counts down it is the last one to visit. Look at the comparison in your `while` line: can the round with `position` at 0 still run?
+  - id: plain-copy
+    label: Copies the list in its original order
+    shows: wrong-result
+    code: |
+      reversed_copy = []
+      position = 0
+      while position < len(numbers):
+          reversed_copy.append(numbers[position])
+          position = position + 1
+    feedback: |
+      Your list holds the items of `numbers` in their original order. `.append()` adds at the end, so the item that is read first ends up first, and a loop that starts at position 0 and counts up gives a plain copy. For the last item of `numbers` to come first, it has to be read first. Look at where `position` starts and in which direction it moves.
+  - id: appends-positions
+    label: Appends the position instead of the value stored there
+    shows: wrong-result
+    code: |
+      reversed_copy = []
+      position = len(numbers) - 1
+      while position >= 0:
+          reversed_copy.append(position)
+          position = position - 1
+    feedback: |
+      Your list holds the positions, counted down (2, 1, 0 for a list with 3 items), not the items. The order of the visits is already right. `position` says where the loop is looking, and `numbers[position]` is the value stored there. Look at what is inside the parentheses of your `.append()`.
+  - id: moves-before-reading
+    label: Moves the position on before reading the item
+    shows: wrong-result
+    code: |
+      reversed_copy = []
+      position = len(numbers) - 1
+      while position >= 0:
+          position = position - 1
+          reversed_copy.append(numbers[position])
+    feedback: |
+      Your list starts with the item before the last one, and the last item of `numbers` turns up at the end instead of first. Each round makes `position` smaller before it reads, so with 3 items the first round reads position 1, not 2, and the last round reads position -1. Python reports no error for -1, because a negative position counts from the end of the list: `numbers[-1]` is the last item. Look at the order of the two lines inside the loop.
+  - id: runs-past-zero
+    label: Runs one more round after position 0
+    shows: wrong-result
+    code: |
+      reversed_copy = []
+      position = len(numbers)
+      while position >= 0:
+          position = position - 1
+          reversed_copy.append(numbers[position])
+    feedback: |
+      Your list has one item too many: at the end, the last item of `numbers` appears a second time. That happens when the loop runs one more round after position 0, with `position` at -1. Python reports no error there, because a negative position counts from the end of the list: `numbers[-1]` is the last item. Check which values of `position` reach the line that reads from `numbers`: the smallest should be 0.
+  - id: never-moves-on
+    label: Never moves to the next position
+    shows: never-stops
+    code: |
+      reversed_copy = []
+      position = len(numbers) - 1
+      while position >= 0:
+          reversed_copy.append(numbers[position])
+    feedback: |
+      The loop never ended, so the program had to be stopped. Look at `position` in the variables at that moment. If it still has its start value, no line inside the loop changes it, so every round reads the same position again. The update has to run on every round, and it has to store the smaller value back under the name `position`: a line such as `position - 1` on its own works out a number and then lets it go.
+
+hints:
+  - |
+    In *Copy a list* the loop read the positions in the order 0, 1, 2, and the items came out in that same order. In which order does the loop have to read the positions so that the last item is appended first?
+  - |
+    With `numbers = [8, 3, 5]` the last position is 2. That is `len(numbers) - 1`, because the length is 3 and the positions start at 0. The loop reads position 2, then position 1, then position 0. Position 0 has to be read too, and the loop ends after it.
+  - |
+    In words: start with an empty list and with the position at the length of `numbers` minus 1. While the position is 0 or more, do two things: append the value stored at that position to `reversed_copy`, then make the position 1 smaller. Compared with *Copy a list*, the start, the condition and the update have changed. The appending line works as it did there; only the name of the list that receives is new.
+
+explanation: |
+  `.append()` always adds at the end of a list. So the item that the loop reads first becomes the first item of `reversed_copy`. For the last item of `numbers` to come first, the loop has to read the positions from the last one down to 0.
+
+  With `numbers = [8, 3, 5]`:
+
+  | round | `position` | `numbers[position]` | `reversed_copy` after appending |
+  |---|---|---|---|
+  | 1 | 2 | 5 | `[5]` |
+  | 2 | 1 | 3 | `[5, 3]` |
+  | 3 | 0 | 8 | `[5, 3, 8]` |
+
+  After round 3, `position` becomes -1, and the loop ends.
+
+  Compared with *Copy a list*, all three parts of the loop change:
+
+  | part | counting up | counting down |
+  |---|---|---|
+  | start | position 0 | the last position, which is the length minus 1 (here 3 minus 1, so 2) |
+  | condition | the position is less than the length | the position is 0 or more |
+  | update | 1 more on each round | 1 less on each round |
+
+  Two boundaries need care.
+
+  The start is the length minus 1, not the length. `numbers` has 3 items, at the positions 0, 1 and 2. Position 3 has no item.
+
+  The condition has to be True when `position` is 0, because the first item of `numbers` is stored there. It has to be False when `position` is -1. Python would not report an error for -1: a negative position counts from the end of the list, so `numbers[-1]` is the last item, and it would be appended a second time.
+
+  If `numbers` is empty, its length is 0, and the start is 0 minus 1, which is -1. The condition is False before the first round, so the loop runs zero rounds and `reversed_copy` stays `[]`.
+
+solution:
+  code: |
+    reversed_copy = []
+    position = len(numbers) - 1
+    while position >= 0:
+        reversed_copy.append(numbers[position])
+        position = position - 1
+  walkthrough: |
+    - `reversed_copy = []` makes a new, empty list before the loop.
+    - `position = len(numbers) - 1` starts at the last position. With 3 items the length is 3 and the last position is 2.
+    - `while position >= 0:` keeps going as long as `position` is a position that has an item. Position 0 is included, because the first item of `numbers` is stored there. With `> 0` the loop would stop one round early, and that item would be missing.
+    - `reversed_copy.append(numbers[position])` reads the value stored at the current position and adds it to the end of `reversed_copy`. It works as in *Copy a list*; only the name of the list that receives is different.
+    - `position = position - 1` moves one position toward the front of the list. After the round for position 0 it makes `position` -1, the condition becomes False, and the loop ends.
+
+    If `numbers` is empty, `position` starts at -1. `-1 >= 0` is False at once, so the loop runs zero rounds and `reversed_copy` stays `[]`.
+
+    `numbers` is only read, never changed, and `reversed_copy` is a new list.
+
+prerequisites: [copy-list, positions-length-and-last, loops-countdown]
+related: [positions-last-item]

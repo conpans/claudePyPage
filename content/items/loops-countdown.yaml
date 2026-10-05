@@ -1,0 +1,228 @@
+id: loops-countdown
+title: Countdown
+tier: exercise
+format: write
+skill: loops
+skills: [loops, assignment]
+difficulty: 2
+source:
+  type: original
+
+goal: Write a loop that counts down from a given number to 1 and then prints one last line.
+statement: |
+  A launch counts down from `start` to 1 and then lifts off.
+
+  Write a program that prints the numbers from `start` down to 1, each on its own line, and then prints the line `Liftoff`.
+
+  With `start = 3` the program prints four lines: `3`, `2`, `1` and `Liftoff`.
+
+  This loop does not walk a list. The number starts high and comes down, so the start, the condition and the update all look different from the loops before this one.
+given:
+  - name: start
+    type: int
+    describe: the number the countdown starts from, a whole number from 1 to 10
+    domain: { min: 1, max: 10 }
+prints: 'The numbers from `start` down to 1, one per line, and then one line with the text `Liftoff`. With `start = 3`: `3`, `2`, `1`, `Liftoff`.'
+rules:
+  - '`start` is a whole number from 1 to 10. Both 1 and 10 are allowed.'
+  - Print the numbers from `start` down to 1, one number per line. 1 is printed, 0 is not.
+  - After the numbers, print exactly one more line with the text `Liftoff`, with a capital L and nothing else on the line.
+  - With `start = 1`, the output is two lines, `1` and `Liftoff`.
+  - Print nothing else.
+toWrite: A short program of about five lines. It needs a start value, a loop with a condition and an update, and one `print` after the loop.
+
+starter: |
+  # start is given. Print the countdown, then the line Liftoff.
+exampleGiven: { start: 3 }
+examples:
+  - given: { start: 3 }
+    output: |
+      3
+      2
+      1
+      Liftoff
+    why: The countdown is 3, 2, 1. It stops before 0, and then Liftoff is printed once.
+  - given: { start: 1 }
+    output: |
+      1
+      Liftoff
+    why: The countdown has a single number. Liftoff is still printed.
+
+tests:
+  - name: from three
+    given: { start: 3 }
+    output: |
+      3
+      2
+      1
+      Liftoff
+    purpose: The first example from the task.
+  - name: from one
+    given: { start: 1 }
+    output: |
+      1
+      Liftoff
+    purpose: The smallest start allowed. The loop runs a single round, and the final line is still printed. Catches a countdown that starts one too low or stops before 1.
+  - name: from ten
+    given: { start: 10 }
+    output: |
+      10
+      9
+      8
+      7
+      6
+      5
+      4
+      3
+      2
+      1
+      Liftoff
+    purpose: The largest start allowed, eleven lines in all.
+  - name: from five
+    given: { start: 5 }
+    output: |
+      5
+      4
+      3
+      2
+      1
+      Liftoff
+    purpose: Another start, so a program that prints a fixed set of lines cannot pass.
+  - name: from two
+    given: { start: 2 }
+    output: |
+      2
+      1
+      Liftoff
+    purpose: Two rounds, then the final line.
+
+mistakes:
+  - id: prints-zero
+    label: Also prints 0
+    shows: wrong-result
+    code: |
+      number = start
+      while number >= 0:
+          print(number)
+          number = number - 1
+      print("Liftoff")
+    feedback: |
+      Your output has one line too many: a `0` before `Liftoff`. The condition still lets a round run when the number is 0. The countdown ends at 1, so the condition has to be False as soon as the number is 0. Look at the comparison in your `while` line.
+  - id: counts-up
+    label: Never stops (counts up instead of down, has no update inside the loop, or the condition watches a variable that never changes)
+    shows: never-stops
+    code: |
+      number = start
+      while number > 0:
+          print(number)
+          number = number + 1
+      print("Liftoff")
+    feedback: |
+      The program had to be stopped: its condition never became False. Look at the printed numbers. If they keep growing, the update adds 1 and moves the number away from 0. If the same number repeats, nothing inside the loop changes it: the update is missing, or it is not indented under the `while`. If they go below 0 and keep falling, the condition watches a variable that the loop never changes.
+  - id: no-liftoff
+    label: Forgets the final line
+    shows: wrong-result
+    code: |
+      number = start
+      while number > 0:
+          print(number)
+          number = number - 1
+    feedback: |
+      The countdown is right, but the output ends after `1`. The line `Liftoff` has to be printed once, after the loop has ended. A `print` that is not indented runs after the loop, not on every round.
+  - id: liftoff-inside-loop
+    label: Prints Liftoff on every round
+    shows: wrong-result
+    code: |
+      number = start
+      while number > 0:
+          print(number)
+          number = number - 1
+          print("Liftoff")
+    feedback: |
+      `Liftoff` appears after every number instead of once at the end. The `print` for it is indented under the `while`, so it is part of the body and runs on every round. A line that is not indented runs once, after the loop has ended.
+  - id: starts-one-low
+    label: Starts the countdown at start - 1
+    shows: wrong-result
+    code: |
+      number = start - 1
+      while number > 0:
+          print(number)
+          number = number - 1
+      print("Liftoff")
+    feedback: |
+      Your countdown begins one number too low: with `start = 3` it prints `2` first, and with `start = 1` it prints no number at all. The first round should print `start` itself. Look at the value your loop variable gets before the loop starts.
+  - id: stops-before-one
+    label: Stops before printing 1
+    shows: wrong-result
+    code: |
+      number = start
+      while number > 1:
+          print(number)
+          number = number - 1
+      print("Liftoff")
+    feedback: |
+      Your countdown is missing its last number: `1` is never printed. The condition becomes False one round too soon. The round for 1 has to run, and the round for 0 must not. Which comparison is True for 1 and False for 0?
+  - id: subtracts-first
+    label: Subtracts before printing
+    shows: wrong-result
+    code: |
+      number = start
+      while number > 0:
+          number = number - 1
+          print(number)
+      print("Liftoff")
+    feedback: |
+      Every printed number is one too small, and `0` is printed at the end. Inside the loop, the number is made smaller before it is printed, so the first round already prints `start - 1`. The order of the lines inside the body matters: print the current number first, then move on.
+
+hints:
+  - |
+    In a loop that walks a list, `position` starts at 0 and goes up by 1. Here the number starts at `start` and has to come down. Which of the three parts of the loop change: the start, the condition, the update?
+  - |
+    Keep the current number in a variable of its own, starting at `start`. On each round, print it and then make it one smaller. With `start = 3` the rounds print 3, 2 and 1, and the number is 0 when the loop ends.
+  - |
+    The condition decides where the loop stops. It has to be True for 3, 2 and 1 and False for 0. After the loop, one more `print`, not indented, shows `Liftoff`.
+
+explanation: |
+  The three parts of the loop are all turned around, and the shape stays the same.
+
+  | part | walking a list | counting down |
+  |---|---|---|
+  | start | `position = 0` | the number begins at `start` |
+  | condition | `position < len(numbers)` | the number is still greater than 0 |
+  | update | adds 1 | subtracts 1 |
+
+  With `start = 3`:
+
+  | check | `number` | `number > 0` | printed | `number` after |
+  |---|---|---|---|---|
+  | 1 | 3 | True | 3 | 2 |
+  | 2 | 2 | True | 2 | 1 |
+  | 3 | 1 | True | 1 | 0 |
+  | 4 | 0 | False | the loop ends | 0 |
+
+  Then `Liftoff` is printed once, by a line after the loop.
+
+  The condition is where 0 is kept out: `0 > 0` is False, so there is no round for 0. With `>=` in its place there would be one.
+
+  With `start = 1`, the first check is `1 > 0`, True, so one round runs and prints 1. The second check is `0 > 0`, False. Then `Liftoff`.
+
+solution:
+  code: |
+    number = start
+    while number > 0:
+        print(number)
+        number = number - 1
+    print("Liftoff")
+  walkthrough: |
+    - `number = start` copies the given value into a variable of its own. The loop changes `number` on every round, and `start` keeps its value.
+    - `while number > 0` is the condition. With `start = 3`, it is True for 3, 2 and 1 and False for 0, so the countdown stops after 1.
+    - `print(number)` prints the current number before anything changes it.
+    - `number = number - 1` is the update. It subtracts 1, so the number moves toward 0, where the condition becomes False.
+    - `print("Liftoff")` is not indented. It runs once, after the loop has ended.
+
+    Compared with a loop that walks a list, the direction, the condition and the update all differ. What stays the same: the condition is checked before every round, and the update is the last line of the body.
+
+    The shorthand `number -= 1` does exactly the same as `number = number - 1`.
+
+prerequisites: [loops-count-rounds, loops-missing-step]
+related: [copy-list-backwards, loops-one-too-far]

@@ -1,0 +1,115 @@
+id: accumulators
+order: 5
+title: Accumulators for sums, products, and counts
+shortTitle: Accumulators
+summary: >-
+  Keep a result in one variable and update it on every round of a loop, using its own old value.
+mixups:
+  - Storing the newest value (`total = number`) when you meant to add to what was already there (`total = total + number`).
+  - Starting a product at 0, or setting the start value again inside the loop.
+  - Adding the position when you meant the value stored at that position.
+
+sections:
+  - title: Updating a variable with its own old value
+    body: |
+      An accumulator is a variable that collects a result bit by bit. On each round of a loop, one line reads the variable's old value, combines it with one new item, and stores the result back under the same name:
+
+      ```python
+      total = total + numbers[position]
+      ```
+
+      Python works out the right side first. If `total` is `3` and `numbers[position]` is `1`, the right side is `4`. Only then is `4` stored in `total`, replacing the `3`.
+
+      Step through the example below and watch `total` change on each round.
+    demo:
+      title: Adding up a list
+      given: { numbers: [3, 1, 4] }
+      code: |
+        total = 0
+        position = 0
+        while position < len(numbers):
+            total = total + numbers[position]
+            position = position + 1
+        print(f"Total: {total}")
+
+  - title: Replacing is not accumulating
+    body: |
+      These two lines look alike, but they do different jobs:
+
+      ```python
+      latest = numbers[position]
+      total = total + numbers[position]
+      ```
+
+      The first line replaces. It throws away whatever `latest` held and keeps only the current item, so after the loop `latest` holds the last item and nothing else.
+
+      The second line accumulates. The old `total` appears on the right side, so everything added earlier is carried along.
+
+      A quick test for any line inside a loop: does the name on the left of the `=` also appear on the right? If it does, the line builds on the old value. If it does not, the old value is gone after this line.
+    demo:
+      title: One variable replaces, one accumulates
+      given: { numbers: [4, 6, 5] }
+      code: |
+        latest = 0
+        total = 0
+        position = 0
+        while position < len(numbers):
+            latest = numbers[position]
+            total = total + numbers[position]
+            position = position + 1
+      note: Watch both variables on each round. `latest` only ever holds one item; `total` keeps growing.
+
+  - title: 'Where to start: 0 for adding, 1 for multiplying'
+    body: |
+      The start value has one job: it must leave the first item unchanged.
+
+      - Adding: `0 + 5` is `5`. A sum that starts at `0` gives the first item as it is.
+      - Multiplying: `1 * 5` is `5`. A product that starts at `1` gives the first item as it is.
+
+      A product that starts at `0` goes wrong on the very first round: `0 * 5` is `0`, and from then on `0` times anything is still `0`.
+
+      The start value is written **before** the loop, where it runs once. Inside the loop it would run again on every round and wipe out the result so far.
+    demo:
+      title: A product that starts at 1
+      given: { numbers: [2, 5, 3] }
+      code: |
+        product = 1
+        position = 0
+        while position < len(numbers):
+            product = product * numbers[position]
+            position = position + 1
+        print(f"Product: {product}")
+
+  - title: Counting is adding 1
+    body: |
+      A count is a sum in which every counted item adds `1`:
+
+      ```python
+      count = count + 1
+      ```
+
+      To count only some of the items, put that line under an `if`. The loop still visits every item, and the count goes up only on the rounds where the condition is True.
+    demo:
+      title: Counting the failed checks
+      given: { checks: ['pass', 'fail', 'fail', 'pass'] }
+      code: |
+        failed_count = 0
+        position = 0
+        while position < len(checks):
+            if checks[position] == "fail":
+                failed_count = failed_count + 1
+            position = position + 1
+        print(f"Failed: {failed_count}")
+      note: The step `position = position + 1` is lined up with the `if`, not inside it, so it runs on every round.
+
+  - title: A shorthand you will meet
+    body: |
+      `total += number` means exactly the same as `total = total + number`, and `count += 1` means the same as `count = count + 1`.
+
+      The long form shows both steps: read the old value, then store the new one. That is why the exercises here use it. Write whichever you find clearer. The checker accepts both.
+
+exercises:
+  - accumulators-replace-or-add
+  - accumulators-add-up
+  - accumulators-product-start
+  - accumulators-count-failed

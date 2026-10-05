@@ -1,0 +1,128 @@
+id: assign-update-score
+title: Add a bonus to the score
+tier: exercise
+format: fill
+skill: assignment
+skills: [assignment]
+difficulty: 1
+source:
+  type: original
+
+goal: Write the one line that updates a variable using its own old value.
+statement: |
+  A player has a score and has earned a bonus. Both numbers are already stored: the score in `score` and the bonus in `bonus`.
+
+  Write the one line that adds the bonus to the score. After your line, `score` must hold its old value plus `bonus`.
+
+  With `score = 40` and `bonus = 15`, `score` must end as `55`.
+given:
+  - name: score
+    type: int
+    describe: the score so far, a whole number from 0 to 1000
+    domain: { min: 0, max: 1000 }
+  - name: bonus
+    type: int
+    describe: the bonus to add, a whole number from 0 to 100
+    domain: { min: 0, max: 100 }
+create:
+  - name: score
+    describe: its old value plus `bonus`
+rules:
+  - 'At the start, `score` is a whole number from 0 to 1000 and `bonus` is a whole number from 0 to 100. The numbers at both ends of each range are allowed.'
+  - 'The new score has no upper limit: it can be above 1000.'
+  - '`bonus` can be 0. Then `score` must end with the value it started with.'
+  - The answer goes in `score` itself, not in a new variable.
+toWrite: One line, below the two comment lines.
+
+starter: |
+  # score and bonus are given.
+  # Your line goes below. It updates score.
+exampleGiven: { score: 40, bonus: 15 }
+examples:
+  - given: { score: 40, bonus: 15 }
+    result: { score: 55 }
+    why: 40 + 15 is 55.
+  - given: { score: 70, bonus: 0 }
+    result: { score: 70 }
+    why: 70 + 0 is 70, so the score stays as it was.
+
+tests:
+  - name: a score and a bonus
+    given: { score: 40, bonus: 15 }
+    expect: { score: 55 }
+    purpose: The first example from the task.
+  - name: larger numbers
+    given: { score: 320, bonus: 45 }
+    expect: { score: 365 }
+    purpose: A second pair of values, so a fixed answer cannot pass.
+  - name: a bonus of 0
+    given: { score: 70, bonus: 0 }
+    expect: { score: 70 }
+    purpose: The smallest bonus allowed. Adding 0 leaves the score as it was. A line that stores only the bonus would end with 0.
+  - name: a score of 0
+    given: { score: 0, bonus: 25 }
+    expect: { score: 25 }
+    purpose: The smallest score allowed. The new score is 0 plus the bonus.
+  - name: the largest values
+    given: { score: 1000, bonus: 100 }
+    expect: { score: 1100 }
+    purpose: The largest score and the largest bonus the task allows.
+
+mistakes:
+  - id: replaces
+    label: Stores the bonus instead of adding it
+    shows: wrong-result
+    code: |
+      score = bonus
+    feedback: |
+      `score` ends up equal to `bonus`, and the old score is gone. That happens when the line stores the bonus and drops what `score` held, as in `score = bonus`. To build on the old score, the old `score` has to appear on the right side of the `=` as well.
+  - id: not-stored-in-score
+    label: Works out the sum but does not store it in score
+    shows: wrong-result
+    code: |
+      score + bonus
+    feedback: |
+      `score` still holds the value it started with, so nothing new was stored in it. There are a few usual causes. A line such as `score + bonus` works out the sum and then lets it go, because nothing stores it. `print(score + bonus)` shows the sum, but does not store it either. A line with `==` compares two values and stores nothing. A sum that is stored under a different name leaves `score` as it was. Look at the start of your line: which name is there, and is it followed by a single `=`?
+
+hints:
+  - |
+    With `score = 40` and `bonus = 15`, which number should `score` hold after your line? Which two values does Python have to read to work that number out?
+  - |
+    An assignment has two sides. The right side is the calculation, and Python works it out first. The left side is the name that receives the result. Here the result has to land in `score`, and the calculation needs the old value of `score`.
+  - |
+    The line has this shape: `score = (the old score) + (the bonus)`. The name `score` stands on both sides. That works because the right side is worked out before anything is stored.
+
+explanation: |
+  Your line has two jobs, in this order: work out the new score, then store it under the name `score`.
+
+  With `score = 40` and `bonus = 15`:
+
+  | moment | what Python does | `score` | `bonus` |
+  |---|---|---|---|
+  | before your line | nothing yet | 40 | 15 |
+  | step 1 | works out the right side: 40 + 15 is 55 | 40 | 15 |
+  | step 2 | stores 55 under the name on the left | 55 | 15 |
+
+  During step 1, `score` still holds 40. That is why the same name can stand on both sides of the `=`: the old value is read first and replaced afterward.
+
+  Two lines that look close to the right one but end differently, with the same values:
+
+  - A line that stores only the bonus leaves `score` at 15. The 40 is lost.
+  - A line that works out 40 + 15 without an `=` leaves `score` at 40. The 55 is never stored.
+
+solution:
+  code: |
+    score = score + bonus
+  walkthrough: |
+    The missing line is `score = score + bonus`.
+
+    - `score + bonus` reads the old score and the bonus and adds them. With 40 and 15 that gives 55.
+    - `score = ...` stores the result under the name `score`, replacing the 40.
+
+    When `bonus` is 0, the right side works out to the old score, so `score` ends with the value it started with.
+
+    The shorthand `score += bonus` does exactly the same thing.
+
+prerequisites: [assign-snapshot]
+related: [accumulators-add-up]
+next: assign-two-purchases

@@ -1,0 +1,280 @@
+id: values-in-range
+title: Keep the values in range
+tier: challenge
+format: write
+order: 5
+skills: [positions, loops, conditions, append]
+difficulty: 2
+newIdea: >-
+  The append happens only on the rounds where a condition is True, so the new list can be shorter than the given list, or empty.
+source:
+  type: original
+
+goal: Build a new list that holds only the items of a given list that lie inside a range.
+statement: |
+  Given a list `numbers` and two whole numbers `low` and `high`, build a new list `in_range` that holds the items of `numbers` that are from `low` to `high`. Both ends count as in range: an item equal to `low` or equal to `high` is kept.
+
+  The kept items stay in the order they have in `numbers`. The other items are left out, so `in_range` can be shorter than `numbers`. If no item is in range, `in_range` is an empty list.
+
+  With `numbers = [12, 3, 25, 8, 40, 15]`, `low = 5` and `high = 20`, the items 12, 8 and 15 are in range and the items 3, 25 and 40 are not. So `in_range` must be `[12, 8, 15]`.
+given:
+  - name: numbers
+    type: list[int]
+    describe: a list of whole numbers
+    domain: { minLen: 1, maxLen: 20, min: -100, max: 100 }
+  - name: low
+    type: int
+    describe: the lower end of the range, which counts as inside
+    domain: { min: -100, max: 100 }
+  - name: high
+    type: int
+    describe: the upper end of the range, which counts as inside
+    domain: { min: -100, max: 100 }
+where: low <= high
+create:
+  - name: in_range
+    describe: a new list with the items of `numbers` that are from `low` to `high`, both ends included, in their original order
+rules:
+  - '`numbers` has from 1 to 20 items. Each item is a whole number from -100 to 100.'
+  - '`low` and `high` are whole numbers from -100 to 100, and `low` is never greater than `high`. The two can be equal, and then only items equal to that one number are in range.'
+  - 'An item is in range when it is at least `low` and at most `high`. Both ends count as inside: an item equal to `low` or equal to `high` is kept.'
+  - '`in_range` holds the kept items in the order they have in `numbers`. A value that is in range and appears more than once in `numbers` is kept each time.'
+  - 'If no item is in range, `in_range` must be an empty list, `[]`. When every item is in range, `in_range` has as many items as `numbers`.'
+  - Leave `numbers` unchanged, and make `in_range` a new list.
+toWrite: A short program of about six lines. It needs an empty list, a start position, a loop, an `if` inside the loop with one append under it, and the step to the next position.
+unchanged: [numbers]
+fresh: [in_range]
+
+starter: |
+  # numbers, low and high are given. Leave your answer in in_range.
+exampleGiven: { numbers: [12, 3, 25, 8, 40, 15], low: 5, high: 20 }
+examples:
+  - given: { numbers: [12, 3, 25, 8, 40, 15], low: 5, high: 20 }
+    result: { in_range: [12, 8, 15] }
+    why: 12, 8 and 15 are at least 5 and at most 20. 3 is below 5, and 25 and 40 are above 20, so those three are left out.
+  - given: { numbers: [5, 21, 20, 4], low: 5, high: 20 }
+    result: { in_range: [5, 20] }
+    why: 5 is equal to `low` and 20 is equal to `high`, and both ends count as inside. 21 is one above `high` and 4 is one below `low`.
+  - given: { numbers: [30, 2], low: 5, high: 20 }
+    result: { in_range: [] }
+    why: Neither item is in range. The loop still runs two rounds, but no round appends, so `in_range` stays empty.
+
+tests:
+  - name: mixed values
+    given: { numbers: [12, 3, 25, 8, 40, 15], low: 5, high: 20 }
+    expect: { in_range: [12, 8, 15] }
+    purpose: The first example from the task. Items in range and items outside it are mixed. The kept items 12, 8 and 15 sit at positions 0, 3 and 5, so a list of positions cannot pass.
+  - name: nothing in range
+    given: { numbers: [30, -4, 77], low: 5, high: 20 }
+    expect: { in_range: [] }
+    purpose: No item is in range, so no round appends. The list has to exist and be empty.
+  - name: everything in range
+    given: { numbers: [9, 14, 6], low: 5, high: 20 }
+    expect: { in_range: [9, 14, 6] }
+    purpose: Every round appends. The result has the same items as `numbers`, in the same order.
+  - name: equal to the ends
+    given: { numbers: [20, 1, 10, 21, 5, 4], low: 5, high: 20 }
+    expect: { in_range: [20, 10, 5] }
+    purpose: 20 is equal to `high` and 5 is equal to `low`, and both are kept. 21 and 4 are one step outside the range and are left out.
+  - name: low equals high
+    given: { numbers: [7, 12, 7, -7], low: 7, high: 7 }
+    expect: { in_range: [7, 7] }
+    purpose: The range holds one number, 7, so only the two items equal to 7 are kept. Each comparison has to be True when its two sides are equal. 12 is above the range and -7 is below it.
+  - name: repeated and negative values
+    given: { numbers: [-3, 9, -3, 50, 9], low: -5, high: 10 }
+    expect: { in_range: [-3, 9, -3, 9] }
+    purpose: A value that is in range and appears twice is kept twice. Negative items and a negative `low` follow the same rule.
+  - name: one item
+    given: { numbers: [-100], low: -100, high: 100 }
+    expect: { in_range: [-100] }
+    purpose: The shortest list allowed, holding the smallest value allowed. It is equal to `low`, so it is kept, and the loop runs one round.
+
+mistakes:
+  - id: never-moves-on
+    label: Only moves to the next position when the item is in range
+    shows: never-stops
+    code: |
+      in_range = []
+      position = 0
+      while position < len(numbers):
+          if low <= numbers[position] and numbers[position] <= high:
+              in_range.append(numbers[position])
+              position = position + 1
+    feedback: |
+      The program had to be stopped because the loop never ended. The variables at that moment show why. If `position` has stopped moving, look at the line that moves it on: it may be missing, or it may be indented under the `if`, so that it runs only on the rounds where the item is in range. That step has to run on every round, whether or not the item was appended. If instead `numbers` has grown far beyond the list you were given, your `append` line adds to `numbers` rather than to `in_range`, so the end of the loop keeps moving away.
+  - id: one-too-far
+    label: Asks for a position one past the end
+    shows: error
+    errorType: IndexError
+    errorContains: list index
+    code: |
+      in_range = []
+      position = 0
+      while position <= len(numbers):
+          if low <= numbers[position] and numbers[position] <= high:
+              in_range.append(numbers[position])
+          position = position + 1
+    feedback: |
+      The program asked for a position that has no item. A list's last position is one less than its length: with 6 items the positions are 0 to 5, and position 6 is one past the end. Look first at the comparison in your `while` line: what is the largest value of `position` it lets through, for a list of any length? If that is right, check that `position` moves on at the end of the round, after the item at the current position has been tested. The `while` line decides when the loop ends; the condition in the `if` line only decides which items are kept.
+  - id: stores-none
+    label: Stores what append() hands back
+    shows: error
+    errorType: AttributeError
+    errorContains: NoneType
+    code: |
+      in_range = []
+      position = 0
+      while position < len(numbers):
+          if low <= numbers[position] and numbers[position] <= high:
+              in_range = in_range.append(numbers[position])
+          position = position + 1
+    feedback: |
+      The message says `'NoneType' object has no attribute 'append'`: by the time the second item in range turns up, `in_range` is `None`, not a list. That happens when the result of `append()` is stored with `=`. `append()` changes the list itself and hands nothing back, so the `=` stores `None` under the name and the list is lost. An `append` line stands on its own, with no `=`.
+  - id: append-backwards
+    label: Writes the item before .append and the list inside the parentheses
+    shows: error
+    errorType: AttributeError
+    errorContains: "'int' object"
+    code: |
+      in_range = []
+      position = 0
+      while position < len(numbers):
+          if low <= numbers[position] and numbers[position] <= high:
+              numbers[position].append(in_range)
+          position = position + 1
+    feedback: |
+      The message says `'int' object has no attribute 'append'`. Python looked at what stands before the dot in your `append` line, found a whole number, and a whole number has no `append`. Only a list can receive an item. That usually means the two parts of the line have swapped places. The list that receives stands before the dot, and the item to add goes inside the parentheses. Look at the name written before `.append`: is it the list, or the item?
+  - id: ends-excluded
+    label: Leaves out the items that are equal to low or to high
+    shows: wrong-result
+    code: |
+      in_range = []
+      position = 0
+      while position < len(numbers):
+          if low < numbers[position] and numbers[position] < high:
+              in_range.append(numbers[position])
+          position = position + 1
+    feedback: |
+      Your list is missing the items that are exactly equal to `low` or to `high`, and the rules count both ends as inside. A comparison written with `<` is False when its two sides are equal. Look at each comparison sign in your `if` line and try it by hand with an item equal to `low`, then with an item equal to `high`.
+  - id: appends-positions
+    label: Appends the position instead of the item stored there
+    shows: wrong-result
+    code: |
+      in_range = []
+      position = 0
+      while position < len(numbers):
+          if low <= numbers[position] and numbers[position] <= high:
+              in_range.append(position)
+          position = position + 1
+    feedback: |
+      Your list holds positions instead of items: in the first test it is `[0, 3, 5]`, the places where 12, 8 and 15 were found. The `if` picked the right rounds, but what went into the list was `position`, which says where the loop is looking. `numbers[position]` is the value stored there. Look at what is inside the parentheses of your `.append()`.
+  - id: tests-position
+    label: Tests the position instead of the item (emptying the list inside the loop gives the same result)
+    shows: wrong-result
+    code: |
+      in_range = []
+      position = 0
+      while position < len(numbers):
+          if low <= position and position <= high:
+              in_range.append(numbers[position])
+          position = position + 1
+    feedback: |
+      Your list holds only 15, the item at the last position. Two different causes give this result. The `if` line may compare `position` with `low` and `high` instead of the item stored there: of the positions 0 to 5, only 5 is from 5 to 20, so only the item at position 5 is kept. Or a line inside the loop may make `in_range` a new list again, such as `in_range = []`, so each round throws away what earlier rounds added and only the last item is left. Look at what your `if` line compares, and at where `in_range = []` sits.
+  - id: replaces
+    label: Stores the item in in_range instead of appending it
+    shows: wrong-result
+    code: |
+      in_range = []
+      position = 0
+      while position < len(numbers):
+          if low <= numbers[position] and numbers[position] <= high:
+              in_range = numbers[position]
+          position = position + 1
+    feedback: |
+      `in_range` ends up as a single number, 15, not a list. A line such as `in_range = numbers[position]` replaces whatever the name held, so on each round where the item is in range the new item pushes out the one before it, and only the last one is left. The empty list made before the loop has to grow by one item on each of those rounds, and a list grows with `.append()`.
+  - id: or-instead-of-and
+    label: Joins the two comparisons with or
+    shows: wrong-result
+    code: |
+      in_range = []
+      position = 0
+      while position < len(numbers):
+          if low <= numbers[position] or numbers[position] <= high:
+              in_range.append(numbers[position])
+          position = position + 1
+    feedback: |
+      Your list is a copy of `numbers`: every item was kept, including the ones outside the range, so the append ran on every round. If the append is indented under an `if`, look at how the two comparisons in the `if` line are joined. `or` is True as soon as one side is True, and every number is at least `low` or at most `high`, so with `or` no item is ever left out. An item is in range only when both comparisons are True at the same time.
+  - id: keeps-outside
+    label: Keeps the items outside the range instead of the ones inside
+    shows: wrong-result
+    code: |
+      in_range = []
+      position = 0
+      while position < len(numbers):
+          if numbers[position] < low or numbers[position] > high:
+              in_range.append(numbers[position])
+          position = position + 1
+    feedback: |
+      Your list holds exactly the items that are outside the range, and none of the items inside it. The loop and the append are doing their jobs. The condition in the `if` line is picking the wrong rounds: an `if` runs its indented lines on the rounds where its condition is True, so the condition has to describe the items you want to keep, not the ones you want to leave out. Try your condition by hand with 12, which belongs in the list, and with 3, which does not.
+  - id: appends-condition
+    label: Appends the result of the comparison instead of the item
+    shows: wrong-result
+    code: |
+      in_range = []
+      position = 0
+      while position < len(numbers):
+          in_range.append(low <= numbers[position] and numbers[position] <= high)
+          position = position + 1
+    feedback: |
+      Your list holds `True` and `False`, one for every item of `numbers`, instead of the items that are in range. A comparison gives `True` or `False`, and whatever is inside the parentheses of `.append()` is what goes into the list. The comparison has a different job here: in the `if` line, it decides whether this round appends at all. Look at what is inside the parentheses of your `.append()`, and at whether an `if` decides when that line runs.
+
+hints:
+  - |
+    *Copy a list* appended every item. Here some rounds append and some do not. What decides, on each round, whether the current item goes into the new list?
+  - |
+    The current item is `numbers[position]`. It is in range when it is at least `low` and at most `high`, both at once, the way *Inside the range* tested one value. With `low = 5` and `high = 20`: 12 is in range, 3 is not, and 25 is not.
+  - |
+    In words: start with an empty list and the position at 0. While the position is less than the length of `numbers`: if the item at that position is in range, append that item to `in_range`. Then move to the next position, on every round, whether or not something was appended.
+
+explanation: |
+  Two things you already have meet here. *Copy a list* visits every position and appends the value found there. *Inside the range* tests one value against `low` and `high`. Put the append under an `if` that makes that test, and the append runs only on the rounds where the test is True.
+
+  With `numbers = [12, 3, 25, 8, 40, 15]`, `low = 5` and `high = 20`:
+
+  | round | `position` | `numbers[position]` | in range? | `in_range` after the round |
+  |---|---|---|---|---|
+  | 1 | 0 | 12 | `5 <= 12` and `12 <= 20`, both True | `[12]` |
+  | 2 | 1 | 3 | `5 <= 3` is False | `[12]` |
+  | 3 | 2 | 25 | `25 <= 20` is False | `[12]` |
+  | 4 | 3 | 8 | `5 <= 8` and `8 <= 20`, both True | `[12, 8]` |
+  | 5 | 4 | 40 | `40 <= 20` is False | `[12, 8]` |
+  | 6 | 5 | 15 | `5 <= 15` and `15 <= 20`, both True | `[12, 8, 15]` |
+
+  The loop runs six rounds, one for each item, and `position` moves on in every one of them. Only three rounds append. That is why `in_range` is shorter than `numbers`. If no round had appended, `in_range` would still be the empty list it started as, and that is the right answer for such a list.
+
+  Two numbers are in play on every round, and they have different jobs. `position` goes 0, 1, 2, 3, 4, 5 and says where the loop is looking. `numbers[position]` goes 12, 3, 25, 8, 40, 15 and is the value stored there. The `if` tests the value, and the append receives the value.
+
+  The ends of the range are decided by the comparison signs. With an item equal to 20, `20 <= 20` is True, so the item is kept. With `<` in its place, `20 < 20` would be False and the item would be lost. When `low` and `high` are both 7, the item 7 is kept only if both comparisons, `7 <= 7` and `7 <= 7`, are True, so both signs matter at once.
+
+solution:
+  code: |
+    in_range = []
+    position = 0
+    while position < len(numbers):
+        if low <= numbers[position] and numbers[position] <= high:
+            in_range.append(numbers[position])
+        position = position + 1
+  walkthrough: |
+    - `in_range = []` makes a new, empty list before the loop. If no item is in range, nothing is ever appended, and this empty list is the answer.
+    - `position = 0` and `while position < len(numbers):` visit the positions 0 to `len(numbers) - 1`, one round each, as in *Copy a list*.
+    - `low <= numbers[position] and numbers[position] <= high` is the test from *Inside the range*, with the current item in place of the single value. Both comparisons use `<=`, so an item equal to `low` or to `high` gives True. The course's chained form `low <= numbers[position] <= high` means the same, and the checker accepts it.
+    - `in_range.append(numbers[position])` is indented under the `if`, so it runs only on the rounds where the test is True. The list that receives the item is written before `.append`, and the item goes inside the parentheses.
+    - `position = position + 1` is lined up with the `if`, not under it. It runs on every round, so the loop moves on past the items that are not kept and ends after the last one.
+
+    `numbers` is only read, never changed, and `in_range` is a new list.
+
+    A later part of the course shows `for` loops, a shorter way to visit every item, and the `if` inside them works the same way.
+
+prerequisites: [conditions-inside-range, append-add-shipping, accumulators-count-failed]
+related: [copy-list, count-matching]
+next: positions-in-range
